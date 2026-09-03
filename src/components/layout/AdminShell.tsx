@@ -271,7 +271,7 @@ export function AdminShell({ children }: AdminShellProps) {
         {/* Bottom SalaryBox Branding */}
         <div className="p-4 border-t border-slate-100 flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-[#00D1B2] flex items-center justify-center text-white font-bold text-xs shadow-sm">
-            ⚡
+            âš¡
           </div>
           {sidebarOpen && (
             <span className="font-bold text-slate-900 tracking-tight text-sm">
@@ -317,7 +317,7 @@ export function AdminShell({ children }: AdminShellProps) {
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               <span>Pending Requests</span>
               <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full ml-0.5">
-                22
+                6
               </span>
             </Link>
 
