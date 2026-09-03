@@ -12,6 +12,7 @@ import {
   X,
   UserCheck
 } from "lucide-react";
+import { EmployeeDetailView } from "./EmployeeDetailView";
 
 interface EmployeeItem {
   id: string;
@@ -466,10 +467,27 @@ export function MyTeamView() {
     setIsAddModalOpen(false);
   };
 
+  const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<EmployeeItem | null>(null);
+
   const filteredStaff = staffList.filter((staff) =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (staff.jobTitle && staff.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (selectedEmployeeForDetail) {
+    return (
+      <EmployeeDetailView
+        employee={selectedEmployeeForDetail}
+        onBack={() => setSelectedEmployeeForDetail(null)}
+        onUpdate={(updated) => {
+          setStaffList(
+            staffList.map((s) => (s.id === updated.id ? { ...s, ...updated } : s))
+          );
+          setSelectedEmployeeForDetail(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-xs">
@@ -1055,7 +1073,10 @@ export function MyTeamView() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className={`font-semibold hover:underline cursor-pointer ${staff.needsActivation ? "text-slate-600" : "text-[#007BFF]"}`}>
+                        <span
+                          onClick={() => setSelectedEmployeeForDetail(staff)}
+                          className={`font-semibold hover:underline cursor-pointer ${staff.needsActivation ? "text-slate-600" : "text-[#007BFF]"}`}
+                        >
                           {staff.name}
                         </span>
 
