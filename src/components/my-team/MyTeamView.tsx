@@ -928,33 +928,41 @@ export function MyTeamView() {
 
               {activeTab === "Staff Details" && (
                 <>
-                  <th className="px-4 py-3">JOB TITLE</th>
-                  <th className="px-4 py-3">VERIFICATION STATUS</th>
-                  <th className="px-4 py-3">EMPLOYEE ID</th>
-                  <th className="px-4 py-3">EMPLOYEE TYPE</th>
-                  <th className="px-4 py-3">DATE OF JOINING</th>
-                  <th className="px-4 py-3">DATE OF LEAVING</th>
-                  <th className="px-4 py-3">DATE OF BIRTH</th>
-                  <th className="px-4 py-3">MOBILE NUMBER</th>
-                  <th className="px-4 py-3">PERSONAL EMAIL ID</th>
-                  <th className="px-4 py-3">OFFICIAL EMAIL ID</th>
-                  <th className="px-4 py-3">MARITAL STATUS</th>
-                  <th className="px-4 py-3">GENDER</th>
-                  <th className="px-4 py-3">BLOOD GROUP</th>
-                  <th className="px-4 py-3">CURRENT ADDRESS</th>
-                  <th className="px-4 py-3">PERMANENT ADDRESS</th>
-                  <th className="px-4 py-3">AADHAAR</th>
-                  <th className="px-4 py-3">PAN</th>
-                  <th className="px-4 py-3">UAN</th>
-                  <th className="px-4 py-3">PF A/C NO.</th>
-                  <th className="px-4 py-3">ESI A/C NO.</th>
-                  <th className="px-4 py-3">DRIVING LICENSE</th>
-                  <th className="px-4 py-3">VOTER ID</th>
-                  <th className="px-4 py-3">GUARDIAN NAME</th>
-                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT NAME</th>
-                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT PHONE NUMBER</th>
-                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT RELATIONSHIP</th>
-                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT ADDRESS</th>
+                  {visibleColumns.jobTitle && <th className="px-4 py-3">JOB TITLE</th>}
+                  {visibleColumns.verificationStatus && <th className="px-4 py-3">VERIFICATION STATUS</th>}
+                  {visibleColumns.employeeId && <th className="px-4 py-3">EMPLOYEE ID</th>}
+                  {visibleColumns.employeeType && <th className="px-4 py-3">EMPLOYEE TYPE</th>}
+                  {visibleColumns.dateOfJoining && <th className="px-4 py-3">DATE OF JOINING</th>}
+                  {visibleColumns.dateOfLeaving && <th className="px-4 py-3">DATE OF LEAVING</th>}
+                  {visibleColumns.dateOfBirth && <th className="px-4 py-3">DATE OF BIRTH</th>}
+                  {visibleColumns.mobileNumber && <th className="px-4 py-3">MOBILE NUMBER</th>}
+                  {visibleColumns.personalEmail && <th className="px-4 py-3">PERSONAL EMAIL ID</th>}
+                  {visibleColumns.officialEmail && <th className="px-4 py-3">OFFICIAL EMAIL ID</th>}
+                  {visibleColumns.maritalStatus && <th className="px-4 py-3">MARITAL STATUS</th>}
+                  {visibleColumns.gender && <th className="px-4 py-3">GENDER</th>}
+                  {visibleColumns.bloodGroup && <th className="px-4 py-3">BLOOD GROUP</th>}
+                  {visibleColumns.currentAddress && <th className="px-4 py-3">CURRENT ADDRESS</th>}
+                  {visibleColumns.permanentAddress && <th className="px-4 py-3">PERMANENT ADDRESS</th>}
+                  {visibleColumns.aadhaar && <th className="px-4 py-3">AADHAAR</th>}
+                  {visibleColumns.pan && <th className="px-4 py-3">PAN</th>}
+                  {visibleColumns.uan && <th className="px-4 py-3">UAN</th>}
+                  {visibleColumns.pfAccountNo && <th className="px-4 py-3">PF A/C NO.</th>}
+                  {visibleColumns.esiAccountNo && <th className="px-4 py-3">ESI A/C NO.</th>}
+                  {visibleColumns.drivingLicense && <th className="px-4 py-3">DRIVING LICENSE</th>}
+                  {visibleColumns.voterId && <th className="px-4 py-3">VOTER ID</th>}
+                  {visibleColumns.guardianName && <th className="px-4 py-3">GUARDIAN NAME</th>}
+                  {visibleColumns.emergencyContactName && (
+                    <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT NAME</th>
+                  )}
+                  {visibleColumns.emergencyContactPhone && (
+                    <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT PHONE NUMBER</th>
+                  )}
+                  {visibleColumns.emergencyContactRelationship && (
+                    <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT RELATIONSHIP</th>
+                  )}
+                  {visibleColumns.emergencyContactAddress && (
+                    <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT ADDRESS</th>
+                  )}
                 </>
               )}
 
@@ -1057,43 +1065,87 @@ export function MyTeamView() {
 
                   {activeTab === "Staff Details" && (
                     <>
-                      <td className="px-4 py-3 text-slate-600">{staff.jobTitle || "-"}</td>
-                      <td className="px-4 py-3">
-                        <span className="text-slate-500 text-[11px]">{staff.verificationStatus}</span>
-                      </td>
-                      <td className="px-4 py-3 font-mono text-slate-500">{staff.employeeId || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.employeeType || "Full Time"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.dateOfJoining || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.dateOfLeaving || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.dateOfBirth || "-"}</td>
-                      <td className="px-4 py-3 font-mono">{staff.mobileNumber || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.personalEmail || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.officialEmail || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.maritalStatus || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.gender || "Male"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.bloodGroup || "-"}</td>
-                      <td className="px-4 py-3 max-w-[200px] truncate" title={staff.currentAddress}>
-                        {staff.currentAddress || "-"}
-                      </td>
-                      <td className="px-4 py-3 max-w-[200px] truncate">{staff.permanentAddress || "-"}</td>
-                      <td className="px-4 py-3 font-mono">{staff.aadhaar || "•••• •••• ••••"}</td>
-                      <td className="px-4 py-3 font-mono">{staff.pan || "••••••••••"}</td>
-                      <td className="px-4 py-3 font-mono">{staff.uan || "-"}</td>
-                      <td className="px-4 py-3 font-mono">{staff.pfAccountNo || "-"}</td>
-                      <td className="px-4 py-3 font-mono">{staff.esiAccountNo || "-"}</td>
-                      <td className="px-4 py-3">{staff.drivingLicense || "-"}</td>
-                      <td className="px-4 py-3">{staff.voterId || "-"}</td>
-                      <td className="px-4 py-3">{staff.guardianName || "-"}</td>
-                      <td className="px-4 py-3 font-semibold text-slate-800">
-                        {staff.emergencyContactName || "-"}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-slate-700">
-                        {staff.emergencyContactPhone || "-"}
-                      </td>
-                      <td className="px-4 py-3">{staff.emergencyContactRelationship || "-"}</td>
-                      <td className="px-4 py-3 max-w-[200px] truncate" title={staff.emergencyContactAddress}>
-                        {staff.emergencyContactAddress || "-"}
-                      </td>
+                      {visibleColumns.jobTitle && <td className="px-4 py-3 text-slate-600">{staff.jobTitle || "-"}</td>}
+                      {visibleColumns.verificationStatus && (
+                        <td className="px-4 py-3">
+                          <span className="text-slate-500 text-[11px]">{staff.verificationStatus}</span>
+                        </td>
+                      )}
+                      {visibleColumns.employeeId && (
+                        <td className="px-4 py-3 font-mono text-slate-500">{staff.employeeId || "-"}</td>
+                      )}
+                      {visibleColumns.employeeType && (
+                        <td className="px-4 py-3 text-slate-600">{staff.employeeType || "Full Time"}</td>
+                      )}
+                      {visibleColumns.dateOfJoining && (
+                        <td className="px-4 py-3 text-slate-600">{staff.dateOfJoining || "-"}</td>
+                      )}
+                      {visibleColumns.dateOfLeaving && (
+                        <td className="px-4 py-3 text-slate-600">{staff.dateOfLeaving || "-"}</td>
+                      )}
+                      {visibleColumns.dateOfBirth && (
+                        <td className="px-4 py-3 text-slate-600">{staff.dateOfBirth || "-"}</td>
+                      )}
+                      {visibleColumns.mobileNumber && (
+                        <td className="px-4 py-3 font-mono">{staff.mobileNumber || "-"}</td>
+                      )}
+                      {visibleColumns.personalEmail && (
+                        <td className="px-4 py-3 text-slate-600">{staff.personalEmail || "-"}</td>
+                      )}
+                      {visibleColumns.officialEmail && (
+                        <td className="px-4 py-3 text-slate-600">{staff.officialEmail || "-"}</td>
+                      )}
+                      {visibleColumns.maritalStatus && (
+                        <td className="px-4 py-3 text-slate-600">{staff.maritalStatus || "-"}</td>
+                      )}
+                      {visibleColumns.gender && (
+                        <td className="px-4 py-3 text-slate-600">{staff.gender || "Male"}</td>
+                      )}
+                      {visibleColumns.bloodGroup && (
+                        <td className="px-4 py-3 text-slate-600">{staff.bloodGroup || "-"}</td>
+                      )}
+                      {visibleColumns.currentAddress && (
+                        <td className="px-4 py-3 max-w-[200px] truncate" title={staff.currentAddress}>
+                          {staff.currentAddress || "-"}
+                        </td>
+                      )}
+                      {visibleColumns.permanentAddress && (
+                        <td className="px-4 py-3 max-w-[200px] truncate">{staff.permanentAddress || "-"}</td>
+                      )}
+                      {visibleColumns.aadhaar && (
+                        <td className="px-4 py-3 font-mono">{staff.aadhaar || "•••• •••• ••••"}</td>
+                      )}
+                      {visibleColumns.pan && (
+                        <td className="px-4 py-3 font-mono">{staff.pan || "••••••••••"}</td>
+                      )}
+                      {visibleColumns.uan && <td className="px-4 py-3 font-mono">{staff.uan || "-"}</td>}
+                      {visibleColumns.pfAccountNo && (
+                        <td className="px-4 py-3 font-mono">{staff.pfAccountNo || "-"}</td>
+                      )}
+                      {visibleColumns.esiAccountNo && (
+                        <td className="px-4 py-3 font-mono">{staff.esiAccountNo || "-"}</td>
+                      )}
+                      {visibleColumns.drivingLicense && <td className="px-4 py-3">{staff.drivingLicense || "-"}</td>}
+                      {visibleColumns.voterId && <td className="px-4 py-3">{staff.voterId || "-"}</td>}
+                      {visibleColumns.guardianName && <td className="px-4 py-3">{staff.guardianName || "-"}</td>}
+                      {visibleColumns.emergencyContactName && (
+                        <td className="px-4 py-3 font-semibold text-slate-800">
+                          {staff.emergencyContactName || "-"}
+                        </td>
+                      )}
+                      {visibleColumns.emergencyContactPhone && (
+                        <td className="px-4 py-3 font-mono text-slate-700">
+                          {staff.emergencyContactPhone || "-"}
+                        </td>
+                      )}
+                      {visibleColumns.emergencyContactRelationship && (
+                        <td className="px-4 py-3">{staff.emergencyContactRelationship || "-"}</td>
+                      )}
+                      {visibleColumns.emergencyContactAddress && (
+                        <td className="px-4 py-3 max-w-[200px] truncate" title={staff.emergencyContactAddress}>
+                          {staff.emergencyContactAddress || "-"}
+                        </td>
+                      )}
                     </>
                   )}
 
