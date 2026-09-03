@@ -350,6 +350,41 @@ export function MyTeamView() {
   const [staffList, setStaffList] = useState<EmployeeItem[]>(INITIAL_STAFF);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isShowFieldsOpen, setIsShowFieldsOpen] = useState(false);
+
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    jobTitle: true,
+    verificationStatus: true,
+    employeeId: true,
+    employeeType: true,
+    dateOfJoining: true,
+    dateOfLeaving: true,
+    dateOfBirth: true,
+    mobileNumber: true,
+    personalEmail: true,
+    officialEmail: true,
+    maritalStatus: true,
+    gender: true,
+    bloodGroup: true,
+    currentAddress: true,
+    permanentAddress: true,
+    aadhaar: true,
+    pan: true,
+    uan: true,
+    pfAccountNo: true,
+    esiAccountNo: true,
+    drivingLicense: true,
+    voterId: true,
+    guardianName: true,
+    emergencyContactName: true,
+    emergencyContactPhone: true,
+    emergencyContactRelationship: true,
+    emergencyContactAddress: true,
+  });
+
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const [newStaff, setNewStaff] = useState({
     firstName: "",
@@ -508,10 +543,321 @@ export function MyTeamView() {
             <span>More Filters</span>
           </button>
 
-          <button className="flex items-center gap-1 text-xs text-[#007BFF] hover:underline ml-2">
-            <Eye className="w-3.5 h-3.5" />
-            <span>Show Fields</span>
-          </button>
+          {/* Show Fields Popover Button & Modal */}
+          <div className="relative">
+            <button
+              onClick={() => setIsShowFieldsOpen(!isShowFieldsOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#007BFF] bg-blue-50/50 hover:bg-blue-50 border border-blue-200 rounded-md transition-colors cursor-pointer font-medium"
+            >
+              <Eye className="w-3.5 h-3.5 text-[#007BFF]" />
+              <span>Show Fields</span>
+            </button>
+
+            {/* 1:1 SalaryBox Show Fields Popover Modal */}
+            {isShowFieldsOpen && (
+              <>
+                {/* Backdrop to close on click outside */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsShowFieldsOpen(false)}
+                />
+
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[520px] bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-6 animate-in fade-in zoom-in-95 duration-150">
+                  {/* Top Arrow Tip */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-slate-200 rotate-45" />
+
+                  {/* 2-Column Checkboxes Grid */}
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3.5 text-xs text-slate-800">
+                    {/* Column 1 (Left) */}
+                    <div className="space-y-3.5">
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.jobTitle}
+                          onChange={() => toggleColumn("jobTitle")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Job Title</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.employeeId}
+                          onChange={() => toggleColumn("employeeId")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Employee ID</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.dateOfJoining}
+                          onChange={() => toggleColumn("dateOfJoining")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Date of Joining</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.dateOfBirth}
+                          onChange={() => toggleColumn("dateOfBirth")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Date of Birth</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.personalEmail}
+                          onChange={() => toggleColumn("personalEmail")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Personal Email ID</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.maritalStatus}
+                          onChange={() => toggleColumn("maritalStatus")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Marital Status</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.bloodGroup}
+                          onChange={() => toggleColumn("bloodGroup")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Blood Group</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.permanentAddress}
+                          onChange={() => toggleColumn("permanentAddress")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Permanent Address</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.pan}
+                          onChange={() => toggleColumn("pan")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">PAN</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.pfAccountNo}
+                          onChange={() => toggleColumn("pfAccountNo")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">PF A/C No.</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.drivingLicense}
+                          onChange={() => toggleColumn("drivingLicense")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Driving License</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.guardianName}
+                          onChange={() => toggleColumn("guardianName")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Guardian Name</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.emergencyContactPhone}
+                          onChange={() => toggleColumn("emergencyContactPhone")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Emergency Contact Phone Number</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.emergencyContactAddress}
+                          onChange={() => toggleColumn("emergencyContactAddress")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Emergency Contact Address</span>
+                      </label>
+                    </div>
+
+                    {/* Column 2 (Right) */}
+                    <div className="space-y-3.5">
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.verificationStatus}
+                          onChange={() => toggleColumn("verificationStatus")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Verification Status</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.employeeType}
+                          onChange={() => toggleColumn("employeeType")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Employee Type</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.dateOfLeaving}
+                          onChange={() => toggleColumn("dateOfLeaving")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Date of Leaving</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.mobileNumber}
+                          onChange={() => toggleColumn("mobileNumber")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Mobile Number</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.officialEmail}
+                          onChange={() => toggleColumn("officialEmail")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Official Email ID</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.gender}
+                          onChange={() => toggleColumn("gender")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Gender</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.currentAddress}
+                          onChange={() => toggleColumn("currentAddress")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Current Address</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.aadhaar}
+                          onChange={() => toggleColumn("aadhaar")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Aadhaar</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.uan}
+                          onChange={() => toggleColumn("uan")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">UAN</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.esiAccountNo}
+                          onChange={() => toggleColumn("esiAccountNo")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">ESI A/C No.</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.voterId}
+                          onChange={() => toggleColumn("voterId")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Voter ID</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.emergencyContactName}
+                          onChange={() => toggleColumn("emergencyContactName")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Emergency Contact Name</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.emergencyContactRelationship}
+                          onChange={() => toggleColumn("emergencyContactRelationship")}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="font-medium">Emergency Contact Relationship</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Apply Button */}
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex justify-center">
+                    <button
+                      onClick={() => setIsShowFieldsOpen(false)}
+                      className="px-8 py-2 text-xs font-bold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 self-end md:self-auto">
