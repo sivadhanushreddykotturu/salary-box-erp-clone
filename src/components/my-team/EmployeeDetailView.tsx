@@ -23,6 +23,7 @@ import {
   CalendarDays,
   Percent
 } from "lucide-react";
+import { TaxDeclarationsView } from "./TaxDeclarationsView";
 
 export interface EmployeeDetailProps {
   employee: {
@@ -252,6 +253,22 @@ export function EmployeeDetailView({
     setIsBankModalOpen(false);
     alert("Bank details saved successfully!");
   };
+
+  if (activeTab === "Tax Declarations") {
+    return (
+      <TaxDeclarationsView
+        employee={{
+          id: employee.id,
+          name: formData.name,
+          initials: employee.initials,
+          avatarColor: employee.avatarColor,
+          jobTitle: formData.jobTitle,
+          monthlyCtc: employee.monthlyCtc || 28000,
+        }}
+        onBack={() => setActiveTab("Personal Details")}
+      />
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-xs min-h-[750px]">

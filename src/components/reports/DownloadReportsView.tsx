@@ -16,6 +16,24 @@ interface RecentReportItem {
 
 const INITIAL_RECENT_REPORTS: RecentReportItem[] = [
   {
+    id: "tax-1",
+    reportType: "Bobba Prasad Tax Report",
+    branch: "All Branches",
+    department: "All Departments",
+    duration: "01 Apr 2026 - 31 Mar 2027",
+    format: "XLSX",
+    generatedOn: "04-Sep-2026 01:12 AM",
+  },
+  {
+    id: "crm-1",
+    reportType: "CRM Meeting Detailed Report",
+    branch: "All Branches",
+    department: "All Departments",
+    duration: "03 Sep 2026 - 03 Sep 2026",
+    format: "XLSX",
+    generatedOn: "03-Sep-2026 12:02 PM",
+  },
+  {
     id: "1",
     reportType: "Pay Slips",
     branch: "All Branches",
@@ -32,15 +50,6 @@ const INITIAL_RECENT_REPORTS: RecentReportItem[] = [
     duration: "01 Jun 2026 - 26 Jun 2026",
     format: "XLSX",
     generatedOn: "26 Jun 2026 10:18 PM",
-  },
-  {
-    id: "3",
-    reportType: "Company Attendance Summary Report",
-    branch: "VIJAYAWADA",
-    department: "All Departments",
-    duration: "01 Jun 2026 - 26 Jun 2026",
-    format: "XLSX",
-    generatedOn: "26 Jun 2026 10:17 PM",
   },
 ];
 
