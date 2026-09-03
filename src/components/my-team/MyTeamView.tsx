@@ -409,13 +409,19 @@ export function MyTeamView() {
 
   const attendanceSubTabs = ["Work Timings", "Attendance Modes", "Automation Rules"];
 
+  const activeStaffIds = staffList.filter((s) => !s.needsActivation).map((s) => s.id);
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedStaff(staffList.map((s) => s.id));
+      setSelectedStaff(activeStaffIds);
     } else {
       setSelectedStaff([]);
     }
   };
+
+  const isAllActiveSelected =
+    activeStaffIds.length > 0 &&
+    activeStaffIds.every((id) => selectedStaff.includes(id));
 
   const handleSelectRow = (id: string) => {
     if (selectedStaff.includes(id)) {
@@ -863,15 +869,20 @@ export function MyTeamView() {
         <div className="flex items-center gap-2 self-end md:self-auto">
           {activeTab === "Staff Details" && (
             <>
+              {selectedStaff.length > 0 && (
+                <span className="text-xs text-slate-500 font-medium mr-1 select-none">
+                  {isAllActiveSelected ? "All staff selected" : `${selectedStaff.length} staff selected`}
+                </span>
+              )}
               <button
-                className="px-3 py-1.5 text-xs font-semibold text-[#007BFF] border border-[#007BFF] rounded-md hover:bg-blue-50 transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold text-[#007BFF] border border-[#007BFF] rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
                 onClick={() => alert("Batch Update Staff")}
               >
                 Update Staff
               </button>
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors"
+                className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Staff</span>
@@ -918,7 +929,7 @@ export function MyTeamView() {
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
-                    checked={selectedStaff.length === staffList.length && staffList.length > 0}
+                    checked={isAllActiveSelected}
                     onChange={(e) => handleSelectAll(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
@@ -1025,11 +1036,11 @@ export function MyTeamView() {
                 <tr
                   key={staff.id}
                   className={`hover:bg-blue-50/40 transition-colors ${
-                    isSelected ? "bg-blue-50/60" : ""
+                    isSelected ? "bg-[#EBF5FF]" : staff.needsActivation ? "opacity-75" : ""
                   }`}
                 >
                   {/* Sticky Name Column */}
-                  <td className="sticky left-0 bg-white hover:bg-blue-50/40 z-20 px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-slate-200">
+                  <td className={`sticky left-0 ${isSelected ? "bg-[#EBF5FF]" : "bg-white"} hover:bg-blue-50/40 z-20 px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-slate-200`}>
                     <div className="flex items-center gap-2.5">
                       <input
                         type="checkbox"
@@ -1038,13 +1049,13 @@ export function MyTeamView() {
                         className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
                       <div
-                        className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-[10px] font-bold shrink-0 ${staff.avatarColor}`}
+                        className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-[10px] font-bold shrink-0 ${staff.avatarColor} ${staff.needsActivation ? "opacity-60" : ""}`}
                       >
                         {staff.initials}
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#007BFF] hover:underline cursor-pointer">
+                        <span className={`font-semibold hover:underline cursor-pointer ${staff.needsActivation ? "text-slate-600" : "text-[#007BFF]"}`}>
                           {staff.name}
                         </span>
 
@@ -1068,7 +1079,10 @@ export function MyTeamView() {
                       {visibleColumns.jobTitle && <td className="px-4 py-3 text-slate-600">{staff.jobTitle || "-"}</td>}
                       {visibleColumns.verificationStatus && (
                         <td className="px-4 py-3">
-                          <span className="text-slate-500 text-[11px]">{staff.verificationStatus}</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-700">
+                            <span className="w-3.5 h-3.5 rounded-full bg-red-500 text-white flex items-center justify-center text-[9px] font-bold">!</span>
+                            <span>{staff.verificationStatus}</span>
+                          </span>
                         </td>
                       )}
                       {visibleColumns.employeeId && (
