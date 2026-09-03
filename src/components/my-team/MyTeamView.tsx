@@ -18,13 +18,34 @@ interface EmployeeItem {
   name: string;
   initials: string;
   avatarColor: string;
+  needsActivation?: boolean;
   jobTitle?: string;
   verificationStatus: "Not Started" | "Verified" | "Pending";
   employeeId?: string;
   employeeType?: string;
   dateOfJoining?: string;
   dateOfLeaving?: string;
-  needsActivation?: boolean;
+  dateOfBirth?: string;
+  mobileNumber?: string;
+  personalEmail?: string;
+  officialEmail?: string;
+  maritalStatus?: string;
+  gender?: string;
+  bloodGroup?: string;
+  currentAddress?: string;
+  permanentAddress?: string;
+  aadhaar?: string;
+  pan?: string;
+  uan?: string;
+  pfAccountNo?: string;
+  esiAccountNo?: string;
+  drivingLicense?: string;
+  voterId?: string;
+  guardianName?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+  emergencyContactAddress?: string;
   scheduleType?: string;
   smartphoneAttendance?: string;
   selfie?: string;
@@ -541,76 +562,103 @@ export function MyTeamView() {
         </div>
       </div>
 
-      {/* 5. Data Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      {/* 5. Data Table with Sticky Name Column */}
+      <div className="overflow-x-auto max-w-full">
+        <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr className="border-b border-slate-200 bg-[#FAFBFD] text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-              <th className="w-10 px-4 py-3 text-center">
-                <input
-                  type="checkbox"
-                  checked={selectedStaff.length === staffList.length && staffList.length > 0}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
+              {/* Sticky Checkbox & Name Column */}
+              <th className="sticky left-0 bg-[#FAFBFD] z-20 px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-slate-200">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedStaff.length === staffList.length && staffList.length > 0}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span className="text-[#007BFF] font-bold">NAME</span>
+                </div>
               </th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Job Title</th>
 
               {activeTab === "Staff Details" && (
                 <>
-                  <th className="px-4 py-3">Verification Status</th>
-                  <th className="px-4 py-3">Employee ID</th>
-                  <th className="px-4 py-3">Employee Type</th>
-                  <th className="px-4 py-3">Date of Joining</th>
-                  <th className="px-4 py-3">Date of Leaving</th>
+                  <th className="px-4 py-3">JOB TITLE</th>
+                  <th className="px-4 py-3">VERIFICATION STATUS</th>
+                  <th className="px-4 py-3">EMPLOYEE ID</th>
+                  <th className="px-4 py-3">EMPLOYEE TYPE</th>
+                  <th className="px-4 py-3">DATE OF JOINING</th>
+                  <th className="px-4 py-3">DATE OF LEAVING</th>
+                  <th className="px-4 py-3">DATE OF BIRTH</th>
+                  <th className="px-4 py-3">MOBILE NUMBER</th>
+                  <th className="px-4 py-3">PERSONAL EMAIL ID</th>
+                  <th className="px-4 py-3">OFFICIAL EMAIL ID</th>
+                  <th className="px-4 py-3">MARITAL STATUS</th>
+                  <th className="px-4 py-3">GENDER</th>
+                  <th className="px-4 py-3">BLOOD GROUP</th>
+                  <th className="px-4 py-3">CURRENT ADDRESS</th>
+                  <th className="px-4 py-3">PERMANENT ADDRESS</th>
+                  <th className="px-4 py-3">AADHAAR</th>
+                  <th className="px-4 py-3">PAN</th>
+                  <th className="px-4 py-3">UAN</th>
+                  <th className="px-4 py-3">PF A/C NO.</th>
+                  <th className="px-4 py-3">ESI A/C NO.</th>
+                  <th className="px-4 py-3">DRIVING LICENSE</th>
+                  <th className="px-4 py-3">VOTER ID</th>
+                  <th className="px-4 py-3">GUARDIAN NAME</th>
+                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT NAME</th>
+                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT PHONE NUMBER</th>
+                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT RELATIONSHIP</th>
+                  <th className="px-4 py-3 text-[#007BFF]">EMERGENCY CONTACT ADDRESS</th>
                 </>
               )}
 
               {activeTab === "Attendance Details" && activeSubTab === "Work Timings" && (
-                <th className="px-4 py-3">Schedule Type</th>
+                <th className="px-4 py-3">SCHEDULE TYPE</th>
               )}
 
               {activeTab === "Attendance Details" && activeSubTab === "Attendance Modes" && (
                 <>
-                  <th className="px-4 py-3">Smartphone Attendance</th>
-                  <th className="px-4 py-3">Selfie</th>
+                  <th className="px-4 py-3">SMARTPHONE ATTENDANCE</th>
+                  <th className="px-4 py-3">SELFIE</th>
                   <th className="px-4 py-3">QR</th>
-                  <th className="px-4 py-3">Mark Attendance From</th>
-                  <th className="px-4 py-3">Biometric</th>
+                  <th className="px-4 py-3">MARK ATTENDANCE FROM</th>
+                  <th className="px-4 py-3">BIOMETRIC</th>
                 </>
               )}
 
               {activeTab === "Attendance Details" && activeSubTab === "Automation Rules" && (
                 <>
-                  <th className="px-4 py-3">Auto Present</th>
-                  <th className="px-4 py-3">Present On Punch In</th>
-                  <th className="px-4 py-3">Auto Half Day</th>
-                  <th className="px-4 py-3">Mandatory Half Day Hours</th>
-                  <th className="px-4 py-3">Mandatory Full Day Hours</th>
+                  <th className="px-4 py-3">AUTO PRESENT</th>
+                  <th className="px-4 py-3">PRESENT ON PUNCH IN</th>
+                  <th className="px-4 py-3">AUTO HALF DAY</th>
+                  <th className="px-4 py-3">MANDATORY HALF DAY HOURS</th>
+                  <th className="px-4 py-3">MANDATORY FULL DAY HOURS</th>
                 </>
               )}
 
               {activeTab === "Bank Details" && (
                 <>
-                  <th className="px-4 py-3">Bank Name</th>
-                  <th className="px-4 py-3">Bank Account</th>
-                  <th className="px-4 py-3">Penny Drop Status</th>
+                  <th className="px-4 py-3">BANK NAME</th>
+                  <th className="px-4 py-3">BANK ACCOUNT</th>
+                  <th className="px-4 py-3">PENNY DROP STATUS</th>
                 </>
               )}
 
               {activeTab === "Salary Details" && (
                 <>
-                  <th className="px-4 py-3">Monthly CTC</th>
-                  <th className="px-4 py-3">Basic Pay</th>
-                  <th className="px-4 py-3">PF / ESI</th>
+                  <th className="px-4 py-3">MONTHLY CTC</th>
+                  <th className="px-4 py-3">BASIC PAY (50%)</th>
+                  <th className="px-4 py-3">HRA (25%)</th>
+                  <th className="px-4 py-3">PF DEDUCTION (12%)</th>
+                  <th className="px-4 py-3">ESI</th>
+                  <th className="px-4 py-3">NET PAY</th>
                 </>
               )}
 
               {activeTab === "Leave Details" && (
                 <>
-                  <th className="px-4 py-3">Available Leaves</th>
-                  <th className="px-4 py-3">Leave History</th>
+                  <th className="px-4 py-3">AVAILABLE LEAVES</th>
+                  <th className="px-4 py-3">LEAVE HISTORY</th>
                 </>
               )}
             </tr>
@@ -626,17 +674,15 @@ export function MyTeamView() {
                     isSelected ? "bg-blue-50/60" : ""
                   }`}
                 >
-                  <td className="w-10 px-4 py-3 text-center">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleSelectRow(staff.id)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                    />
-                  </td>
-
-                  <td className="px-4 py-3">
+                  {/* Sticky Name Column */}
+                  <td className="sticky left-0 bg-white hover:bg-blue-50/40 z-20 px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-slate-200">
                     <div className="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleSelectRow(staff.id)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
                       <div
                         className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-[10px] font-bold shrink-0 ${staff.avatarColor}`}
                       >
@@ -644,12 +690,18 @@ export function MyTeamView() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-[#007BFF] hover:underline cursor-pointer">
+                        <span className="font-semibold text-[#007BFF] hover:underline cursor-pointer">
                           {staff.name}
                         </span>
 
                         {staff.needsActivation && (
-                          <button className="px-2 py-0.5 text-[10px] font-semibold text-[#007BFF] border border-[#007BFF] rounded-full hover:bg-blue-50">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert(`Activating employee ${staff.name}...`);
+                            }}
+                            className="px-2 py-0.5 text-[10px] font-semibold text-[#007BFF] border border-[#007BFF] rounded-full hover:bg-blue-50 cursor-pointer"
+                          >
                             Activate
                           </button>
                         )}
@@ -657,22 +709,45 @@ export function MyTeamView() {
                     </div>
                   </td>
 
-                  <td className="px-4 py-3 text-slate-600">
-                    {staff.jobTitle || "-"}
-                  </td>
-
                   {activeTab === "Staff Details" && (
                     <>
+                      <td className="px-4 py-3 text-slate-600">{staff.jobTitle || "-"}</td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium text-red-600 bg-red-50">
-                          <AlertCircle className="w-3 h-3 text-red-500" />
-                          <span>{staff.verificationStatus}</span>
-                        </span>
+                        <span className="text-slate-500 text-[11px]">{staff.verificationStatus}</span>
                       </td>
-                      <td className="px-4 py-3 text-slate-500">{staff.employeeId || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.employeeType || "-"}</td>
+                      <td className="px-4 py-3 font-mono text-slate-500">{staff.employeeId || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.employeeType || "Full Time"}</td>
                       <td className="px-4 py-3 text-slate-600">{staff.dateOfJoining || "-"}</td>
                       <td className="px-4 py-3 text-slate-600">{staff.dateOfLeaving || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.dateOfBirth || "-"}</td>
+                      <td className="px-4 py-3 font-mono">{staff.mobileNumber || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.personalEmail || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.officialEmail || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.maritalStatus || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.gender || "Male"}</td>
+                      <td className="px-4 py-3 text-slate-600">{staff.bloodGroup || "-"}</td>
+                      <td className="px-4 py-3 max-w-[200px] truncate" title={staff.currentAddress}>
+                        {staff.currentAddress || "-"}
+                      </td>
+                      <td className="px-4 py-3 max-w-[200px] truncate">{staff.permanentAddress || "-"}</td>
+                      <td className="px-4 py-3 font-mono">{staff.aadhaar || "•••• •••• ••••"}</td>
+                      <td className="px-4 py-3 font-mono">{staff.pan || "••••••••••"}</td>
+                      <td className="px-4 py-3 font-mono">{staff.uan || "-"}</td>
+                      <td className="px-4 py-3 font-mono">{staff.pfAccountNo || "-"}</td>
+                      <td className="px-4 py-3 font-mono">{staff.esiAccountNo || "-"}</td>
+                      <td className="px-4 py-3">{staff.drivingLicense || "-"}</td>
+                      <td className="px-4 py-3">{staff.voterId || "-"}</td>
+                      <td className="px-4 py-3">{staff.guardianName || "-"}</td>
+                      <td className="px-4 py-3 font-semibold text-slate-800">
+                        {staff.emergencyContactName || "-"}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-slate-700">
+                        {staff.emergencyContactPhone || "-"}
+                      </td>
+                      <td className="px-4 py-3">{staff.emergencyContactRelationship || "-"}</td>
+                      <td className="px-4 py-3 max-w-[200px] truncate" title={staff.emergencyContactAddress}>
+                        {staff.emergencyContactAddress || "-"}
+                      </td>
                     </>
                   )}
 
@@ -722,6 +797,17 @@ export function MyTeamView() {
                         ₹{Math.round((staff.monthlyCtc || 0) * 0.5).toLocaleString("en-IN")}
                       </td>
                       <td className="px-4 py-3 text-slate-600">Standard 12% PF</td>
+                      <td className="px-4 py-3 text-rose-600 font-semibold">
+                        ₹{Math.round((staff.monthlyCtc || 0) * 0.5 * 0.12).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">₹200</td>
+                      <td className="px-4 py-3 font-bold text-emerald-600">
+                        ₹{(
+                          (staff.monthlyCtc || 0) -
+                          Math.round((staff.monthlyCtc || 0) * 0.5 * 0.12) -
+                          200
+                        ).toLocaleString("en-IN")}
+                      </td>
                     </>
                   )}
 
