@@ -10,7 +10,6 @@ import {
   Calendar,
   X,
   Copy,
-  FileSpreadsheet,
   Check
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -45,6 +44,16 @@ export function TaxDeclarationsView({
   const [isRentModalOpen, setIsRentModalOpen] = useState(false);
   const [monthlyRent, setMonthlyRent] = useState("0.00");
   const [landlordPan, setLandlordPan] = useState("");
+
+  const [is80DeductionModalOpen, setIs80DeductionModalOpen] = useState(false);
+  const [sec80CAmount, setSec80CAmount] = useState("0.00");
+  const [sec80DAmount, setSec80DAmount] = useState("0.00");
+
+  const [isHomeLoanModalOpen, setIsHomeLoanModalOpen] = useState(false);
+  const [homeLoanInterest, setHomeLoanInterest] = useState("0.00");
+
+  const [isLtaModalOpen, setIsLtaModalOpen] = useState(false);
+  const [ltaAmount, setLtaAmount] = useState("0.00");
 
   const annualEarnings = ((employee.monthlyCtc || 28000) * 12);
   const formattedEarnings = `₹ ${annualEarnings.toLocaleString("en-IN")}.00`;
@@ -126,7 +135,7 @@ export function TaxDeclarationsView({
         </h1>
       </div>
 
-      {/* 1. TDS Calculations Summary Section */}
+      {/* 1. TDS Calculations Summary Section (Screenshot 1) */}
       <div className="space-y-3">
         <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
           TDS Calculations Summary
@@ -195,7 +204,7 @@ export function TaxDeclarationsView({
         </div>
         <button
           onClick={() => setIsPastTdsModalOpen(true)}
-          className="px-4 py-1.5 text-xs font-semibold text-[#007BFF] border border-[#007BFF] rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
+          className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
         >
           Edit
         </button>
@@ -216,29 +225,165 @@ export function TaxDeclarationsView({
         </div>
         <button
           onClick={() => setIsRegimeModalOpen(true)}
-          className="px-4 py-1.5 text-xs font-semibold text-[#007BFF] border border-[#007BFF] rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
+          className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
         >
           Edit
         </button>
       </div>
 
-      {/* 4. Home Rent Card */}
-      <div className="p-4 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
-        <div>
+      {/* 4. Home Rent Section (Screenshot 2) */}
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <h4 className="text-xs font-bold text-slate-800">Home Rent</h4>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Monthly rent paid for HRA tax exemption: ₹{monthlyRent}
-          </p>
+          <button
+            onClick={() => setIsRentModalOpen(true)}
+            className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+          >
+            Edit
+          </button>
         </div>
-        <button
-          onClick={() => setIsRentModalOpen(true)}
-          className="px-4 py-1.5 text-xs font-semibold text-[#007BFF] border border-[#007BFF] rounded-md hover:bg-blue-50 transition-colors cursor-pointer"
-        >
-          Edit
-        </button>
+
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="bg-[#FAFBFD] text-[11px] font-semibold text-slate-500 border-b border-slate-100">
+              <th className="px-5 py-2.5 w-1/2"></th>
+              <th className="px-5 py-2.5">Declared Amount</th>
+              <th className="px-5 py-2.5">Approved Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+            <tr>
+              <td className="px-5 py-2.5">Total Home Rent</td>
+              <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+              <td className="px-5 py-2.5 font-mono">₹ {monthlyRent}</td>
+            </tr>
+            <tr>
+              <td className="px-5 py-2.5">Latest Monthly Rent</td>
+              <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+              <td className="px-5 py-2.5 font-mono">₹ {monthlyRent}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      {/* MODAL 1: Invite Staff (Screenshot 4) */}
+      {/* 5. Section 80 Deductions (Screenshot 2 & 3) */}
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <h4 className="text-xs font-bold text-slate-800">
+            Section 80 Deductions ( investments, education loans, medical insurance etc. )
+          </h4>
+          <button
+            onClick={() => setIs80DeductionModalOpen(true)}
+            className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+          >
+            Edit
+          </button>
+        </div>
+
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="bg-[#FAFBFD] text-[11px] font-semibold text-slate-500 border-b border-slate-100">
+              <th className="px-5 py-2.5 w-1/2"></th>
+              <th className="px-5 py-2.5">Declared Amount</th>
+              <th className="px-5 py-2.5">Approved Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+            {[
+              { label: "Section 80C", val: sec80CAmount },
+              { label: "Section 80CCD(1B)", val: "0.00" },
+              { label: "Section 80D", val: sec80DAmount },
+              { label: "Section 80DD", val: "0.00" },
+              { label: "Section 80E", val: "0.00" },
+              { label: "Section 80EEB", val: "0.00" },
+              { label: "Section 80G", val: "0.00" },
+              { label: "Section 80GG", val: "0.00" },
+              { label: "Section 80GGA", val: "0.00" },
+              { label: "Section 80GGC", val: "0.00" },
+              { label: "Section 80DDB", val: "0.00" },
+              { label: "Section 80U", val: "0.00" },
+            ].map((item, idx) => (
+              <tr key={idx}>
+                <td className="px-5 py-2.5">{item.label}</td>
+                <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+                <td className="px-5 py-2.5 font-mono">₹ {item.val}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 6. Interest On Home Loan (Screenshot 4) */}
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <h4 className="text-xs font-bold text-slate-800">Interest On Home Loan</h4>
+          <button
+            onClick={() => setIsHomeLoanModalOpen(true)}
+            className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+          >
+            Edit
+          </button>
+        </div>
+
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="bg-[#FAFBFD] text-[11px] font-semibold text-slate-500 border-b border-slate-100">
+              <th className="px-5 py-2.5 w-1/2"></th>
+              <th className="px-5 py-2.5">Declared Amount</th>
+              <th className="px-5 py-2.5">Approved Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+            <tr>
+              <td className="px-5 py-2.5">Annual interest payable</td>
+              <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+              <td className="px-5 py-2.5 font-mono">₹ {homeLoanInterest}</td>
+            </tr>
+            <tr>
+              <td className="px-5 py-2.5">Additional benefit under Section 80EE</td>
+              <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+              <td className="px-5 py-2.5 font-mono">₹ 0.00</td>
+            </tr>
+            <tr>
+              <td className="px-5 py-2.5">Section 80EEA</td>
+              <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+              <td className="px-5 py-2.5 font-mono">₹ 0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* 7. Leave Travel Allowance (Screenshot 4) */}
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <h4 className="text-xs font-bold text-slate-800">Leave Travel Allowance</h4>
+          <button
+            onClick={() => setIsLtaModalOpen(true)}
+            className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+          >
+            Edit
+          </button>
+        </div>
+
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="bg-[#FAFBFD] text-[11px] font-semibold text-slate-500 border-b border-slate-100">
+              <th className="px-5 py-2.5 w-1/2"></th>
+              <th className="px-5 py-2.5">Declared Amount</th>
+              <th className="px-5 py-2.5">Approved Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+            <tr>
+              <td className="px-5 py-2.5">LTA Amount</td>
+              <td className="px-5 py-2.5 text-slate-400">--NA--</td>
+              <td className="px-5 py-2.5 font-mono">₹ {ltaAmount}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* MODAL 1: Invite Staff (Screenshot 1 Match) */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
@@ -290,7 +435,7 @@ export function TaxDeclarationsView({
         </div>
       )}
 
-      {/* MODAL 2: Download Report Confirmation (Screenshot 2) */}
+      {/* MODAL 2: Download Report Confirmation (Screenshot 2 Match) */}
       {isDownloadModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 p-8 text-center space-y-4">
@@ -485,6 +630,160 @@ export function TaxDeclarationsView({
               </button>
               <button
                 onClick={() => setIsRentModalOpen(false)}
+                className="px-5 py-1.5 font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: Section 80 Deductions Modal */}
+      {is80DeductionModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 p-6 space-y-3.5 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-sm">
+                Section 80 Deductions
+              </h3>
+              <button
+                onClick={() => setIs80DeductionModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-slate-600 font-medium mb-1">
+                Section 80C (PPF, ELSS, Insurance up to ₹1.5L)
+              </label>
+              <input
+                type="number"
+                value={sec80CAmount}
+                onChange={(e) => setSec80CAmount(e.target.value)}
+                placeholder="e.g. 150000"
+                className="w-full px-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-600 font-medium mb-1">
+                Section 80D (Health Insurance)
+              </label>
+              <input
+                type="number"
+                value={sec80DAmount}
+                onChange={(e) => setSec80DAmount(e.target.value)}
+                placeholder="e.g. 25000"
+                className="w-full px-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                onClick={() => setIs80DeductionModalOpen(false)}
+                className="px-4 py-1.5 text-slate-600 hover:bg-slate-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setIs80DeductionModalOpen(false)}
+                className="px-5 py-1.5 font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 7: Home Loan Interest Modal */}
+      {isHomeLoanModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 p-6 space-y-3.5 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-sm">
+                Interest On Home Loan
+              </h3>
+              <button
+                onClick={() => setIsHomeLoanModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-slate-600 font-medium mb-1">
+                Annual Interest Payable (Section 24b up to ₹2L)
+              </label>
+              <input
+                type="number"
+                value={homeLoanInterest}
+                onChange={(e) => setHomeLoanInterest(e.target.value)}
+                placeholder="e.g. 180000"
+                className="w-full px-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                onClick={() => setIsHomeLoanModalOpen(false)}
+                className="px-4 py-1.5 text-slate-600 hover:bg-slate-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setIsHomeLoanModalOpen(false)}
+                className="px-5 py-1.5 font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 8: LTA Modal */}
+      {isLtaModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 p-6 space-y-3.5 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-800 text-sm">
+                Leave Travel Allowance
+              </h3>
+              <button
+                onClick={() => setIsLtaModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-slate-600 font-medium mb-1">
+                LTA Amount (₹)
+              </label>
+              <input
+                type="number"
+                value={ltaAmount}
+                onChange={(e) => setLtaAmount(e.target.value)}
+                placeholder="e.g. 30000"
+                className="w-full px-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                onClick={() => setIsLtaModalOpen(false)}
+                className="px-4 py-1.5 text-slate-600 hover:bg-slate-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setIsLtaModalOpen(false)}
                 className="px-5 py-1.5 font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md"
               >
                 Save
