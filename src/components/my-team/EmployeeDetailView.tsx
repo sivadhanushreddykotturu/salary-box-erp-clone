@@ -6,6 +6,7 @@ import {
   MoreVertical,
   ChevronRight,
   Plus,
+  Minus,
   AlertCircle,
   Building2,
   CheckCircle2,
@@ -24,7 +25,14 @@ import {
   Percent,
   GitFork,
   Trash2,
-  ChevronDown
+  ChevronDown,
+  MapPin,
+  Smartphone,
+  Laptop,
+  Camera,
+  Wifi,
+  Shield,
+  Fingerprint
 } from "lucide-react";
 import { TaxDeclarationsView } from "./TaxDeclarationsView";
 
@@ -205,6 +213,142 @@ export function EmployeeDetailView({
   >("landing");
   const [attendanceTimezone, setAttendanceTimezone] = useState("Calcutta, Asia");
   const [canStaffViewOwnAttendance, setCanStaffViewOwnAttendance] = useState(true);
+
+  // Work Timings Schedule State (Screenshot Match)
+  const [timingType, setTimingType] = useState<"Fixed" | "Flexible">("Fixed");
+  const [dailySchedules, setDailySchedules] = useState<
+    Record<
+      string,
+      {
+        isWeekoff: boolean;
+        weekoffType?: string;
+        shifts: Array<{ name: string; timing: string }>;
+      }
+    >
+  >({
+    Mon: { isWeekoff: false, shifts: [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }] },
+    Tue: { isWeekoff: false, shifts: [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }] },
+    Wed: { isWeekoff: false, shifts: [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }] },
+    Thu: { isWeekoff: false, shifts: [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }] },
+    Fri: { isWeekoff: false, shifts: [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }] },
+    Sat: { isWeekoff: false, shifts: [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }] },
+    Sun: { isWeekoff: true, weekoffType: "All sundays week off", shifts: [] },
+  });
+
+  const [flexibleHours, setFlexibleHours] = useState("9");
+  const [flexibleMins, setFlexibleMins] = useState("00");
+  const [coreHoursStart, setCoreHoursStart] = useState("10:00 AM");
+  const [coreHoursEnd, setCoreHoursEnd] = useState("04:00 PM");
+  const [flexibleWeekoffDays, setFlexibleWeekoffDays] = useState<string[]>(["Sun"]);
+
+  // Attendance Modes State
+  const [isGeofenceEnabled, setIsGeofenceEnabled] = useState(true);
+  const [geofenceRadius, setGeofenceRadius] = useState("100");
+  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const [isSelfieEnabled, setIsSelfieEnabled] = useState(true);
+  const [isWebPunchEnabled, setIsWebPunchEnabled] = useState(true);
+  const [isIpRestricted, setIsIpRestricted] = useState(false);
+
+  // Automation Rules State
+  const [autoHalfDayThreshold, setAutoHalfDayThreshold] = useState("4.5");
+  const [autoAbsentTime, setAutoAbsentTime] = useState("01:00 PM");
+  const [gracePeriodMins, setGracePeriodMins] = useState("15");
+  const [lateDeductionCount, setLateDeductionCount] = useState("3");
+
+  // Shift Editing State
+  const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+  const [editingShiftDay, setEditingShiftDay] = useState<string | null>(null);
+  const [editingShiftIdx, setEditingShiftIdx] = useState<number | null>(null);
+  const [editingShiftName, setEditingShiftName] = useState("REGULAR");
+  const [editingShiftTiming, setEditingShiftTiming] = useState("09:00 AM - 06:30 PM");
+
+  const handleToggleWeekoff = (day: string) => {
+    setDailySchedules((prev) => {
+      const current = prev[day] || { isWeekoff: false, shifts: [] };
+      const nextIsWeekoff = !current.isWeekoff;
+      return {
+        ...prev,
+        [day]: {
+          ...current,
+          isWeekoff: nextIsWeekoff,
+          shifts: nextIsWeekoff
+            ? []
+            : current.shifts && current.shifts.length > 0
+            ? current.shifts
+            : [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }],
+          weekoffType: day === "Sun" ? current.weekoffType || "All sundays week off" : undefined,
+        },
+      };
+    });
+  };
+
+  const handleSundayWeekoffTypeChange = (type: string) => {
+    setDailySchedules((prev) => ({
+      ...prev,
+      Sun: {
+        ...prev.Sun,
+        weekoffType: type,
+      },
+    }));
+  };
+
+  const handleRemoveShift = (day: string, idx: number) => {
+    setDailySchedules((prev) => {
+      const currentShifts = [...(prev[day]?.shifts || [])];
+      currentShifts.splice(idx, 1);
+      return {
+        ...prev,
+        [day]: {
+          ...prev[day],
+          shifts: currentShifts,
+        },
+      };
+    });
+  };
+
+  const handleAddShift = (day: string) => {
+    setDailySchedules((prev) => {
+      const currentShifts = [...(prev[day]?.shifts || [])];
+      currentShifts.push({ name: "REGULAR", timing: "09:00 AM - 06:30 PM" });
+      return {
+        ...prev,
+        [day]: {
+          ...prev[day],
+          shifts: currentShifts,
+        },
+      };
+    });
+  };
+
+  const handleOpenEditShift = (day: string, idx: number, currentShift: { name: string; timing: string }) => {
+    setEditingShiftDay(day);
+    setEditingShiftIdx(idx);
+    setEditingShiftName(currentShift.name);
+    setEditingShiftTiming(currentShift.timing);
+    setIsShiftModalOpen(true);
+  };
+
+  const handleSaveShiftEdit = () => {
+    if (editingShiftDay && editingShiftIdx !== null) {
+      setDailySchedules((prev) => {
+        const currentShifts = [...(prev[editingShiftDay]?.shifts || [])];
+        if (currentShifts[editingShiftIdx]) {
+          currentShifts[editingShiftIdx] = {
+            name: editingShiftName,
+            timing: editingShiftTiming,
+          };
+        }
+        return {
+          ...prev,
+          [editingShiftDay]: {
+            ...prev[editingShiftDay],
+            shifts: currentShifts,
+          },
+        };
+      });
+    }
+    setIsShiftModalOpen(false);
+  };
 
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
@@ -2015,96 +2159,718 @@ export function EmployeeDetailView({
           {/* TAB 8: Attendance Details (Screenshot Match 1:1) */}
           {activeTab === "Attendance Details" && (
             <div className="space-y-6 max-w-3xl">
-              <div className="pb-3 border-b border-slate-100">
-                <h3 className="text-base font-bold text-slate-800">
-                  Attendance Details
-                </h3>
-              </div>
-
-              <div className="space-y-3">
-                {/* 1. Work Timings Card */}
-                <div
-                  onClick={() => alert("Opening Work Timings details...")}
-                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
-                      Work Timings
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
-                      New
-                    </span>
+              {/* SUBVIEW 1: Landing List */}
+              {attendanceDetailsSubView === "landing" && (
+                <>
+                  <div className="pb-3 border-b border-slate-100">
+                    <h3 className="text-base font-bold text-slate-800">
+                      Attendance Details
+                    </h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
-                </div>
 
-                {/* 2. Attendance Modes Card */}
-                <div
-                  onClick={() => alert("Opening Attendance Modes details...")}
-                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
-                      Attendance Modes
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
-                      New
-                    </span>
+                  <div className="space-y-3">
+                    {/* 1. Work Timings Card */}
+                    <div
+                      onClick={() => setAttendanceDetailsSubView("work_timings")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                          Work Timings
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
+                          New
+                        </span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* 2. Attendance Modes Card */}
+                    <div
+                      onClick={() => setAttendanceDetailsSubView("attendance_modes")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                          Attendance Modes
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
+                          New
+                        </span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* 3. Automation Rules Card */}
+                    <div
+                      onClick={() => setAttendanceDetailsSubView("automation_rules")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                          Automation Rules
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
+                          New
+                        </span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* 4. Attendance Timezone Card */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <span className="font-semibold text-slate-800 text-xs">
+                        Attendance Timezone
+                      </span>
+                      <select
+                        value={attendanceTimezone}
+                        onChange={(e) => setAttendanceTimezone(e.target.value)}
+                        className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option>Calcutta, Asia</option>
+                        <option>Dubai, Asia</option>
+                        <option>Singapore, Asia</option>
+                        <option>London, Europe</option>
+                      </select>
+                    </div>
+
+                    {/* 5. Staff can view own attendance Toggle Card */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <span className="font-semibold text-slate-800 text-xs">
+                        Staff can view own attendance
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCanStaffViewOwnAttendance(!canStaffViewOwnAttendance)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          canStaffViewOwnAttendance ? "bg-[#007BFF]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                            canStaffViewOwnAttendance ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
-                </div>
+                </>
+              )}
 
-                {/* 3. Automation Rules Card */}
-                <div
-                  onClick={() => alert("Opening Automation Rules details...")}
-                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
-                      Automation Rules
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
-                      New
-                    </span>
+              {/* SUBVIEW 2: Work Timings (1:1 Screenshot Match) */}
+              {attendanceDetailsSubView === "work_timings" && (
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5 text-base font-bold text-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setAttendanceDetailsSubView("landing")}
+                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-slate-600 font-bold"
+                      >
+                        Attendance Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-900 font-bold">Work Timings</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert("Work timings updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
-                </div>
 
-                {/* 4. Attendance Timezone Card */}
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                  <span className="font-semibold text-slate-800 text-xs">
-                    Attendance Timezone
-                  </span>
-                  <select
-                    value={attendanceTimezone}
-                    onChange={(e) => setAttendanceTimezone(e.target.value)}
-                    className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option>Calcutta, Asia</option>
-                    <option>Dubai, Asia</option>
-                    <option>Singapore, Asia</option>
-                    <option>London, Europe</option>
-                  </select>
-                </div>
+                  {/* Select Type Card */}
+                  <div className="bg-[#EBF5FF]/50 border border-blue-200/80 rounded-xl p-3.5 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">Select Type</span>
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="timingType"
+                          value="Fixed"
+                          checked={timingType === "Fixed"}
+                          onChange={() => setTimingType("Fixed")}
+                          className="text-[#007BFF] focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                        />
+                        <span>Fixed</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="timingType"
+                          value="Flexible"
+                          checked={timingType === "Flexible"}
+                          onChange={() => setTimingType("Flexible")}
+                          className="text-[#007BFF] focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                        />
+                        <span>Flexible</span>
+                      </label>
+                    </div>
+                  </div>
 
-                {/* 5. Staff can view own attendance Toggle Card */}
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                  <span className="font-semibold text-slate-800 text-xs">
-                    Staff can view own attendance
-                  </span>
+                  {/* Fixed Schedule Matrix */}
+                  {timingType === "Fixed" && (
+                    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-[#F8FAFC] border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                          <tr>
+                            <th className="px-5 py-3 w-28">Day</th>
+                            <th className="px-5 py-3 w-24 text-center">Weekoff</th>
+                            <th className="px-5 py-3">Shifts</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => {
+                            const sched = dailySchedules[day] || { isWeekoff: false, shifts: [] };
+                            return (
+                              <tr key={day} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-5 py-3 font-semibold text-slate-800">
+                                  {day !== "Sun" && (
+                                    <span className="text-red-500 font-bold mr-0.5">*</span>
+                                  )}
+                                  {day}
+                                </td>
+                                <td className="px-5 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={sched.isWeekoff}
+                                    onChange={() => handleToggleWeekoff(day)}
+                                    className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                                  />
+                                </td>
+                                <td className="px-5 py-3">
+                                  {sched.isWeekoff ? (
+                                    day === "Sun" ? (
+                                      <select
+                                        value={sched.weekoffType || "All sundays week off"}
+                                        onChange={(e) =>
+                                          handleSundayWeekoffTypeChange(e.target.value)
+                                        }
+                                        className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      >
+                                        <option>All sundays week off</option>
+                                        <option>1st and 3rd Sunday week off</option>
+                                        <option>2nd and 4th Sunday week off</option>
+                                        <option>Alternate Sundays week off</option>
+                                      </select>
+                                    ) : (
+                                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium text-slate-500 bg-slate-100 border border-slate-200">
+                                        Week Off
+                                      </span>
+                                    )
+                                  ) : (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      {sched.shifts?.map((shift, sIdx) => (
+                                        <div key={sIdx} className="flex items-center gap-1.5">
+                                          <div
+                                            onClick={() =>
+                                              handleOpenEditShift(day, sIdx, shift)
+                                            }
+                                            className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:border-blue-400 hover:text-blue-600 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                            title="Click to change shift name or timings"
+                                          >
+                                            <span>{shift.name}</span>
+                                            <span className="text-slate-300 font-normal">|</span>
+                                            <span>{shift.timing}</span>
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleRemoveShift(day, sIdx)}
+                                            className="w-5 h-5 rounded-full border border-red-400 text-red-500 flex items-center justify-center hover:bg-red-50 cursor-pointer transition-colors"
+                                            title="Remove shift"
+                                          >
+                                            <Minus className="w-3 h-3 stroke-[2.5]" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                      <button
+                                        type="button"
+                                        onClick={() => handleAddShift(day)}
+                                        className="w-5 h-5 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center hover:bg-blue-50 cursor-pointer transition-colors ml-0.5"
+                                        title="Add shift"
+                                      >
+                                        <Plus className="w-3 h-3 stroke-[2.5]" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Flexible Schedule Matrix */}
+                  {timingType === "Flexible" && (
+                    <div className="space-y-4">
+                      {/* 1. Daily Required Hours */}
+                      <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          Daily Working Hours Requirement
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-slate-600 font-medium text-xs mb-1">
+                              Minimum Hours per Day
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="1"
+                                max="24"
+                                value={flexibleHours}
+                                onChange={(e) => setFlexibleHours(e.target.value)}
+                                className="w-20 px-3 py-1.5 text-xs rounded border border-slate-300 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                              <span className="text-xs text-slate-500 font-medium">Hours</span>
+                              <input
+                                type="text"
+                                value={flexibleMins}
+                                onChange={(e) => setFlexibleMins(e.target.value)}
+                                className="w-16 px-3 py-1.5 text-xs rounded border border-slate-300 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                              <span className="text-xs text-slate-500 font-medium">Mins</span>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-slate-600 font-medium text-xs mb-1">
+                              Half Day Minimum Threshold
+                            </label>
+                            <input
+                              type="text"
+                              defaultValue="4.5 Hours"
+                              className="w-full px-3 py-1.5 text-xs rounded border border-slate-300 bg-slate-50 text-slate-600 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2. Core Window */}
+                      <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          Office Timing & Core Working Window
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <label className="block text-slate-600 font-medium mb-1">
+                              Mandatory Core Hours
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={coreHoursStart}
+                                onChange={(e) => setCoreHoursStart(e.target.value)}
+                                className="w-full px-3 py-1.5 rounded border border-slate-300 text-xs font-mono"
+                              />
+                              <span className="text-slate-400">to</span>
+                              <input
+                                type="text"
+                                value={coreHoursEnd}
+                                onChange={(e) => setCoreHoursEnd(e.target.value)}
+                                className="w-full px-3 py-1.5 rounded border border-slate-300 text-xs font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-slate-600 font-medium mb-1">
+                              Break Duration Allowed
+                            </label>
+                            <select className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-xs">
+                              <option>30 Minutes (Unpaid)</option>
+                              <option defaultValue="60 Minutes (Unpaid)">60 Minutes (Unpaid)</option>
+                              <option>90 Minutes (Unpaid)</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 3. Flexible Week Off Selector */}
+                      <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          Weekly Off Days
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => {
+                            const isOff = flexibleWeekoffDays.includes(d);
+                            return (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={() => {
+                                  if (isOff) {
+                                    setFlexibleWeekoffDays(
+                                      flexibleWeekoffDays.filter((x) => x !== d)
+                                    );
+                                  } else {
+                                    setFlexibleWeekoffDays([...flexibleWeekoffDays, d]);
+                                  }
+                                }}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                  isOff
+                                    ? "bg-[#007BFF] text-white shadow-xs"
+                                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                }`}
+                              >
+                                {d} {isOff ? "✓ (Off)" : ""}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SUBVIEW 3: Attendance Modes */}
+              {attendanceDetailsSubView === "attendance_modes" && (
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5 text-base font-bold text-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setAttendanceDetailsSubView("landing")}
+                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-slate-600 font-bold"
+                      >
+                        Attendance Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-900 font-bold">Attendance Modes</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert("Attendance modes updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Mode 1: Geofence */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#007BFF] flex items-center justify-center">
+                            <MapPin className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-800 text-xs">
+                              Geofence Attendance
+                            </div>
+                            <div className="text-[11px] text-slate-500">
+                              Allow staff to punch only within branch radius
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsGeofenceEnabled(!isGeofenceEnabled)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            isGeofenceEnabled ? "bg-[#007BFF]" : "bg-slate-300"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              isGeofenceEnabled ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {isGeofenceEnabled && (
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                          <span className="text-slate-600 font-medium">Geofence Radius:</span>
+                          <select
+                            value={geofenceRadius}
+                            onChange={(e) => setGeofenceRadius(e.target.value)}
+                            className="px-3 py-1 text-xs rounded border border-slate-300 bg-white"
+                          >
+                            <option value="50">50 meters</option>
+                            <option value="100">100 meters (Default)</option>
+                            <option value="200">200 meters</option>
+                            <option value="500">500 meters</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mode 2: Biometric Device */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                          <Fingerprint className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-800 text-xs">
+                            Biometric / Facial Device
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            Sync punches from office biometric hardware machine
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsBiometricEnabled(!isBiometricEnabled)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          isBiometricEnabled ? "bg-[#007BFF]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                            isBiometricEnabled ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Mode 3: Selfie Attendance */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                          <Camera className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-800 text-xs">
+                            Selfie Attendance with GPS
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            Require selfie verification upon clocking in
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsSelfieEnabled(!isSelfieEnabled)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          isSelfieEnabled ? "bg-[#007BFF]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                            isSelfieEnabled ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Mode 4: Web / Mobile Punch */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                          <Smartphone className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-800 text-xs">
+                            Mobile App & Web Punch
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            Allow staff to punch in/out from SalaryBox employee app
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsWebPunchEnabled(!isWebPunchEnabled)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          isWebPunchEnabled ? "bg-[#007BFF]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                            isWebPunchEnabled ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SUBVIEW 4: Automation Rules */}
+              {attendanceDetailsSubView === "automation_rules" && (
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5 text-base font-bold text-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setAttendanceDetailsSubView("landing")}
+                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-slate-600 font-bold"
+                      >
+                        Attendance Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-900 font-bold">Automation Rules</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert("Automation rules updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Rule 1: Auto Half Day */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-slate-800 text-xs">
+                          Auto Half Day Rule
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Mark half day if total work duration is less than threshold
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={autoHalfDayThreshold}
+                          onChange={(e) => setAutoHalfDayThreshold(e.target.value)}
+                          className="w-16 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
+                        />
+                        <span className="text-xs text-slate-500 font-medium">Hours</span>
+                      </div>
+                    </div>
+
+                    {/* Rule 2: Auto Absent */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-slate-800 text-xs">
+                          Auto Absent Rule
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Mark absent if employee has not punched in before cutoff time
+                        </div>
+                      </div>
+                      <input
+                        type="text"
+                        value={autoAbsentTime}
+                        onChange={(e) => setAutoAbsentTime(e.target.value)}
+                        className="w-28 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
+                      />
+                    </div>
+
+                    {/* Rule 3: Grace Period */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-slate-800 text-xs">
+                          Late Arrival Grace Period
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Allowed delay after shift start without marking late
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={gracePeriodMins}
+                          onChange={(e) => setGracePeriodMins(e.target.value)}
+                          className="w-16 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
+                        />
+                        <span className="text-xs text-slate-500 font-medium">Minutes</span>
+                      </div>
+                    </div>
+
+                    {/* Rule 4: Late Deduction */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-slate-800 text-xs">
+                          Late Fine Deduction
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Deduct 0.5 day salary after specified number of late arrivals
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={lateDeductionCount}
+                          onChange={(e) => setLateDeductionCount(e.target.value)}
+                          className="w-16 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
+                        />
+                        <span className="text-xs text-slate-500 font-medium">Late Days</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Shift Edit Modal */}
+          {isShiftModalOpen && (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
+                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800 text-sm">
+                    Edit Shift for {editingShiftDay}
+                  </h3>
                   <button
-                    type="button"
-                    onClick={() => setCanStaffViewOwnAttendance(!canStaffViewOwnAttendance)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      canStaffViewOwnAttendance ? "bg-[#007BFF]" : "bg-slate-300"
-                    }`}
+                    onClick={() => setIsShiftModalOpen(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                   >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                        canStaffViewOwnAttendance ? "translate-x-5" : "translate-x-0"
-                      }`}
-                    />
+                    <X className="w-4 h-4" />
                   </button>
+                </div>
+
+                <div className="p-5 space-y-3.5 text-xs">
+                  <div>
+                    <label className="block text-slate-600 font-medium mb-1">
+                      Shift Name
+                    </label>
+                    <select
+                      value={editingShiftName}
+                      onChange={(e) => setEditingShiftName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white"
+                    >
+                      <option value="REGULAR">REGULAR</option>
+                      <option value="MORNING">MORNING</option>
+                      <option value="EVENING">EVENING</option>
+                      <option value="NIGHT">NIGHT</option>
+                      <option value="GENERAL">GENERAL</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 font-medium mb-1">
+                      Shift Timing
+                    </label>
+                    <select
+                      value={editingShiftTiming}
+                      onChange={(e) => setEditingShiftTiming(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white font-mono"
+                    >
+                      <option value="09:00 AM - 06:30 PM">09:00 AM - 06:30 PM</option>
+                      <option value="09:30 AM - 06:30 PM">09:30 AM - 06:30 PM</option>
+                      <option value="10:00 AM - 07:00 PM">10:00 AM - 07:00 PM</option>
+                      <option value="08:00 AM - 05:00 PM">08:00 AM - 05:00 PM</option>
+                      <option value="06:00 AM - 02:30 PM">06:00 AM - 02:30 PM</option>
+                      <option value="02:00 PM - 10:30 PM">02:00 PM - 10:30 PM</option>
+                      <option value="10:00 PM - 06:30 AM">10:00 PM - 06:30 AM</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setIsShiftModalOpen(false)}
+                      className="px-4 py-1.5 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveShiftEdit}
+                      className="px-4 py-1.5 rounded-md bg-[#007BFF] hover:bg-blue-600 text-white font-semibold shadow-xs"
+                    >
+                      Save Shift
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
