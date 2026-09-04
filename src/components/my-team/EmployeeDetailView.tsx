@@ -609,6 +609,10 @@ export function EmployeeDetailView({
     casualLeave: "",
   });
 
+  // Profile Image Modal State (1:1 Screenshot Match)
+  const [isProfileImageModalOpen, setIsProfileImageModalOpen] = useState(false);
+  const [employeePhoto, setEmployeePhoto] = useState<string | null>(null);
+
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
 
@@ -810,9 +814,14 @@ export function EmployeeDetailView({
           </button>
 
           <div
-            className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-[10px] font-bold ${employee.avatarColor}`}
+            onClick={() => setIsProfileImageModalOpen(true)}
+            title="Click to change profile image"
+            className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-[10px] font-bold ${
+              employeePhoto ? "bg-cover bg-center" : employee.avatarColor
+            } cursor-pointer hover:opacity-90 hover:ring-2 hover:ring-blue-400 transition-all overflow-hidden`}
+            style={employeePhoto ? { backgroundImage: `url(${employeePhoto})` } : {}}
           >
-            {employee.initials}
+            {!employeePhoto && employee.initials}
           </div>
 
           <h2 className="text-base font-bold text-slate-800 tracking-tight">
@@ -5986,6 +5995,70 @@ export function EmployeeDetailView({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: Upload Profile Image Modal (1:1 Screenshot Match) */}
+      {isProfileImageModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 text-sm">
+                Upload Profile Image
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsProfileImageModalOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-8 flex flex-col items-center justify-center space-y-6">
+              {/* Profile Image Circle Placeholder matching Screenshot 2 */}
+              <div className="w-28 h-28 rounded-full bg-slate-200 border-4 border-white shadow-md flex items-center justify-center overflow-hidden relative">
+                {employeePhoto ? (
+                  <img
+                    src={employeePhoto}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#CBD5E1] flex items-center justify-center text-white">
+                    <User className="w-16 h-16 stroke-[1.5]" />
+                  </div>
+                )}
+              </div>
+
+              {/* Add Image / Update Image Button */}
+              <div>
+                <label className="px-6 py-2 rounded-md bg-[#007BFF] hover:bg-blue-600 text-white font-semibold text-xs shadow-xs cursor-pointer inline-flex items-center gap-2 transition-colors">
+                  <span>{employeePhoto ? "Update Image" : "Add Image"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onload = (uploadEvent) => {
+                          if (uploadEvent.target?.result) {
+                            setEmployeePhoto(uploadEvent.target.result as string);
+                            setIsProfileImageModalOpen(false);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       )}
