@@ -199,6 +199,13 @@ export function EmployeeDetailView({
       (p) => p.view || p.edit || p.approve
     );
 
+  // Attendance Details State (Screenshot Match)
+  const [attendanceDetailsSubView, setAttendanceDetailsSubView] = useState<
+    "landing" | "work_timings" | "attendance_modes" | "automation_rules"
+  >("landing");
+  const [attendanceTimezone, setAttendanceTimezone] = useState("Calcutta, Asia");
+  const [canStaffViewOwnAttendance, setCanStaffViewOwnAttendance] = useState(true);
+
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
 
@@ -2005,6 +2012,104 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 8: Attendance Details (Screenshot Match 1:1) */}
+          {activeTab === "Attendance Details" && (
+            <div className="space-y-6 max-w-3xl">
+              <div className="pb-3 border-b border-slate-100">
+                <h3 className="text-base font-bold text-slate-800">
+                  Attendance Details
+                </h3>
+              </div>
+
+              <div className="space-y-3">
+                {/* 1. Work Timings Card */}
+                <div
+                  onClick={() => alert("Opening Work Timings details...")}
+                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                      Work Timings
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
+                      New
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                </div>
+
+                {/* 2. Attendance Modes Card */}
+                <div
+                  onClick={() => alert("Opening Attendance Modes details...")}
+                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                      Attendance Modes
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
+                      New
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                </div>
+
+                {/* 3. Automation Rules Card */}
+                <div
+                  onClick={() => alert("Opening Automation Rules details...")}
+                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                      Automation Rules
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-100">
+                      New
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                </div>
+
+                {/* 4. Attendance Timezone Card */}
+                <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <span className="font-semibold text-slate-800 text-xs">
+                    Attendance Timezone
+                  </span>
+                  <select
+                    value={attendanceTimezone}
+                    onChange={(e) => setAttendanceTimezone(e.target.value)}
+                    className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option>Calcutta, Asia</option>
+                    <option>Dubai, Asia</option>
+                    <option>Singapore, Asia</option>
+                    <option>London, Europe</option>
+                  </select>
+                </div>
+
+                {/* 5. Staff can view own attendance Toggle Card */}
+                <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <span className="font-semibold text-slate-800 text-xs">
+                    Staff can view own attendance
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCanStaffViewOwnAttendance(!canStaffViewOwnAttendance)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      canStaffViewOwnAttendance ? "bg-[#007BFF]" : "bg-slate-300"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        canStaffViewOwnAttendance ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
@@ -2012,7 +2117,8 @@ export function EmployeeDetailView({
             activeTab !== "Background Verification" &&
             activeTab !== "Bank Account" &&
             activeTab !== "Approval Flows" &&
-            activeTab !== "User Permission" && (
+            activeTab !== "User Permission" &&
+            activeTab !== "Attendance Details" && (
               <div className="py-16 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto">
                   <Layers className="w-6 h-6" />
