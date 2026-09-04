@@ -286,14 +286,38 @@ model Employee {
   employeeCode        String
   firstName           String
   lastName            String?
+  jobTitle            String?
   gender              String?
   dob                 DateTime?
   dateOfJoining       DateTime
   dateOfLeaving       DateTime?
   status              EmployeeStatus     @default(ACTIVE)
-  
+  employeeType        String?            @default("Full Time")
+  timezone            String?            @default("Calcutta, Asia")
+  avatarUrl           String?
+  avatarColor         String?            @default("bg-blue-500")
+  needsActivation     Boolean            @default(false)
+
+  // Personal & Contact Columns
+  mobileNumber        String?
+  personalEmail       String?
+  officialEmail       String?
+  maritalStatus       String?
+  bloodGroup          String?
+  guardianName        String?
+  currentAddress      String?
+  permanentAddress    String?
+
+  // Emergency Contact
+  emergencyContactName         String?
+  emergencyContactPhone        String?
+  emergencyContactRelationship String?
+  emergencyContactAddress      String?
+
+  // Organization & Multi-Branch
   branchId            String?            @db.ObjectId
   branch              Branch?            @relation(fields: [branchId], references: [id])
+  assignedBranches    String[]
   departmentId        String?            @db.ObjectId
   department          Department?        @relation(fields: [departmentId], references: [id])
   designationId       String?            @db.ObjectId
@@ -304,10 +328,36 @@ model Employee {
   reportingManagerId  String?            @db.ObjectId
   reportingManager    Employee?          @relation("ManagerSubordinates", fields: [reportingManagerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subordinates        Employee[]         @relation("ManagerSubordinates")
-  
-  emergencyContactName  String?
-  emergencyContactPhone String?
-  
+
+  // Attendance Modes & Rules
+  scheduleType        String?            @default("Fixed")
+  smartphoneAttendance String?           @default("Yes")
+  selfieAttendance    String?            @default("Yes")
+  qrAttendance        String?            @default("No")
+  markAttendanceFrom  String?            @default("Office")
+  biometricAttendance String?            @default("No")
+  autoPresent         String?            @default("No")
+  presentOnPunchIn    String?            @default("No")
+
+  // Banking Details
+  bankName            String?
+  bankAccountNumber   String?
+  ifscCode            String?
+  accountHolderName   String?
+  paymentType         String?            @default("bank")
+  upiId               String?
+
+  // Permissions & Role
+  canUseLocationTracking Boolean         @default(false)
+  canUseCrmLite          Boolean         @default(false)
+  userRole               String?         @default("Employee")
+  customPermissions      Json?
+
+  // Extensible Custom Fields & Past Employments
+  pastEmployments     Json?
+  customFields        Json?
+
+  // Salary Structure
   salaryStructureId   String?            @db.ObjectId
   salaryStructure     SalaryStructure?   @relation(fields: [salaryStructureId], references: [id])
 
@@ -344,6 +394,10 @@ model EmployeeKYC {
   panStatus           VerificationStatus @default(NOT_SUBMITTED)
   panLegalName        String?
   panNameMatchScore   Float?
+  
+  // Driving License & Voter ID
+  drivingLicense      String?
+  voterId             String?
   
   // Bank Account Data
   bankAccountNumber   String?
