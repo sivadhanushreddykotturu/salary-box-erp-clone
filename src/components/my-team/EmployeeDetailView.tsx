@@ -21,7 +21,10 @@ import {
   Clock,
   DollarSign,
   CalendarDays,
-  Percent
+  Percent,
+  GitFork,
+  Trash2,
+  ChevronDown
 } from "lucide-react";
 import { TaxDeclarationsView } from "./TaxDeclarationsView";
 
@@ -159,6 +162,17 @@ export function EmployeeDetailView({
     upiId: "",
   });
 
+  // Approval Flows State (Screenshots 1-5)
+  const [approvalSubView, setApprovalSubView] = useState<"list" | "leave" | "reimbursement">("list");
+  const [isAddApprovalFlowModalOpen, setIsAddApprovalFlowModalOpen] = useState(false);
+  const [leaveApprovalFlows, setLeaveApprovalFlows] = useState<any[]>([]);
+  const [reimbursementApprovalFlows, setReimbursementApprovalFlows] = useState<any[]>([]);
+
+  const [newFlowName, setNewFlowName] = useState("");
+  const [flowLevels, setFlowLevels] = useState<
+    Array<{ approver: string; policy: string; isDropdownOpen?: boolean }>
+  >([{ approver: "All Admins", policy: "Wait for approval" }]);
+
   const navTabs = [
     { id: "Personal Details", label: "Personal Details", icon: User },
     { id: "Employment Details", label: "Employment Details", icon: Briefcase },
@@ -254,6 +268,38 @@ export function EmployeeDetailView({
     alert("Bank details saved successfully!");
   };
 
+  const handleAddApprovalLevel = () => {
+    setFlowLevels([
+      ...flowLevels,
+      { approver: "PAPPU SRINIVASA PRABHAKAR RAO", policy: "Wait for approval" },
+    ]);
+  };
+
+  const handleSaveApprovalFlow = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFlowName.trim()) {
+      alert("Please enter a Flow Name.");
+      return;
+    }
+
+    const createdFlow = {
+      id: String(Date.now()),
+      name: newFlowName,
+      levels: [...flowLevels],
+    };
+
+    if (approvalSubView === "leave") {
+      setLeaveApprovalFlows([...leaveApprovalFlows, createdFlow]);
+    } else {
+      setReimbursementApprovalFlows([...reimbursementApprovalFlows, createdFlow]);
+    }
+
+    setIsAddApprovalFlowModalOpen(false);
+    setNewFlowName("");
+    setFlowLevels([{ approver: "All Admins", policy: "Wait for approval" }]);
+    alert("Approval flow configured successfully!");
+  };
+
   if (activeTab === "Tax Declarations") {
     return (
       <TaxDeclarationsView
@@ -316,7 +362,12 @@ export function EmployeeDetailView({
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === "Approval Flows") {
+                    setApprovalSubView("list");
+                  }
+                }}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md text-xs font-medium transition-all text-left cursor-pointer ${
                   isActive
                     ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
@@ -1164,12 +1215,206 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 6: Approval Flows (Screenshots 1-5 Match 1:1) */}
+          {activeTab === "Approval Flows" && (
+            <div className="space-y-6 max-w-3xl">
+              {/* Approval Flows Landing View (Screenshot 1) */}
+              {approvalSubView === "list" && (
+                <div className="space-y-4">
+                  <h3 className="text-base font-bold text-slate-800 pb-3 border-b border-slate-100">
+                    Approval Flows
+                  </h3>
+
+                  <div className="space-y-3">
+                    {/* Card 1: Leave Approval Flow */}
+                    <div
+                      onClick={() => setApprovalSubView("leave")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <div className="space-y-1">
+                        <div className="font-bold text-slate-800 text-sm group-hover:text-[#007BFF] transition-colors">
+                          Leave Approval Flow
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {leaveApprovalFlows.length > 0
+                            ? `${leaveApprovalFlows.length} active flow configured`
+                            : "No approval flows configured"}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* Card 2: Reimbursement Approval Flow */}
+                    <div
+                      onClick={() => setApprovalSubView("reimbursement")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <div className="space-y-1">
+                        <div className="font-bold text-slate-800 text-sm group-hover:text-[#007BFF] transition-colors">
+                          Reimbursement Approval Flow
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {reimbursementApprovalFlows.length > 0
+                            ? `${reimbursementApprovalFlows.length} active flow configured`
+                            : "No approval flows configured"}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-view: Leave / Reimbursement Approval Flow (Screenshot 2) */}
+              {(approvalSubView === "leave" || approvalSubView === "reimbursement") && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold">
+                      <button
+                        onClick={() => setApprovalSubView("list")}
+                        className="text-[#007BFF] hover:underline cursor-pointer"
+                      >
+                        Approval Flows
+                      </button>
+                      <span className="text-slate-400">&gt;&gt;</span>
+                      <span className="text-slate-800">
+                        {approvalSubView === "leave"
+                          ? "Leave Approval Flow"
+                          : "Reimbursement Approval Flow"}
+                      </span>
+                    </div>
+
+                    <button
+                      disabled={
+                        (approvalSubView === "leave" && leaveApprovalFlows.length === 0) ||
+                        (approvalSubView === "reimbursement" && reimbursementApprovalFlows.length === 0)
+                      }
+                      onClick={() => alert("Approval flow updated successfully!")}
+                      className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                        (approvalSubView === "leave" && leaveApprovalFlows.length > 0) ||
+                        (approvalSubView === "reimbursement" && reimbursementApprovalFlows.length > 0)
+                          ? "text-white bg-[#007BFF] hover:bg-blue-600 shadow-xs cursor-pointer"
+                          : "text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed"
+                      }`}
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  {/* Empty State vs Flow List */}
+                  {(approvalSubView === "leave" && leaveApprovalFlows.length === 0) ||
+                  (approvalSubView === "reimbursement" && reimbursementApprovalFlows.length === 0) ? (
+                    <div className="py-16 text-center space-y-4">
+                      {/* Flow Hierarchy Blueprint Icon */}
+                      <div className="w-14 h-14 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto border border-blue-100 shadow-xs">
+                        <GitFork className="w-6 h-6 stroke-[2.2]" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-slate-800">
+                          No approval flows yet
+                        </h4>
+                        <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                          Create a flow to route this staff member's{" "}
+                          {approvalSubView === "leave" ? "leave" : "reimbursement"}{" "}
+                          requests through more than one approver.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => setIsAddApprovalFlowModalOpen(true)}
+                        className="px-6 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add Flow</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          Configured Approval Steps
+                        </h4>
+                        <button
+                          onClick={() => setIsAddApprovalFlowModalOpen(true)}
+                          className="px-3 py-1 text-xs font-semibold text-[#007BFF] border border-[#007BFF] rounded-md hover:bg-blue-50 transition-colors cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Another Flow</span>
+                        </button>
+                      </div>
+
+                      {(approvalSubView === "leave"
+                        ? leaveApprovalFlows
+                        : reimbursementApprovalFlows
+                      ).map((flow, fIdx) => (
+                        <div
+                          key={flow.id}
+                          className="p-5 rounded-xl border border-slate-200 bg-white space-y-4 shadow-xs"
+                        >
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div>
+                              <div className="font-bold text-slate-800 text-sm">
+                                {flow.name}
+                              </div>
+                              <div className="text-[11px] text-slate-500">
+                                Sequential {flow.levels.length}-level approval hierarchy
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (approvalSubView === "leave") {
+                                  setLeaveApprovalFlows(
+                                    leaveApprovalFlows.filter((f) => f.id !== flow.id)
+                                  );
+                                } else {
+                                  setReimbursementApprovalFlows(
+                                    reimbursementApprovalFlows.filter((f) => f.id !== flow.id)
+                                  );
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-red-600 rounded-md hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="space-y-3">
+                            {flow.levels.map((lvl: any, lIdx: number) => (
+                              <div
+                                key={lIdx}
+                                className="flex items-start gap-3 text-xs p-3 rounded-lg bg-[#FAFBFD] border border-slate-200"
+                              >
+                                <div className="w-6 h-6 rounded-full bg-[#007BFF] text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                                  {lIdx + 1}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-bold text-slate-800">
+                                    Level {lIdx + 1}: {lvl.approver}
+                                  </div>
+                                  <div className="text-slate-500 text-[11px] mt-0.5">
+                                    Policy: {lvl.policy}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
             activeTab !== "Custom Details" &&
             activeTab !== "Background Verification" &&
-            activeTab !== "Bank Account" && (
+            activeTab !== "Bank Account" &&
+            activeTab !== "Approval Flows" && (
               <div className="py-16 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto">
                   <Layers className="w-6 h-6" />
@@ -1431,7 +1676,7 @@ export function EmployeeDetailView({
         </div>
       )}
 
-      {/* MODAL 3: Bank / UPI Details (Screenshot 3 Match) */}
+      {/* MODAL 3: Bank / UPI Details */}
       {isBankModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
@@ -1448,7 +1693,6 @@ export function EmployeeDetailView({
             </div>
 
             <form onSubmit={handleSaveBank} className="p-6 space-y-4 text-xs">
-              {/* Radio options: Bank Account | UPI */}
               <div className="flex items-center gap-6 pb-2">
                 <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
                   <input
@@ -1588,6 +1832,213 @@ export function EmployeeDetailView({
                   className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
                 >
                   Save Details
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: Add New Approval Flow Modal (Screenshots 3, 4, 5 Match 1:1) */}
+      {isAddApprovalFlowModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 text-sm">
+                Add New Approval Flow
+              </h3>
+              <button
+                onClick={() => setIsAddApprovalFlowModalOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveApprovalFlow} className="p-6 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">
+                  <span className="text-red-500">*</span> Flow Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newFlowName}
+                  onChange={(e) => setNewFlowName(e.target.value)}
+                  placeholder="e.g. Standard 2-level flow"
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-2">
+                  Approval Levels
+                </label>
+
+                <div className="space-y-3">
+                  {flowLevels.map((lvl, index) => (
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full bg-[#007BFF] text-white flex items-center justify-center font-bold text-[10px]">
+                            {index + 1}
+                          </div>
+                          <span className="font-bold text-slate-800 text-xs">
+                            Level {index + 1}
+                          </span>
+                        </div>
+
+                        {flowLevels.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFlowLevels(flowLevels.filter((_, i) => i !== index))
+                            }
+                            className="text-slate-400 hover:text-red-500 text-xs"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Approvers Dropdown (Screenshot 3 & 4 Match) */}
+                      <div className="space-y-1 relative">
+                        <label className="block text-slate-600 font-medium text-[11px]">
+                          <span className="text-red-500">*</span> Approvers
+                        </label>
+                        <div
+                          onClick={() => {
+                            const updated = [...flowLevels];
+                            updated[index].isDropdownOpen = !updated[index].isDropdownOpen;
+                            setFlowLevels(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white flex items-center justify-between cursor-pointer focus:ring-1 focus:ring-blue-500"
+                        >
+                          <span className="text-slate-800 font-medium">
+                            {lvl.approver || "Select role or employee"}
+                          </span>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                        </div>
+
+                        {lvl.isDropdownOpen && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-30"
+                              onClick={() => {
+                                const updated = [...flowLevels];
+                                updated[index].isDropdownOpen = false;
+                                setFlowLevels(updated);
+                              }}
+                            />
+                            <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-md shadow-xl border border-slate-200 z-40 py-1 max-h-56 overflow-y-auto text-xs">
+                              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50">
+                                Admins
+                              </div>
+                              <div
+                                onClick={() => {
+                                  const updated = [...flowLevels];
+                                  updated[index].approver = "All Admins";
+                                  updated[index].isDropdownOpen = false;
+                                  setFlowLevels(updated);
+                                }}
+                                className="px-4 py-2 hover:bg-blue-50 hover:text-[#007BFF] cursor-pointer"
+                              >
+                                All Admins
+                              </div>
+                              <div
+                                onClick={() => {
+                                  const updated = [...flowLevels];
+                                  updated[index].approver = "PAPPU SRINIVASA PRABHAKAR RAO";
+                                  updated[index].isDropdownOpen = false;
+                                  setFlowLevels(updated);
+                                }}
+                                className="px-4 py-2 hover:bg-blue-50 hover:text-[#007BFF] cursor-pointer"
+                              >
+                                PAPPU SRINIVASA PRABHAKAR RAO
+                              </div>
+
+                              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-t border-slate-100">
+                                Branch Admins
+                              </div>
+                              <div
+                                onClick={() => {
+                                  const updated = [...flowLevels];
+                                  updated[index].approver = "All Branch Admins";
+                                  updated[index].isDropdownOpen = false;
+                                  setFlowLevels(updated);
+                                }}
+                                className="px-4 py-2 hover:bg-blue-50 hover:text-[#007BFF] cursor-pointer"
+                              >
+                                All Branch Admins
+                              </div>
+
+                              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-t border-slate-100">
+                                Advanced Attendance Manager
+                              </div>
+                              <div
+                                onClick={() => {
+                                  const updated = [...flowLevels];
+                                  updated[index].approver = "All Advanced Attendance Managers";
+                                  updated[index].isDropdownOpen = false;
+                                  setFlowLevels(updated);
+                                }}
+                                className="px-4 py-2 hover:bg-blue-50 hover:text-[#007BFF] cursor-pointer"
+                              >
+                                All Advanced Attendance Managers
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* If nobody acts Dropdown (Screenshot 5 Match) */}
+                      <div className="space-y-1">
+                        <label className="block text-slate-600 font-medium text-[11px]">
+                          If nobody acts
+                        </label>
+                        <select
+                          value={lvl.policy}
+                          onChange={(e) => {
+                            const updated = [...flowLevels];
+                            updated[index].policy = e.target.value;
+                            setFlowLevels(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-800"
+                        >
+                          <option>Wait for approval</option>
+                          <option>Auto-approve</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddApprovalLevel}
+                  className="mt-3 text-xs font-semibold text-[#007BFF] hover:underline cursor-pointer inline-flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Level</span>
+                </button>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddApprovalFlowModalOpen(false)}
+                  className="px-4 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-md cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                >
+                  Add Flow
                 </button>
               </div>
             </form>
