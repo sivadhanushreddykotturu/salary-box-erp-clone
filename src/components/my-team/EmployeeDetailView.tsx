@@ -36,7 +36,8 @@ import {
   QrCode,
   ScanFace,
   Search,
-  Compass
+  Compass,
+  Info
 } from "lucide-react";
 import { TaxDeclarationsView } from "./TaxDeclarationsView";
 
@@ -501,6 +502,57 @@ export function EmployeeDetailView({
     setIsAddCustomShiftInline(false);
     setNewCustomShiftName("");
   };
+
+  // Salary Details State (1:1 Match with Screenshots)
+  const [salaryEffectiveDate, setSalaryEffectiveDate] = useState("Sep 2026");
+  const [salaryType, setSalaryType] = useState("Per Month");
+  const [salaryStructure, setSalaryStructure] = useState("SalaryBox provided...");
+  const [isSalaryStructureDropdownOpen, setIsSalaryStructureDropdownOpen] = useState(false);
+  const [ctcAmount, setCtcAmount] = useState("25000");
+
+  // Earnings Breakdown
+  const [salaryEarnings, setSalaryEarnings] = useState({
+    basic: "12500",
+    hra: "6250",
+    travelAllowance: "2500",
+    specialAllowance: "3750",
+  });
+
+  // Compliances: Employer Contributions
+  const [employerPfCalc, setEmployerPfCalc] = useState("None");
+  const [isEmployerPfIncludedInCtc, setIsEmployerPfIncludedInCtc] = useState(false);
+  const [employerPfAmount, setEmployerPfAmount] = useState("0");
+
+  const [employerPfEdliCalc, setEmployerPfEdliCalc] = useState("None");
+  const [employerPfEdliAmount, setEmployerPfEdliAmount] = useState("0");
+
+  const [employerEsiCalc, setEmployerEsiCalc] = useState("None");
+  const [isEmployerEsiIncludedInCtc, setIsEmployerEsiIncludedInCtc] = useState(false);
+  const [employerEsiAmount, setEmployerEsiAmount] = useState("0");
+
+  const [employerLwfCalc, setEmployerLwfCalc] = useState("None");
+  const [isEmployerLwfIncludedInCtc, setIsEmployerLwfIncludedInCtc] = useState(false);
+  const [employerLwfAmount, setEmployerLwfAmount] = useState("0");
+
+  // Compliances: Employee Contributions
+  const [employeePfCalc, setEmployeePfCalc] = useState("None");
+  const [employeePfAmount, setEmployeePfAmount] = useState("0");
+
+  const [employeeEsiCalc, setEmployeeEsiCalc] = useState("None");
+  const [employeeEsiAmount, setEmployeeEsiAmount] = useState("0");
+
+  const [professionalTaxCalc, setProfessionalTaxCalc] = useState("None");
+  const [employeeLwfCalc, setEmployeeLwfCalc] = useState("None");
+  const [employeeLwfAmount, setEmployeeLwfAmount] = useState("0");
+
+  // Deductions list
+  const [salaryDeductions, setSalaryDeductions] = useState<
+    Array<{ id: string; name: string; calculation: string; amount: string }>
+  >([]);
+  const [isAddDeductionModalOpen, setIsAddDeductionModalOpen] = useState(false);
+  const [newDeductionName, setNewDeductionName] = useState("");
+  const [newDeductionCalc, setNewDeductionCalc] = useState("Fixed Amount");
+  const [newDeductionAmount, setNewDeductionAmount] = useState("");
 
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
@@ -3258,6 +3310,609 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 9: Salary Details (1:1 Match with Screenshots) */}
+          {activeTab === "Salary Details" && (
+            <div className="space-y-6 max-w-4xl pb-16">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-bold text-slate-800">
+                  Salary Details
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => alert("Salary Details Updated Successfully!")}
+                  className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                >
+                  Update Details
+                </button>
+              </div>
+
+              {/* Row 1: Effective Date, Salary Type, Salary Structure, CTC Amount */}
+              <div className="grid grid-cols-4 gap-4 items-start">
+                {/* 1. Effective Date of Change */}
+                <div className="space-y-1.5">
+                  <label className="block text-slate-600 font-medium text-xs">
+                    Effective Date of Change
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={salaryEffectiveDate}
+                      onChange={(e) => setSalaryEffectiveDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                    />
+                    <Calendar className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 2. Salary Type */}
+                <div className="space-y-1.5">
+                  <label className="block text-slate-600 font-medium text-xs">
+                    Salary Type
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={salaryType}
+                      onChange={(e) => setSalaryType(e.target.value)}
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      <option>Per Month</option>
+                      <option>Per Day</option>
+                      <option>Per Hour</option>
+                      <option>Per Week</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 3. Salary Structure (with SalaryBox provided... / Custom dropdown) */}
+                <div className="space-y-1.5 relative">
+                  <label className="block text-slate-600 font-medium text-xs">
+                    Salary Structure
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsSalaryStructureDropdownOpen(!isSalaryStructureDropdownOpen)}
+                      className="w-full px-3 py-2 rounded-md border border-blue-400 bg-white text-xs text-slate-800 flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      <span className="truncate">{salaryStructure}</span>
+                      <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                    </button>
+
+                    {isSalaryStructureDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-30"
+                          onClick={() => setIsSalaryStructureDropdownOpen(false)}
+                        />
+                        <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-md shadow-xl border border-slate-200 z-40 py-1 text-xs">
+                          <div
+                            onClick={() => {
+                              setSalaryStructure("SalaryBox provided...");
+                              setIsSalaryStructureDropdownOpen(false);
+                            }}
+                            className={`px-3 py-2 cursor-pointer hover:bg-blue-50 hover:text-[#007BFF] transition-colors ${
+                              salaryStructure === "SalaryBox provided..." ? "bg-slate-50 font-semibold text-slate-900" : "text-slate-700"
+                            }`}
+                          >
+                            SalaryBox provided...
+                          </div>
+                          <div
+                            onClick={() => {
+                              setSalaryStructure("Custom");
+                              setIsSalaryStructureDropdownOpen(false);
+                            }}
+                            className={`px-3 py-2 cursor-pointer hover:bg-blue-50 hover:text-[#007BFF] transition-colors ${
+                              salaryStructure === "Custom" ? "bg-slate-50 font-semibold text-slate-900" : "text-slate-700"
+                            }`}
+                          >
+                            Custom
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 4. CTC Amount */}
+                <div className="space-y-1.5">
+                  <label className="block text-slate-600 font-medium text-xs">
+                    CTC Amount
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                      ₹
+                    </span>
+                    <input
+                      type="text"
+                      value={ctcAmount}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, "");
+                        setCtcAmount(val);
+                        const num = Number(val) || 0;
+                        setSalaryEarnings({
+                          basic: String(Math.round(num * 0.5)),
+                          hra: String(Math.round(num * 0.25)),
+                          travelAllowance: String(Math.round(num * 0.1)),
+                          specialAllowance: String(Math.round(num * 0.15)),
+                        });
+                      }}
+                      className="w-full pl-6 pr-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Earnings Section */}
+              <div className="space-y-4 pt-2">
+                <h4 className="text-xs font-bold text-slate-800">Earnings</h4>
+
+                {/* Earnings Table Header */}
+                <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-800 pb-2 border-b border-slate-100">
+                  <div className="col-span-5">Heads</div>
+                  <div className="col-span-4">Calculation</div>
+                  <div className="col-span-3 text-right pr-2">Amount</div>
+                </div>
+
+                {/* Earnings Rows */}
+                <div className="space-y-3 text-xs">
+                  {/* Basic */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Basic</div>
+                    <div className="col-span-4">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 flex items-center justify-between">
+                        <span>On Attendance</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 text-right font-medium">
+                        ₹ {salaryEarnings.basic}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* HRA */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">HRA</div>
+                    <div className="col-span-4">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 flex items-center justify-between">
+                        <span>On Attendance</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 text-right font-medium">
+                        ₹ {salaryEarnings.hra}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Travel Allowance */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Travel Allowance</div>
+                    <div className="col-span-4">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 flex items-center justify-between">
+                        <span>On Attendance</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 text-right font-medium">
+                        ₹ {salaryEarnings.travelAllowance}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Special Allowance */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Special Allowance</div>
+                    <div className="col-span-4">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 flex items-center justify-between">
+                        <span>On Attendance</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-2 rounded-md border border-slate-200 bg-slate-50/70 text-slate-500 text-right font-medium">
+                        ₹ {salaryEarnings.specialAllowance}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Compliances Section */}
+              <div className="space-y-4 pt-4">
+                <h4 className="text-xs font-bold text-slate-800">Compliances</h4>
+
+                {/* Compliances Header */}
+                <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-800 pb-2 border-b border-slate-100">
+                  <div className="col-span-5">Employer Contributions</div>
+                  <div className="col-span-3">Calculation</div>
+                  <div className="col-span-2 text-center">Included in CTC</div>
+                  <div className="col-span-2 text-right pr-2">Amount</div>
+                </div>
+
+                {/* Employer Contributions Rows */}
+                <div className="space-y-3 text-xs">
+                  {/* Employer PF */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Employer PF</div>
+                    <div className="col-span-3">
+                      <div className="relative">
+                        <select
+                          value={employerPfCalc}
+                          onChange={(e) => setEmployerPfCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>12% of Basic</option>
+                          <option>12% of (Basic + DA)</option>
+                          <option>Custom</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isEmployerPfIncludedInCtc}
+                        onChange={(e) => setIsEmployerPfIncludedInCtc(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employerPfAmount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PF EDLI & Admin Charges */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">PF EDLI & Admin Charges</div>
+                    <div className="col-span-3">
+                      <div className="relative">
+                        <select
+                          value={employerPfEdliCalc}
+                          onChange={(e) => setEmployerPfEdliCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>1% of Basic</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-2 text-center text-slate-400 font-medium text-xs">
+                      N/A
+                    </div>
+                    <div className="col-span-2">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employerPfEdliAmount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Employer ESI */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Employer ESI</div>
+                    <div className="col-span-3">
+                      <div className="relative">
+                        <select
+                          value={employerEsiCalc}
+                          onChange={(e) => setEmployerEsiCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>3.25% of Gross</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isEmployerEsiIncludedInCtc}
+                        onChange={(e) => setIsEmployerEsiIncludedInCtc(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employerEsiAmount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Employer LWF */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Employer LWF</div>
+                    <div className="col-span-3">
+                      <div className="relative">
+                        <select
+                          value={employerLwfCalc}
+                          onChange={(e) => setEmployerLwfCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>State Surcharge</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isEmployerLwfIncludedInCtc}
+                        onChange={(e) => setIsEmployerLwfIncludedInCtc(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employerLwfAmount}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Employee Contributions Sub-Header */}
+                <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-800 pt-4 pb-2 border-b border-slate-100">
+                  <div className="col-span-5">Employee Contributions</div>
+                  <div className="col-span-4">Calculation</div>
+                  <div className="col-span-3 text-right pr-2">Amount</div>
+                </div>
+
+                {/* Employee Contributions Rows */}
+                <div className="space-y-3 text-xs">
+                  {/* Employee PF */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Employee PF</div>
+                    <div className="col-span-4">
+                      <div className="relative">
+                        <select
+                          value={employeePfCalc}
+                          onChange={(e) => setEmployeePfCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>12% of Basic</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employeePfAmount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Employee ESI */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Employee ESI</div>
+                    <div className="col-span-4">
+                      <div className="relative">
+                        <select
+                          value={employeeEsiCalc}
+                          onChange={(e) => setEmployeeEsiCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>0.75% of Gross</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employeeEsiAmount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Professional Tax */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Professional Tax</div>
+                    <div className="col-span-4">
+                      <div className="relative">
+                        <select
+                          value={professionalTaxCalc}
+                          onChange={(e) => setProfessionalTaxCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>State PT Slab</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-3 text-right text-slate-400 text-xs font-medium pr-2">
+                      System calculated
+                    </div>
+                  </div>
+
+                  {/* Employee LWF */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">Employee LWF</div>
+                    <div className="col-span-4">
+                      <div className="relative">
+                        <select
+                          value={employeeLwfCalc}
+                          onChange={(e) => setEmployeeLwfCalc(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>None</option>
+                          <option>State Surcharge</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <div className="px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50/70 text-slate-400 text-right font-medium">
+                        ₹ {employeeLwfAmount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* TDS */}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-5 font-medium text-slate-700">TDS</div>
+                    <div className="col-span-4"></div>
+                    <div className="col-span-3 flex items-center justify-end gap-1.5 text-slate-500 text-xs font-medium pr-1">
+                      <span>System Calculated</span>
+                      <Info className="w-3.5 h-3.5 text-[#007BFF]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deductions Section */}
+              <div className="space-y-4 pt-4">
+                <h4 className="text-xs font-bold text-slate-800">Deductions</h4>
+
+                {/* Deductions Header */}
+                <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-800 pb-2 border-b border-slate-100">
+                  <div className="col-span-5">Heads</div>
+                  <div className="col-span-4">Calculation</div>
+                  <div className="col-span-3 text-right pr-2">Amount</div>
+                </div>
+
+                {/* Deductions List or Empty State */}
+                {salaryDeductions.length === 0 ? (
+                  <div className="py-2 text-xs text-slate-400 font-medium">
+                    No Deductions Added
+                  </div>
+                ) : (
+                  <div className="space-y-3 text-xs">
+                    {salaryDeductions.map((ded) => (
+                      <div key={ded.id} className="grid grid-cols-12 gap-4 items-center">
+                        <div className="col-span-5 font-medium text-slate-700">{ded.name}</div>
+                        <div className="col-span-4 text-slate-600">{ded.calculation}</div>
+                        <div className="col-span-3 flex items-center justify-end gap-2 pr-2">
+                          <span className="font-medium text-slate-800">₹ {ded.amount}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSalaryDeductions(salaryDeductions.filter((d) => d.id !== ded.id))}
+                            className="text-slate-400 hover:text-red-500 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* + Add Deduction Action */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewDeductionName("");
+                    setNewDeductionAmount("");
+                    setIsAddDeductionModalOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#007BFF] hover:underline cursor-pointer pt-1"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Add Deduction</span>
+                </button>
+              </div>
+
+              {/* Bottom Sticky Total CTC Footer Bar */}
+              <div className="pt-8 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-800">
+                <div>Total CTC: -</div>
+                <div className="text-sm font-black text-slate-900">
+                  ₹ {ctcAmount ? Number(ctcAmount).toLocaleString("en-IN") : "0"}.00 / Month
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Add Deduction Modal */}
+          {isAddDeductionModalOpen && (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+              <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
+                <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800 text-xs">Add Deduction</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddDeductionModalOpen(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="p-5 space-y-3.5 text-xs">
+                  <div>
+                    <label className="block text-slate-600 font-medium mb-1">Deduction Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Loan Recovery, Advance Deduction"
+                      value={newDeductionName}
+                      onChange={(e) => setNewDeductionName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-600 font-medium mb-1">Calculation Type</label>
+                    <select
+                      value={newDeductionCalc}
+                      onChange={(e) => setNewDeductionCalc(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white cursor-pointer"
+                    >
+                      <option>Fixed Amount</option>
+                      <option>Percentage of Basic</option>
+                      <option>Percentage of Gross</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-slate-600 font-medium mb-1">Amount (₹)</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={newDeductionAmount}
+                      onChange={(e) => setNewDeductionAmount(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddDeductionModalOpen(false)}
+                      className="px-4 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-md cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newDeductionName && newDeductionAmount) {
+                          setSalaryDeductions([
+                            ...salaryDeductions,
+                            {
+                              id: String(Date.now()),
+                              name: newDeductionName,
+                              calculation: newDeductionCalc,
+                              amount: newDeductionAmount,
+                            },
+                          ]);
+                          setIsAddDeductionModalOpen(false);
+                        }
+                      }}
+                      className="px-4 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md cursor-pointer"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
@@ -3266,7 +3921,8 @@ export function EmployeeDetailView({
             activeTab !== "Bank Account" &&
             activeTab !== "Approval Flows" &&
             activeTab !== "User Permission" &&
-            activeTab !== "Attendance Details" && (
+            activeTab !== "Attendance Details" &&
+            activeTab !== "Salary Details" && (
               <div className="py-16 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto">
                   <Layers className="w-6 h-6" />
