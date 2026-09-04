@@ -37,7 +37,10 @@ import {
   ScanFace,
   Search,
   Compass,
-  Info
+  Info,
+  Folder,
+  Upload,
+  File
 } from "lucide-react";
 import { TaxDeclarationsView } from "./TaxDeclarationsView";
 
@@ -557,6 +560,17 @@ export function EmployeeDetailView({
   // Additional Settings State (1:1 Screenshot Match)
   const [canUseLocationTracking, setCanUseLocationTracking] = useState(false);
   const [canUseCrmLite, setCanUseCrmLite] = useState(false);
+
+  // Documents State (1:1 Match with Screenshots)
+  const [documentsSubView, setDocumentsSubView] = useState<"root" | "salary_slips">("root");
+  const [isUploadDocumentModalOpen, setIsUploadDocumentModalOpen] = useState(false);
+  const [selectedUploadDocType, setSelectedUploadDocType] = useState("");
+  const [isDocTypeDropdownOpen, setIsDocTypeDropdownOpen] = useState(false);
+  const [isAddSalarySlipModalOpen, setIsAddSalarySlipModalOpen] = useState(false);
+  const [newSlipMonth, setNewSlipMonth] = useState("Aug 2026");
+  const [salarySlipsList, setSalarySlipsList] = useState<
+    Array<{ id: string; docType: string; fileName: string; addedOn: string }>
+  >([]);
 
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
@@ -3966,6 +3980,336 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 13: Documents (1:1 Screenshot Match) */}
+          {activeTab === "Documents" && (
+            <div className="space-y-6 max-w-4xl pb-16">
+              {/* SUBVIEW 1: Documents Root View */}
+              {documentsSubView === "root" && (
+                <>
+                  {/* Header with Title and Add Document Button */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 className="text-base font-bold text-slate-800">
+                      Documents
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedUploadDocType("");
+                        setIsUploadDocumentModalOpen(true);
+                      }}
+                      className="px-4 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Add Document</span>
+                    </button>
+                  </div>
+
+                  {/* Documents Table Container */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50/70 border-b border-slate-200 text-xs font-semibold text-slate-700">
+                      <div className="col-span-3">Document Type</div>
+                      <div className="col-span-5">File Name</div>
+                      <div className="col-span-2 text-center">Added On</div>
+                      <div className="col-span-2 text-right">Actions</div>
+                    </div>
+
+                    {/* Salary Slip Default Folder Row */}
+                    <div className="divide-y divide-slate-100 text-xs">
+                      <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-50/50 transition-colors">
+                        <div className="col-span-3 font-medium text-slate-800">
+                          Salary Slip
+                        </div>
+                        <div className="col-span-5">
+                          <button
+                            type="button"
+                            onClick={() => setDocumentsSubView("salary_slips")}
+                            className="flex items-center gap-2.5 text-slate-800 hover:text-[#007BFF] cursor-pointer group transition-colors"
+                          >
+                            <div className="w-6 h-5 rounded bg-[#F59E0B]/15 border border-[#F59E0B]/30 flex items-center justify-center text-[#F59E0B] shadow-2xs">
+                              <Folder className="w-3.5 h-3.5 fill-[#F59E0B]" />
+                            </div>
+                            <span className="font-medium group-hover:underline">
+                              Salary Slip
+                            </span>
+                          </button>
+                        </div>
+                        <div className="col-span-2 text-center text-slate-400 font-medium">
+                          -
+                        </div>
+                        <div className="col-span-2 text-right text-slate-400 font-medium">
+                          -
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* SUBVIEW 2: Inside Salary Slips Folder (Screenshot 4 Match) */}
+              {documentsSubView === "salary_slips" && (
+                <>
+                  {/* Header with Back Arrow and Add Salary Slip Button */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDocumentsSubView("root")}
+                        className="p-1 -ml-1 text-slate-600 hover:text-slate-900 rounded-md hover:bg-slate-100 cursor-pointer transition-colors"
+                      >
+                        <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
+                      </button>
+                      <h3 className="text-base font-bold text-slate-800">
+                        Salary Slips
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddSalarySlipModalOpen(true)}
+                      className="px-4 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Add Salary Slip</span>
+                    </button>
+                  </div>
+
+                  {/* Salary Slips Table Container */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50/70 border-b border-slate-200 text-xs font-semibold text-slate-700">
+                      <div className="col-span-3">Document Type</div>
+                      <div className="col-span-5">File Name</div>
+                      <div className="col-span-2 text-center">Added On</div>
+                      <div className="col-span-2 text-right">Actions</div>
+                    </div>
+
+                    {salarySlipsList.length === 0 ? (
+                      /* Empty State matching Screenshot 4 ("No Data") */
+                      <div className="py-20 flex flex-col items-center justify-center text-center space-y-2.5 bg-white">
+                        <div className="w-14 h-12 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 flex items-center justify-center text-slate-300">
+                          <FileText className="w-6 h-6 stroke-[1.5]" />
+                        </div>
+                        <span className="text-xs font-medium text-slate-400">
+                          No Data
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-slate-100 text-xs">
+                        {salarySlipsList.map((slip) => (
+                          <div
+                            key={slip.id}
+                            className="grid grid-cols-12 gap-4 px-6 py-3.5 items-center hover:bg-slate-50/50 transition-colors"
+                          >
+                            <div className="col-span-3 font-medium text-slate-800">
+                              {slip.docType}
+                            </div>
+                            <div className="col-span-5 font-medium text-slate-700 flex items-center gap-2">
+                              <File className="w-3.5 h-3.5 text-[#007BFF]" />
+                              <span>{slip.fileName}</span>
+                            </div>
+                            <div className="col-span-2 text-center text-slate-500">
+                              {slip.addedOn}
+                            </div>
+                            <div className="col-span-2 flex items-center justify-end gap-2 text-right">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSalarySlipsList(
+                                    salarySlipsList.filter((s) => s.id !== slip.id)
+                                  )
+                                }
+                                className="text-slate-400 hover:text-red-500 cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* MODAL: Upload Document Modal (1:1 Screenshot 2 Match) */}
+          {isUploadDocumentModalOpen && (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+              <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 text-xs">
+                {/* Modal Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800 text-sm">
+                    Upload Document
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadDocumentModalOpen(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-4">
+                  {/* Select a document Dropdown */}
+                  <div className="relative">
+                    <div
+                      onClick={() => setIsDocTypeDropdownOpen(!isDocTypeDropdownOpen)}
+                      className="w-full px-3.5 py-2 rounded-md border border-slate-300 bg-white flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <span className={selectedUploadDocType ? "text-slate-800 font-medium" : "text-slate-400"}>
+                        {selectedUploadDocType || "Select a document"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    </div>
+
+                    {isDocTypeDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-30"
+                          onClick={() => setIsDocTypeDropdownOpen(false)}
+                        />
+                        <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-md shadow-xl border border-slate-200 z-40 py-1 text-xs">
+                          {["Offer Letter", "Relieving Letter", "Experience Letter", "Aadhaar Card", "PAN Card", "Driving License", "Educational Certificate"].map((t) => (
+                            <div
+                              key={t}
+                              onClick={() => {
+                                setSelectedUploadDocType(t);
+                                setIsDocTypeDropdownOpen(false);
+                              }}
+                              className="px-4 py-2 hover:bg-blue-50 hover:text-[#007BFF] cursor-pointer"
+                            >
+                              {t}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Upload a file Button */}
+                  <div>
+                    <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#007BFF] text-white font-semibold text-xs hover:bg-blue-600 shadow-xs cursor-pointer transition-colors">
+                      <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Upload a file</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            alert(`File selected: ${e.target.files[0].name}`);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Modal Footer Buttons */}
+                <div className="px-6 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadDocumentModalOpen(false)}
+                    className="px-4 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 cursor-pointer font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUploadDocumentModalOpen(false);
+                      alert("Document uploaded successfully!");
+                    }}
+                    className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs cursor-pointer"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL: Add Salary Slip Modal */}
+          {isAddSalarySlipModalOpen && (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+              <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 text-xs">
+                {/* Modal Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800 text-sm">
+                    Add Salary Slip
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddSalarySlipModalOpen(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-slate-600 font-medium mb-1">
+                      Salary Month & Year
+                    </label>
+                    <input
+                      type="text"
+                      value={newSlipMonth}
+                      onChange={(e) => setNewSlipMonth(e.target.value)}
+                      placeholder="e.g. Aug 2026"
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#007BFF] text-white font-semibold text-xs hover:bg-blue-600 shadow-xs cursor-pointer transition-colors">
+                      <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Upload Salary Slip PDF</span>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            setSalarySlipsList([
+                              ...salarySlipsList,
+                              {
+                                id: String(Date.now()),
+                                docType: "Salary Slip",
+                                fileName: file.name,
+                                addedOn: new Date().toLocaleDateString("en-GB", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                }),
+                              },
+                            ]);
+                            setIsAddSalarySlipModalOpen(false);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Modal Footer Buttons */}
+                <div className="px-6 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddSalarySlipModalOpen(false)}
+                    className="px-4 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 cursor-pointer font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
@@ -3976,6 +4320,7 @@ export function EmployeeDetailView({
             activeTab !== "User Permission" &&
             activeTab !== "Attendance Details" &&
             activeTab !== "Salary Details" &&
+            activeTab !== "Documents" &&
             activeTab !== "Additional Settings" && (
               <div className="py-16 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto">
