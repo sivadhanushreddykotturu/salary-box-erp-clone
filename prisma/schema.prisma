@@ -95,6 +95,20 @@ enum WebhookStatus {
   FAILED
 }
 
+enum NotificationType {
+  PUNCH_IN
+  PUNCH_OUT
+  LEAVE_REQUEST
+  LEAVE_APPROVED
+  LEAVE_REJECTED
+  ADVANCE_REQUEST
+  REIMBURSEMENT_CLAIM
+  LATE_COMING
+  EARLY_LEAVING
+  ANNOUNCEMENT
+  GENERAL
+}
+
 // ----------------------------------------------------
 // 1. Super Admin & SaaS Subscription Billing Models
 // ----------------------------------------------------
@@ -161,6 +175,7 @@ model Company {
   crmLeads               CRMLead[]
   crmCustomers           CRMCustomer[]
   auditLogs              AuditLog[]
+  notifications          Notification[]
 }
 
 model Subscription {
@@ -232,6 +247,7 @@ model Branch {
   updatedAt    DateTime    @updatedAt
 
   employees    Employee[]
+  notifications Notification[]
 }
 
 model Department {
@@ -243,6 +259,7 @@ model Department {
   updatedAt DateTime   @updatedAt
 
   employees Employee[]
+  notifications Notification[]
 }
 
 model Designation {
@@ -374,6 +391,7 @@ model Employee {
   reimbursements      ReimbursementClaim[]
   salaryAdvances      SalaryAdvance[]
   regularizations     AttendanceRegularization[]
+  notifications       Notification[]
 
   @@unique([companyId, employeeCode])
 }
@@ -739,4 +757,32 @@ model AuditLog {
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// 10. Notifications Feed & Alerts
+// ----------------------------------------------------
+
+model Notification {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  companyId    String           @db.ObjectId
+  company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId   String?          @db.ObjectId
+  employee     Employee?        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branchId     String?          @db.ObjectId
+  branch       Branch?          @relation(fields: [branchId], references: [id])
+  departmentId String?          @db.ObjectId
+  department   Department?      @relation(fields: [departmentId], references: [id])
+
+  type         NotificationType @default(PUNCH_IN)
+  title        String
+  message      String?
+  location     String?          // Formatted address geocoded string
+  latitude     Float?
+  longitude    Float?
+  photoUrl     String?          // Punch selfie or attachment url
+  isRead       Boolean          @default(false)
+  timestamp    DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 }
