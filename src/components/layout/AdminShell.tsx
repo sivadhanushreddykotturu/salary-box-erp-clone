@@ -412,10 +412,13 @@ export function AdminShell({ children }: AdminShellProps) {
               </span>
             </Link>
 
-            <button className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer">
+            <Link
+              href="/settings"
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer"
+            >
               <img src="/icons/setting-2-svgrepo-com.svg" alt="Settings" className="w-3.5 h-3.5 object-contain opacity-70" />
               <span>Settings</span>
-            </button>
+            </Link>
 
             <button className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer">
               <img src="/icons/help-circle-svgrepo-com.svg" alt="Help" className="w-3.5 h-3.5 object-contain opacity-70" />
