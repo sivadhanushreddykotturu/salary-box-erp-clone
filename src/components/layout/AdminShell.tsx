@@ -319,26 +319,26 @@ export function AdminShell({ children }: AdminShellProps) {
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               <span>Pending Requests</span>
               <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full ml-0.5">
-                6
+                22
               </span>
             </Link>
 
-            <button className="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100">
-              <Settings className="w-3.5 h-3.5 text-slate-500" />
+            <button className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer">
+              <img src="/icons/setting-2-svgrepo-com.svg" alt="Settings" className="w-3.5 h-3.5 object-contain opacity-70" />
               <span>Settings</span>
             </button>
 
-            <button className="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100">
-              <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
+            <button className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer">
+              <img src="/icons/help-circle-svgrepo-com.svg" alt="Help" className="w-3.5 h-3.5 object-contain opacity-70" />
               <span>Help</span>
             </button>
 
-            <button className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full">
-              <Bell className="w-4 h-4" />
+            <button className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer flex items-center justify-center">
+              <img src="/icons/bell-svgrepo-com.svg" alt="Notifications" className="w-4 h-4 object-contain opacity-70" />
             </button>
 
-            <button className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full">
-              <Megaphone className="w-4 h-4" />
+            <button className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer flex items-center justify-center">
+              <img src="/icons/announcement-svgrepo-com.svg" alt="Announcements" className="w-4 h-4 object-contain opacity-70" />
             </button>
 
             <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs border border-purple-200 cursor-pointer ml-1">
