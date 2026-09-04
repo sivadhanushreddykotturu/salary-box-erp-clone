@@ -193,7 +193,56 @@ export function EmployeeDetailView({
     "Reimbursement Requests": { view: false, edit: false, approve: false },
   });
 
-  const isUserPermissionDirty = selectedUserRole !== initialRole || Object.values(customPermissions).some(p => p.view || p.edit || p.approve);
+  const isUserPermissionDirty =
+    selectedUserRole !== initialRole ||
+    Object.values(customPermissions).some(
+      (p) => p.view || p.edit || p.approve
+    );
+
+  const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
+  const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
+
+  const attemptNavigate = (target: string) => {
+    if (isUserPermissionDirty) {
+      setPendingNavTab(target);
+      setIsUnsavedModalOpen(true);
+      return;
+    }
+    if (target === "BACK") {
+      onBack();
+    } else {
+      setActiveTab(target);
+      if (target === "Approval Flows") {
+        setApprovalSubView("list");
+      }
+    }
+  };
+
+  const handleConfirmLeavePage = () => {
+    setIsUnsavedModalOpen(false);
+    // Reset dirty state
+    setSelectedUserRole(initialRole);
+    setCustomPermissions({
+      "Staff Attendance Records": { view: false, edit: false },
+      "Attendance Reports": { view: false, edit: false },
+      "Work Timings & Roster": { view: false, edit: false },
+      "Attendance Modes": { view: false, edit: false },
+      "Automation Rules": { view: false, edit: false },
+      "Leave Requests": { approve: false },
+      "Balances & Policies": { view: false, edit: false },
+      "Reimbursement Requests": { view: false, edit: false, approve: false },
+    });
+
+    if (pendingNavTab === "BACK") {
+      onBack();
+    } else if (pendingNavTab) {
+      setActiveTab(pendingNavTab);
+      if (pendingNavTab === "Approval Flows") {
+        setApprovalSubView("list");
+      }
+    }
+    setPendingNavTab(null);
+  };
 
   const navTabs = [
     { id: "Personal Details", label: "Personal Details", icon: User },
@@ -344,7 +393,7 @@ export function EmployeeDetailView({
       <div className="p-4 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
+            onClick={() => attemptNavigate("BACK")}
             className="p-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer flex items-center gap-1 text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4 text-slate-700" />
@@ -384,12 +433,7 @@ export function EmployeeDetailView({
             return (
               <button
                 key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  if (tab.id === "Approval Flows") {
-                    setApprovalSubView("list");
-                  }
-                }}
+                onClick={() => attemptNavigate(tab.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md text-xs font-medium transition-all text-left cursor-pointer ${
                   isActive
                     ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
@@ -2775,6 +2819,40 @@ export function EmployeeDetailView({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: Leave without saving changes? Confirmation (Screenshot Match 1:1) */}
+      {isUnsavedModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 p-6 space-y-4 text-xs animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="font-bold text-slate-800 text-sm">
+              Leave without saving changes?
+            </h3>
+            <p className="text-slate-600 leading-relaxed text-xs">
+              You have unsaved changes on this page. Do you want to switch?
+            </p>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUnsavedModalOpen(false);
+                  setPendingNavTab(null);
+                }}
+                className="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium transition-colors cursor-pointer"
+              >
+                Stay on this page
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLeavePage}
+                className="px-5 py-2 rounded-md bg-[#007BFF] hover:bg-blue-600 text-white font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                Leave Page
+              </button>
+            </div>
           </div>
         </div>
       )}
