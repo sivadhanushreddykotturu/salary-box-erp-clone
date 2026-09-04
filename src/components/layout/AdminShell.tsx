@@ -343,9 +343,13 @@ export function AdminShell({ children }: AdminShellProps) {
           {/* Subscriptions & Billing */}
           <Link
             href="/billing"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              pathname.startsWith("/billing") || pathname.startsWith("/subscriptions-billing")
+                ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
           >
-            <BillingIcon className="w-4 h-4 shrink-0 text-slate-500" />
+            <BillingIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/billing") || pathname.startsWith("/subscriptions-billing") ? "text-[#007BFF]" : "text-slate-500"}`} />
             {sidebarOpen && <span>Subscriptions & Billing</span>}
           </Link>
 
