@@ -352,6 +352,12 @@ export function MyTeamView() {
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isShowFieldsOpen, setIsShowFieldsOpen] = useState(false);
+  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+
+  // More Filters state (1:1 Screenshots Match)
+  const [filterStaffStatus, setFilterStaffStatus] = useState("All Staff");
+  const [filterGender, setFilterGender] = useState("All");
+  const [filterEmployeeType, setFilterEmployeeType] = useState("All");
 
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
     jobTitle: true,
@@ -469,10 +475,29 @@ export function MyTeamView() {
 
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<EmployeeItem | null>(null);
 
-  const filteredStaff = staffList.filter((staff) =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (staff.jobTitle && staff.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredStaff = staffList.filter((staff) => {
+    // 1. Search Query
+    const matchesSearch =
+      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (staff.jobTitle && staff.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (!matchesSearch) return false;
+
+    // 2. Staff Status Filter (All Staff / Active Staff / Inactive Staff)
+    if (filterStaffStatus === "Active Staff" && staff.needsActivation) return false;
+    if (filterStaffStatus === "Inactive Staff" && !staff.needsActivation) return false;
+
+    // 3. Gender Filter (All / Male / Female / Others)
+    if (filterGender !== "All") {
+      if ((staff.gender || "Male") !== filterGender) return false;
+    }
+
+    // 4. Employee Type Filter (All / Full Time / Permanent / Part Time / Consultant / Temporary / Probation / Intern)
+    if (filterEmployeeType !== "All") {
+      if ((staff.employeeType || "Full Time") !== filterEmployeeType) return false;
+    }
+
+    return true;
+  });
 
   if (selectedEmployeeForDetail) {
     return (
@@ -562,10 +587,118 @@ export function MyTeamView() {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </button>
 
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span>More Filters</span>
-          </button>
+          {/* More Filters Popover Button & Modal (1:1 Screenshot Match) */}
+          <div className="relative">
+            <button
+              onClick={() => setIsMoreFiltersOpen(!isMoreFiltersOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-colors cursor-pointer ${
+                isMoreFiltersOpen || filterStaffStatus !== "All Staff" || filterGender !== "All" || filterEmployeeType !== "All"
+                  ? "text-[#007BFF] bg-blue-50/50 border-blue-300 font-semibold"
+                  : "text-slate-700 bg-white border-slate-300 hover:bg-slate-50 font-medium"
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <span>More Filters</span>
+            </button>
+
+            {/* 1:1 SalaryBox More Filters Popover Modal */}
+            {isMoreFiltersOpen && (
+              <>
+                {/* Backdrop to close on click outside */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsMoreFiltersOpen(false)}
+                />
+
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-6 animate-in fade-in zoom-in-95 duration-150 text-xs">
+                  {/* Top Arrow Tip */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-slate-200 rotate-45" />
+
+                  {/* Modal Title */}
+                  <div className="font-bold text-slate-800 text-xs pb-4 border-b border-slate-100">
+                    More Filters
+                  </div>
+
+                  {/* Filter Rows */}
+                  <div className="py-4 space-y-4">
+                    {/* 1. Staff Status (Screenshot 2) */}
+                    <div className="grid grid-cols-12 items-center gap-3">
+                      <div className="col-span-4 text-right text-slate-700 font-medium text-xs">
+                        Staff Status:
+                      </div>
+                      <div className="col-span-8 relative">
+                        <select
+                          value={filterStaffStatus}
+                          onChange={(e) => setFilterStaffStatus(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>All Staff</option>
+                          <option>Active Staff</option>
+                          <option>Inactive Staff</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    {/* 2. Gender (Screenshot 3) */}
+                    <div className="grid grid-cols-12 items-center gap-3">
+                      <div className="col-span-4 text-right text-slate-700 font-medium text-xs">
+                        Gender:
+                      </div>
+                      <div className="col-span-8 relative">
+                        <select
+                          value={filterGender}
+                          onChange={(e) => setFilterGender(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option>All</option>
+                          <option>Male</option>
+                          <option>Female</option>
+                          <option>Others</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    {/* 3. Employee Type (Screenshot 4) */}
+                    <div className="grid grid-cols-12 items-center gap-3">
+                      <div className="col-span-4 text-right text-slate-700 font-medium text-xs">
+                        Employee Type:
+                      </div>
+                      <div className="col-span-8 relative">
+                        <select
+                          value={filterEmployeeType}
+                          onChange={(e) => setFilterEmployeeType(e.target.value)}
+                          className="w-full px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer max-h-40 overflow-y-auto"
+                        >
+                          <option>All</option>
+                          <option>Full Time</option>
+                          <option>Permanent</option>
+                          <option>Part Time</option>
+                          <option>Consultant</option>
+                          <option>Temporary</option>
+                          <option>Probation</option>
+                          <option>Intern</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Close Blue Button */}
+                  <div className="pt-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setIsMoreFiltersOpen(false)}
+                      className="px-6 py-1.5 rounded-md bg-[#007BFF] hover:bg-blue-600 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Show Fields Popover Button & Modal */}
           <div className="relative">
