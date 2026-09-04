@@ -257,12 +257,33 @@ export function EmployeeDetailView({
   const [gracePeriodMins, setGracePeriodMins] = useState("15");
   const [lateDeductionCount, setLateDeductionCount] = useState("3");
 
-  // Shift Editing State
+  // Day Name Mapping for Shifts Modal
+  const dayNameMap: Record<string, string> = {
+    Mon: "Monday",
+    Tue: "Tuesday",
+    Wed: "Wednesday",
+    Thu: "Thursday",
+    Fri: "Friday",
+    Sat: "Saturday",
+    Sun: "Sunday",
+  };
+
+  const [availableShifts, setAvailableShifts] = useState<
+    Array<{ id: string; name: string; timing: string }>
+  >([
+    { id: "1", name: "REGULAR", timing: "09:00 AM - 06:30 PM" },
+    { id: "2", name: "Women Shift", timing: "10:00 AM - 06:30 PM" },
+    { id: "3", name: "Trainee", timing: "03:00 PM - 06:30 PM" },
+  ]);
+
+  // Shift Editing State (1:1 Screenshot Match)
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
-  const [editingShiftDay, setEditingShiftDay] = useState<string | null>(null);
-  const [editingShiftIdx, setEditingShiftIdx] = useState<number | null>(null);
-  const [editingShiftName, setEditingShiftName] = useState("REGULAR");
-  const [editingShiftTiming, setEditingShiftTiming] = useState("09:00 AM - 06:30 PM");
+  const [editingShiftDay, setEditingShiftDay] = useState<string>("Mon");
+  const [selectedShiftIdsInModal, setSelectedShiftIdsInModal] = useState<string[]>(["1"]);
+  const [isAddCustomShiftInline, setIsAddCustomShiftInline] = useState(false);
+  const [newCustomShiftName, setNewCustomShiftName] = useState("");
+  const [newCustomShiftStart, setNewCustomShiftStart] = useState("09:00 AM");
+  const [newCustomShiftEnd, setNewCustomShiftEnd] = useState("06:30 PM");
 
   const handleToggleWeekoff = (day: string) => {
     setDailySchedules((prev) => {
@@ -309,47 +330,61 @@ export function EmployeeDetailView({
   };
 
   const handleAddShift = (day: string) => {
-    setDailySchedules((prev) => {
-      const currentShifts = [...(prev[day]?.shifts || [])];
-      currentShifts.push({ name: "REGULAR", timing: "09:00 AM - 06:30 PM" });
-      return {
-        ...prev,
-        [day]: {
-          ...prev[day],
-          shifts: currentShifts,
-        },
-      };
-    });
+    handleOpenDayShiftsModal(day);
   };
 
-  const handleOpenEditShift = (day: string, idx: number, currentShift: { name: string; timing: string }) => {
+  const handleOpenDayShiftsModal = (day: string) => {
     setEditingShiftDay(day);
-    setEditingShiftIdx(idx);
-    setEditingShiftName(currentShift.name);
-    setEditingShiftTiming(currentShift.timing);
+    const currentDayShifts = dailySchedules[day]?.shifts || [];
+    // Match existing shifts in availableShifts list
+    const matchedIds = availableShifts
+      .filter((s) => currentDayShifts.some((ds) => ds.name === s.name || ds.timing === s.timing))
+      .map((s) => s.id);
+
+    setSelectedShiftIdsInModal(matchedIds.length > 0 ? matchedIds : ["1"]);
+    setIsAddCustomShiftInline(false);
     setIsShiftModalOpen(true);
   };
 
-  const handleSaveShiftEdit = () => {
-    if (editingShiftDay && editingShiftIdx !== null) {
-      setDailySchedules((prev) => {
-        const currentShifts = [...(prev[editingShiftDay]?.shifts || [])];
-        if (currentShifts[editingShiftIdx]) {
-          currentShifts[editingShiftIdx] = {
-            name: editingShiftName,
-            timing: editingShiftTiming,
-          };
-        }
-        return {
-          ...prev,
-          [editingShiftDay]: {
-            ...prev[editingShiftDay],
-            shifts: currentShifts,
-          },
-        };
-      });
+  const handleToggleModalShift = (shiftId: string) => {
+    if (selectedShiftIdsInModal.includes(shiftId)) {
+      if (selectedShiftIdsInModal.length > 1) {
+        setSelectedShiftIdsInModal(selectedShiftIdsInModal.filter((id) => id !== shiftId));
+      }
+    } else {
+      setSelectedShiftIdsInModal([...selectedShiftIdsInModal, shiftId]);
     }
+  };
+
+  const handleSaveModalShifts = () => {
+    const chosenShifts = availableShifts
+      .filter((s) => selectedShiftIdsInModal.includes(s.id))
+      .map((s) => ({ name: s.name, timing: s.timing }));
+
+    setDailySchedules((prev) => ({
+      ...prev,
+      [editingShiftDay]: {
+        ...prev[editingShiftDay],
+        shifts:
+          chosenShifts.length > 0
+            ? chosenShifts
+            : [{ name: "REGULAR", timing: "09:00 AM - 06:30 PM" }],
+      },
+    }));
     setIsShiftModalOpen(false);
+  };
+
+  const handleCreateNewShift = () => {
+    if (!newCustomShiftName.trim()) return;
+    const newShift = {
+      id: String(Date.now()),
+      name: newCustomShiftName.trim(),
+      timing: `${newCustomShiftStart} - ${newCustomShiftEnd}`,
+    };
+    setAvailableShifts([...availableShifts, newShift]);
+    setSelectedShiftIdsInModal([...selectedShiftIdsInModal, newShift.id]);
+    setIsAddCustomShiftInline(false);
+    setNewCustomShiftName("");
   };
 
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
@@ -2367,11 +2402,9 @@ export function EmployeeDetailView({
                                       {sched.shifts?.map((shift, sIdx) => (
                                         <div key={sIdx} className="flex items-center gap-1.5">
                                           <div
-                                            onClick={() =>
-                                              handleOpenEditShift(day, sIdx, shift)
-                                            }
+                                            onClick={() => handleOpenDayShiftsModal(day)}
                                             className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:border-blue-400 hover:text-blue-600 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                                            title="Click to change shift name or timings"
+                                            title="Click to select shift"
                                           >
                                             <span>{shift.name}</span>
                                             <span className="text-slate-300 font-normal">|</span>
@@ -2830,75 +2863,121 @@ export function EmployeeDetailView({
             </div>
           )}
 
-          {/* Shift Edit Modal */}
+          {/* 1:1 Shift Selection Modal (Screenshot Match) */}
           {isShiftModalOpen && (
-            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
-                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="font-bold text-slate-800 text-sm">
-                    Edit Shift for {editingShiftDay}
+            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                {/* Modal Title */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-semibold text-slate-800 text-sm">
+                    {dayNameMap[editingShiftDay] || editingShiftDay} - Shifts
                   </h3>
-                  <button
-                    onClick={() => setIsShiftModalOpen(false)}
-                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
                 </div>
 
-                <div className="p-5 space-y-3.5 text-xs">
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">
-                      Shift Name
-                    </label>
-                    <select
-                      value={editingShiftName}
-                      onChange={(e) => setEditingShiftName(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white"
-                    >
-                      <option value="REGULAR">REGULAR</option>
-                      <option value="MORNING">MORNING</option>
-                      <option value="EVENING">EVENING</option>
-                      <option value="NIGHT">NIGHT</option>
-                      <option value="GENERAL">GENERAL</option>
-                    </select>
-                  </div>
+                {/* Shift Options List */}
+                <div className="divide-y divide-slate-100">
+                  {availableShifts.map((s) => {
+                    const isChecked = selectedShiftIdsInModal.includes(s.id);
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => handleToggleModalShift(s.id)}
+                        className="px-6 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 text-xs font-normal text-slate-800">
+                          <span className="font-medium">{s.name}</span>
+                          <span className="text-slate-300">|</span>
+                          <span className="text-slate-600 font-mono text-[11px]">{s.timing}</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleModalShift(s.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
 
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">
-                      Shift Timing
-                    </label>
-                    <select
-                      value={editingShiftTiming}
-                      onChange={(e) => setEditingShiftTiming(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white font-mono"
-                    >
-                      <option value="09:00 AM - 06:30 PM">09:00 AM - 06:30 PM</option>
-                      <option value="09:30 AM - 06:30 PM">09:30 AM - 06:30 PM</option>
-                      <option value="10:00 AM - 07:00 PM">10:00 AM - 07:00 PM</option>
-                      <option value="08:00 AM - 05:00 PM">08:00 AM - 05:00 PM</option>
-                      <option value="06:00 AM - 02:30 PM">06:00 AM - 02:30 PM</option>
-                      <option value="02:00 PM - 10:30 PM">02:00 PM - 10:30 PM</option>
-                      <option value="10:00 PM - 06:30 AM">10:00 PM - 06:30 AM</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                {/* + Add Shift Action */}
+                {!isAddCustomShiftInline ? (
+                  <div className="px-6 py-3.5 border-t border-slate-100">
                     <button
                       type="button"
-                      onClick={() => setIsShiftModalOpen(false)}
-                      className="px-4 py-1.5 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium"
+                      onClick={() => setIsAddCustomShiftInline(true)}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-[#007BFF] hover:underline cursor-pointer"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveShiftEdit}
-                      className="px-4 py-1.5 rounded-md bg-[#007BFF] hover:bg-blue-600 text-white font-semibold shadow-xs"
-                    >
-                      Save Shift
+                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Add Shift</span>
                     </button>
                   </div>
+                ) : (
+                  <div className="p-4 bg-slate-50 border-t border-slate-100 space-y-3 text-xs">
+                    <div className="font-bold text-slate-700">Add New Shift</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Shift Name (e.g. Night Shift)"
+                        value={newCustomShiftName}
+                        onChange={(e) => setNewCustomShiftName(e.target.value)}
+                        className="col-span-2 px-3 py-1.5 rounded border border-slate-300 bg-white"
+                      />
+                      <div>
+                        <label className="text-[11px] text-slate-500 block mb-0.5">Start Time</label>
+                        <input
+                          type="text"
+                          value={newCustomShiftStart}
+                          onChange={(e) => setNewCustomShiftStart(e.target.value)}
+                          className="w-full px-2.5 py-1 rounded border border-slate-300 bg-white font-mono text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-slate-500 block mb-0.5">End Time</label>
+                        <input
+                          type="text"
+                          value={newCustomShiftEnd}
+                          onChange={(e) => setNewCustomShiftEnd(e.target.value)}
+                          className="w-full px-2.5 py-1 rounded border border-slate-300 bg-white font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddCustomShiftInline(false)}
+                        className="px-3 py-1 rounded border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCreateNewShift}
+                        className="px-3 py-1 rounded bg-[#007BFF] text-white font-semibold hover:bg-blue-600 text-xs"
+                      >
+                        Save Shift
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="px-6 py-3.5 bg-white border-t border-slate-100 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsShiftModalOpen(false)}
+                    className="px-5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveModalShifts}
+                    className="px-5 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                  >
+                    Confirm
+                  </button>
                 </div>
               </div>
             </div>
