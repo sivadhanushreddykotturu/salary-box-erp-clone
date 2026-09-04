@@ -251,11 +251,61 @@ export function EmployeeDetailView({
   const [isGpsAttendance, setIsGpsAttendance] = useState(true);
   const [markAttendanceFrom, setMarkAttendanceFrom] = useState<"From Office" | "From Anywhere">("From Office");
 
-  // Automation Rules State
-  const [autoHalfDayThreshold, setAutoHalfDayThreshold] = useState("4.5");
-  const [autoAbsentTime, setAutoAbsentTime] = useState("01:00 PM");
-  const [gracePeriodMins, setGracePeriodMins] = useState("15");
-  const [lateDeductionCount, setLateDeductionCount] = useState("3");
+  // Automation Rules State (1:1 Screenshot Match)
+  const [autoPresentAtDayStart, setAutoPresentAtDayStart] = useState(false);
+  const [presentOnPunchIn, setPresentOnPunchIn] = useState(false);
+  const [autoHalfDayIfLateBy, setAutoHalfDayIfLateBy] = useState<{ hours: string; minutes: string } | null>(null);
+  const [mandatoryHalfDayHours, setMandatoryHalfDayHours] = useState<{ hours: string; minutes: string } | null>(null);
+  const [mandatoryFullDayHours, setMandatoryFullDayHours] = useState<{ hours: string; minutes: string } | null>(null);
+
+  // Automation Rule Duration Modal State
+  const [isAutomationRuleModalOpen, setIsAutomationRuleModalOpen] = useState(false);
+  const [activeAutomationRuleKey, setActiveAutomationRuleKey] = useState<
+    "autoHalfDayIfLateBy" | "mandatoryHalfDayHours" | "mandatoryFullDayHours" | null
+  >(null);
+  const [activeAutomationRuleTitle, setActiveAutomationRuleTitle] = useState("");
+  const [automationModalHours, setAutomationModalHours] = useState("");
+  const [automationModalMinutes, setAutomationModalMinutes] = useState("");
+
+  const handleOpenAutomationRuleModal = (
+    key: "autoHalfDayIfLateBy" | "mandatoryHalfDayHours" | "mandatoryFullDayHours",
+    title: string
+  ) => {
+    setActiveAutomationRuleKey(key);
+    setActiveAutomationRuleTitle(title);
+    let currentVal: { hours: string; minutes: string } | null = null;
+    if (key === "autoHalfDayIfLateBy") currentVal = autoHalfDayIfLateBy;
+    if (key === "mandatoryHalfDayHours") currentVal = mandatoryHalfDayHours;
+    if (key === "mandatoryFullDayHours") currentVal = mandatoryFullDayHours;
+
+    setAutomationModalHours(currentVal?.hours || "");
+    setAutomationModalMinutes(currentVal?.minutes || "");
+    setIsAutomationRuleModalOpen(true);
+  };
+
+  const handleConfirmAutomationRule = () => {
+    const val =
+      automationModalHours.trim() || automationModalMinutes.trim()
+        ? {
+            hours: automationModalHours.trim() || "0",
+            minutes: automationModalMinutes.trim() || "0",
+          }
+        : null;
+
+    if (activeAutomationRuleKey === "autoHalfDayIfLateBy") setAutoHalfDayIfLateBy(val);
+    if (activeAutomationRuleKey === "mandatoryHalfDayHours") setMandatoryHalfDayHours(val);
+    if (activeAutomationRuleKey === "mandatoryFullDayHours") setMandatoryFullDayHours(val);
+
+    setIsAutomationRuleModalOpen(false);
+  };
+
+  const handleTurnOffAutomationRule = () => {
+    if (activeAutomationRuleKey === "autoHalfDayIfLateBy") setAutoHalfDayIfLateBy(null);
+    if (activeAutomationRuleKey === "mandatoryHalfDayHours") setMandatoryHalfDayHours(null);
+    if (activeAutomationRuleKey === "mandatoryFullDayHours") setMandatoryFullDayHours(null);
+
+    setIsAutomationRuleModalOpen(false);
+  };
 
   // Day Name Mapping for Shifts Modal
   const dayNameMap: Record<string, string> = {
@@ -2752,7 +2802,7 @@ export function EmployeeDetailView({
                 </div>
               )}
 
-              {/* SUBVIEW 4: Automation Rules */}
+              {/* SUBVIEW 4: Automation Rules (1:1 Screenshot Match) */}
               {attendanceDetailsSubView === "automation_rules" && (
                 <div className="space-y-5">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -2760,106 +2810,197 @@ export function EmployeeDetailView({
                       <button
                         type="button"
                         onClick={() => setAttendanceDetailsSubView("landing")}
-                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-slate-600 font-bold"
+                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-[#007BFF] font-bold underline-offset-2 hover:underline"
                       >
                         Attendance Details
                       </button>
                       <span className="text-slate-400 font-normal">»</span>
-                      <span className="text-slate-900 font-bold">Automation Rules</span>
+                      <span className="text-slate-700 font-bold">Automation Rules</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => alert("Automation rules updated successfully!")}
-                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
-                    >
-                      Update Details
-                    </button>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* Rule 1: Auto Half Day */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-slate-800 text-xs">
-                          Auto Half Day Rule
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          Mark half day if total work duration is less than threshold
-                        </div>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    <div className="divide-y divide-slate-100 text-xs">
+                      {/* Rule 1: Auto Present at day start */}
+                      <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                        <span className="font-medium text-slate-800">
+                          Auto Present at day start
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setAutoPresentAtDayStart(!autoPresentAtDayStart)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            autoPresentAtDayStart ? "bg-[#007BFF]" : "bg-slate-300"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              autoPresentAtDayStart ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={autoHalfDayThreshold}
-                          onChange={(e) => setAutoHalfDayThreshold(e.target.value)}
-                          className="w-16 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
-                        />
-                        <span className="text-xs text-slate-500 font-medium">Hours</span>
-                      </div>
-                    </div>
 
-                    {/* Rule 2: Auto Absent */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-slate-800 text-xs">
-                          Auto Absent Rule
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          Mark absent if employee has not punched in before cutoff time
-                        </div>
+                      {/* Rule 2: Present on Punch In */}
+                      <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                        <span className="font-medium text-slate-800">
+                          Present on Punch In
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setPresentOnPunchIn(!presentOnPunchIn)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            presentOnPunchIn ? "bg-[#007BFF]" : "bg-slate-300"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              presentOnPunchIn ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
                       </div>
-                      <input
-                        type="text"
-                        value={autoAbsentTime}
-                        onChange={(e) => setAutoAbsentTime(e.target.value)}
-                        className="w-28 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
-                      />
-                    </div>
 
-                    {/* Rule 3: Grace Period */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-slate-800 text-xs">
-                          Late Arrival Grace Period
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          Allowed delay after shift start without marking late
-                        </div>
+                      {/* Rule 3: Auto half day if late by */}
+                      <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                        <span className="font-medium text-slate-800">
+                          Auto half day if late by
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleOpenAutomationRuleModal(
+                              "autoHalfDayIfLateBy",
+                              "Auto half day if late by"
+                            )
+                          }
+                          className="px-4 py-1.5 rounded-md border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:border-slate-300 hover:bg-slate-50 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          {autoHalfDayIfLateBy
+                            ? `${autoHalfDayIfLateBy.hours ? `${autoHalfDayIfLateBy.hours} hrs ` : ""}${
+                                autoHalfDayIfLateBy.minutes ? `${autoHalfDayIfLateBy.minutes} mins` : ""
+                              }`
+                            : "Not Set"}
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={gracePeriodMins}
-                          onChange={(e) => setGracePeriodMins(e.target.value)}
-                          className="w-16 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
-                        />
-                        <span className="text-xs text-slate-500 font-medium">Minutes</span>
-                      </div>
-                    </div>
 
-                    {/* Rule 4: Late Deduction */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-slate-800 text-xs">
-                          Late Fine Deduction
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          Deduct 0.5 day salary after specified number of late arrivals
-                        </div>
+                      {/* Rule 4: Mandatory half day hours */}
+                      <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                        <span className="font-medium text-slate-800">
+                          Mandatory half day hours
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleOpenAutomationRuleModal(
+                              "mandatoryHalfDayHours",
+                              "Mandatory half day hours"
+                            )
+                          }
+                          className="px-4 py-1.5 rounded-md border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:border-slate-300 hover:bg-slate-50 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          {mandatoryHalfDayHours
+                            ? `${mandatoryHalfDayHours.hours ? `${mandatoryHalfDayHours.hours} hrs ` : ""}${
+                                mandatoryHalfDayHours.minutes
+                                  ? `${mandatoryHalfDayHours.minutes} mins`
+                                  : ""
+                              }`
+                            : "Not Set"}
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={lateDeductionCount}
-                          onChange={(e) => setLateDeductionCount(e.target.value)}
-                          className="w-16 px-2.5 py-1 text-xs rounded border border-slate-300 font-mono text-center"
-                        />
-                        <span className="text-xs text-slate-500 font-medium">Late Days</span>
+
+                      {/* Rule 5: Mandatory full day hours */}
+                      <div className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                        <span className="font-medium text-slate-800">
+                          Mandatory full day hours
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleOpenAutomationRuleModal(
+                              "mandatoryFullDayHours",
+                              "Mandatory full day hours"
+                            )
+                          }
+                          className="px-4 py-1.5 rounded-md border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:border-slate-300 hover:bg-slate-50 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          {mandatoryFullDayHours
+                            ? `${mandatoryFullDayHours.hours ? `${mandatoryFullDayHours.hours} hrs ` : ""}${
+                                mandatoryFullDayHours.minutes
+                                  ? `${mandatoryFullDayHours.minutes} mins`
+                                  : ""
+                              }`
+                            : "Not Set"}
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 1:1 Automation Rule Duration Modal (Screenshot Match) */}
+          {isAutomationRuleModalOpen && (
+            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                {/* Modal Title */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-semibold text-slate-800 text-sm">
+                    {activeAutomationRuleTitle}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsAutomationRuleModalOpen(false)}
+                    className="w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center hover:bg-slate-500 cursor-pointer transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-3">
+                  <div className="text-xs font-semibold text-slate-700">
+                    Select Duration
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-700">
+                    <input
+                      type="text"
+                      maxLength={2}
+                      value={automationModalHours}
+                      onChange={(e) => setAutomationModalHours(e.target.value)}
+                      className="w-14 h-9 border border-slate-300 rounded text-center font-mono text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <span className="mr-3">hours</span>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      value={automationModalMinutes}
+                      onChange={(e) => setAutomationModalMinutes(e.target.value)}
+                      className="w-14 h-9 border border-slate-300 rounded text-center font-mono text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <span>minutes</span>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={handleTurnOffAutomationRule}
+                    className="px-5 py-1.5 text-xs font-medium text-red-600 bg-red-50/60 border border-red-200 rounded-md hover:bg-red-100/60 transition-colors cursor-pointer"
+                  >
+                    Turn Off
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmAutomationRule}
+                    className="px-6 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
