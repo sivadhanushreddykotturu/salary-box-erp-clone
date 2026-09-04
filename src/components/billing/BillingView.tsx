@@ -118,12 +118,12 @@ export function BillingView() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setActiveModal("upgradePlan")}
+            <Link
+              href="/subscriptions-billing/upgrade"
               className="border border-[#007BFF] text-[#007BFF] hover:bg-blue-50 px-4 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-colors"
             >
               Upgrade Plan
-            </button>
+            </Link>
           </div>
 
           {/* Card 2: Check Plan Details */}

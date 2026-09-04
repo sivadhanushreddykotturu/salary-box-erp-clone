@@ -20,7 +20,7 @@ export function UpgradePlanView() {
   const router = useRouter();
 
   // State
-  const [billingPeriod, setBillingPeriod] = useState<"quarterly" | "annual">("annual");
+  const [billingPeriod, setBillingPeriod] = useState<"quarterly" | "annual">("quarterly");
   const [selectedPlan, setSelectedPlan] = useState<"Starter" | "Business">("Business");
   const [userCount, setUserCount] = useState<number>(10);
   const [currentUsers] = useState<number>(10);
@@ -44,7 +44,7 @@ export function UpgradePlanView() {
   const [expandedPlanDetails, setExpandedPlanDetails] = useState<"Starter" | "Business" | null>("Business");
 
   // Next renewal accordion
-  const [isRenewalExpanded, setIsRenewalExpanded] = useState<boolean>(false);
+  const [isRenewalExpanded, setIsRenewalExpanded] = useState<boolean>(true);
 
   // Coupon & Toast
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
@@ -505,6 +505,363 @@ export function UpgradePlanView() {
           </div>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* 1. SELECT PLAN MODAL */}
+      {/* ========================================================= */}
+      {isSelectPlanModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900">Select Plan</h3>
+              <button
+                type="button"
+                onClick={() => setIsSelectPlanModalOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              {/* Option 1: Starter Plan */}
+              <div
+                onClick={() => setTempSelectedPlan("Starter")}
+                className={`rounded-xl border transition-all cursor-pointer p-4 ${
+                  tempSelectedPlan === "Starter"
+                    ? "border-2 border-blue-500 bg-white shadow-xs"
+                    : "border-slate-200 hover:border-slate-300 bg-white"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="modalSelectedPlan"
+                    checked={tempSelectedPlan === "Starter"}
+                    onChange={() => setTempSelectedPlan("Starter")}
+                    className="mt-1 h-4 w-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div className="flex-1 space-y-1">
+                    <div className="text-sm font-bold text-slate-900">Starter</div>
+                    <div className="text-xs font-semibold text-blue-600">
+                      ₹1,350/month + ₹27/user/month
+                    </div>
+                    <p className="text-xs text-slate-500">Get your attendance off paper.</p>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePlanAccordion("Starter");
+                        }}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer"
+                      >
+                        <span>{expandedPlanDetails === "Starter" ? "Hide Details" : "Show Details"}</span>
+                        {expandedPlanDetails === "Starter" ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {expandedPlanDetails === "Starter" && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-700 animate-in fade-in duration-150">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>GPS-verified attendance</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Leave management</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Real-time notifications</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Attendance reports</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Option 2: Business Plan */}
+              <div
+                onClick={() => setTempSelectedPlan("Business")}
+                className={`rounded-xl border transition-all cursor-pointer p-4 ${
+                  tempSelectedPlan === "Business"
+                    ? "border-2 border-blue-500 bg-white shadow-xs"
+                    : "border-slate-200 hover:border-slate-300 bg-white"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="modalSelectedPlan"
+                    checked={tempSelectedPlan === "Business"}
+                    onChange={() => setTempSelectedPlan("Business")}
+                    className="mt-1 h-4 w-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div className="flex-1 space-y-1">
+                    <div className="text-sm font-bold text-slate-900">Business</div>
+                    <div className="text-xs font-semibold text-blue-600">
+                      ₹2,700/month + ₹67.50/user/month
+                    </div>
+                    <p className="text-xs text-slate-500">Run payroll. Prevent fraud. Stay compliant.</p>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePlanAccordion("Business");
+                        }}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer"
+                      >
+                        <span>{expandedPlanDetails === "Business" ? "Hide Details" : "Show Details"}</span>
+                        {expandedPlanDetails === "Business" ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {expandedPlanDetails === "Business" && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-700 animate-in fade-in duration-150">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Automated payroll & compliances</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>AI attendance fraud prevention</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Payslip generation</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Rosters and Automations</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <span className="text-[11px] text-slate-400">
+                  See full plan comparison at{" "}
+                  <a
+                    href="https://salarybox.in/pricing"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    salarybox.in/pricing
+                  </a>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleConfirmPlanChange}
+                className="w-full py-2.5 bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 2. SELECT ADD-ONS MODAL */}
+      {/* ========================================================= */}
+      {isAddonsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900">Select Add-ons</h3>
+              <button
+                type="button"
+                onClick={() => setIsAddonsModalOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              {/* Add-on 1: Live Location Tracking */}
+              <div className="rounded-xl border border-slate-200 p-4 bg-white">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedAddons.liveLocation}
+                    onChange={(e) =>
+                      setSelectedAddons((prev) => ({ ...prev, liveLocation: e.target.checked }))
+                    }
+                    className="mt-1 h-4 w-4 text-blue-600 rounded-sm border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div className="flex-1 space-y-1">
+                    <div className="text-sm font-bold text-slate-900">Live Location Tracking</div>
+                    <div className="text-xs font-semibold text-blue-600">₹90/month</div>
+                    <p className="text-xs text-slate-500">Track user's location in real-time.</p>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleAddonAccordion("liveLocation")}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer"
+                      >
+                        <span>{expandedAddonDetails === "liveLocation" ? "Hide Details" : "Show Details"}</span>
+                        {expandedAddonDetails === "liveLocation" ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {expandedAddonDetails === "liveLocation" && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-700 animate-in fade-in duration-150">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Live GPS tracking</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Autotrack on punch in</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Alerts when user disables GPS or internet</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Location history report</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add-on 2: Field Force CRM */}
+              <div className="rounded-xl border border-slate-200 p-4 bg-white">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedAddons.fieldForceCRM}
+                    onChange={(e) =>
+                      setSelectedAddons((prev) => ({ ...prev, fieldForceCRM: e.target.checked }))
+                    }
+                    className="mt-1 h-4 w-4 text-blue-600 rounded-sm border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div className="flex-1 space-y-1">
+                    <div className="text-sm font-bold text-slate-900">Field Force CRM</div>
+                    <div className="text-xs font-semibold text-blue-600">₹225/month</div>
+                    <p className="text-xs text-slate-500">Get 100% visibility into your field operations.</p>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleAddonAccordion("fieldForceCRM")}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer"
+                      >
+                        <span>{expandedAddonDetails === "fieldForceCRM" ? "Hide Details" : "Show Details"}</span>
+                        {expandedAddonDetails === "fieldForceCRM" ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {expandedAddonDetails === "fieldForceCRM" && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-700 animate-in fade-in duration-150">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Lead & Client visit scheduling</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Client geofenced check-ins</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>Sales route planner & expense claims</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddonsModalOpen(false);
+                  showToast("Add-on preferences saved!");
+                }}
+                className="w-full py-2.5 bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 3. COUPON MODAL */}
+      {/* ========================================================= */}
+      {isCouponModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+              <h3 className="text-xs font-bold text-slate-900">Apply Coupon Code</h3>
+              <button
+                type="button"
+                onClick={() => setIsCouponModalOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-3">
+              <input
+                type="text"
+                placeholder="Enter Coupon Code (e.g. SAVE20)"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase font-bold"
+              />
+
+              <div className="p-2.5 bg-blue-50/60 border border-blue-100 rounded-md text-[11px] text-blue-800">
+                Tip: Try <strong>SAVE20</strong> for an extra 20% discount on quarterly/annual billing.
+              </div>
+
+              <button
+                type="button"
+                onClick={handleApplyCoupon}
+                className="w-full py-2 bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                Apply Coupon
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
