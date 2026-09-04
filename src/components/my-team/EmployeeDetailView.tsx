@@ -4812,8 +4812,10 @@ export function EmployeeDetailView({
                               className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
                             >
                               <option>Fixed Hourly Rate</option>
-                              <option>1.5x Hourly Rate</option>
-                              <option>2x Hourly Rate</option>
+                              <option>1x Hourly Salary</option>
+                              <option>1.5x Hourly Salary</option>
+                              <option>2x Hourly Salary</option>
+                              <option>Custom Multiplier</option>
                             </select>
                             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                           </div>
@@ -4824,17 +4826,21 @@ export function EmployeeDetailView({
                             Amount <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                              ₹
-                            </span>
+                            {extraHoursPayType !== "Custom Multiplier" && (
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                                ₹
+                              </span>
+                            )}
                             <input
                               type="text"
                               value={extraHoursPayAmount}
-                              onChange={(e) => setExtraHoursPayAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                              className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              onChange={(e) => setExtraHoursPayAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                              className={`w-full ${
+                                extraHoursPayType === "Custom Multiplier" ? "pl-3 pr-24" : "pl-6 pr-14"
+                              } py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500`}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                              /hour
+                              {extraHoursPayType === "Custom Multiplier" ? "x Hourly Salary" : "/hour"}
                             </span>
                           </div>
                         </div>
@@ -4858,8 +4864,10 @@ export function EmployeeDetailView({
                               className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
                             >
                               <option>Fixed Daily Rate</option>
-                              <option>2x Daily Rate</option>
-                              <option>1.5x Daily Rate</option>
+                              <option>1x Daily Salary</option>
+                              <option>1.5x Daily Salary</option>
+                              <option>2x Daily Salary</option>
+                              <option>Custom Multiplier</option>
                             </select>
                             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                           </div>
@@ -4870,17 +4878,21 @@ export function EmployeeDetailView({
                             Amount <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                              ₹
-                            </span>
+                            {publicHolidayPayType !== "Custom Multiplier" && (
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                                ₹
+                              </span>
+                            )}
                             <input
                               type="text"
                               value={publicHolidayPayAmount}
-                              onChange={(e) => setPublicHolidayPayAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                              className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              onChange={(e) => setPublicHolidayPayAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                              className={`w-full ${
+                                publicHolidayPayType === "Custom Multiplier" ? "pl-3 pr-24" : "pl-6 pr-14"
+                              } py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500`}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                              /day
+                              {publicHolidayPayType === "Custom Multiplier" ? "x Daily Salary" : "/day"}
                             </span>
                           </div>
                         </div>
@@ -4899,8 +4911,10 @@ export function EmployeeDetailView({
                               className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
                             >
                               <option>Fixed Daily Rate</option>
-                              <option>2x Daily Rate</option>
-                              <option>1.5x Daily Rate</option>
+                              <option>1x Daily Salary</option>
+                              <option>1.5x Daily Salary</option>
+                              <option>2x Daily Salary</option>
+                              <option>Custom Multiplier</option>
                             </select>
                             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                           </div>
@@ -4911,17 +4925,21 @@ export function EmployeeDetailView({
                             Amount <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                              ₹
-                            </span>
+                            {weekOffPayType !== "Custom Multiplier" && (
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                                ₹
+                              </span>
+                            )}
                             <input
                               type="text"
                               value={weekOffPayAmount}
-                              onChange={(e) => setWeekOffPayAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                              className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              onChange={(e) => setWeekOffPayAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                              className={`w-full ${
+                                weekOffPayType === "Custom Multiplier" ? "pl-3 pr-24" : "pl-6 pr-14"
+                              } py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500`}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                              /day
+                              {weekOffPayType === "Custom Multiplier" ? "x Daily Salary" : "/day"}
                             </span>
                           </div>
                         </div>
