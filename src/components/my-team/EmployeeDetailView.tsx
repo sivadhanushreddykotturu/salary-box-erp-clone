@@ -554,6 +554,10 @@ export function EmployeeDetailView({
   const [newDeductionCalc, setNewDeductionCalc] = useState("Fixed Amount");
   const [newDeductionAmount, setNewDeductionAmount] = useState("");
 
+  // Additional Settings State (1:1 Screenshot Match)
+  const [canUseLocationTracking, setCanUseLocationTracking] = useState(false);
+  const [canUseCrmLite, setCanUseCrmLite] = useState(false);
+
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
 
@@ -3913,6 +3917,55 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 14: Additional Settings (1:1 Screenshot Match) */}
+          {activeTab === "Additional Settings" && (
+            <div className="space-y-6 max-w-4xl pb-16">
+              {/* Header */}
+              <div className="pb-3 border-b border-slate-100">
+                <h3 className="text-base font-bold text-slate-800">
+                  Additional Settings
+                </h3>
+              </div>
+
+              {/* Settings Cards List */}
+              <div className="space-y-3">
+                {/* 1. Can use Location Tracking */}
+                <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <span className="font-semibold text-slate-700 text-xs">
+                    Can use Location Tracking
+                  </span>
+                  
+                  {/* Disabled cursor-not-allowed toggle for regular employee */}
+                  <div
+                    title="Employee does not have permission to enable Location Tracking"
+                    className="relative inline-flex h-6 w-11 shrink-0 cursor-not-allowed rounded-full border-2 border-transparent bg-slate-200 transition-colors duration-200 ease-in-out opacity-80"
+                  >
+                    <span
+                      className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out translate-x-0"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Can use CRM Lite */}
+                <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <span className="font-semibold text-slate-700 text-xs">
+                    Can use CRM Lite
+                  </span>
+                  
+                  {/* Disabled cursor-not-allowed toggle for regular employee */}
+                  <div
+                    title="Employee does not have permission to enable CRM Lite"
+                    className="relative inline-flex h-6 w-11 shrink-0 cursor-not-allowed rounded-full border-2 border-transparent bg-slate-200 transition-colors duration-200 ease-in-out opacity-80"
+                  >
+                    <span
+                      className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out translate-x-0"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
@@ -3922,7 +3975,8 @@ export function EmployeeDetailView({
             activeTab !== "Approval Flows" &&
             activeTab !== "User Permission" &&
             activeTab !== "Attendance Details" &&
-            activeTab !== "Salary Details" && (
+            activeTab !== "Salary Details" &&
+            activeTab !== "Additional Settings" && (
               <div className="py-16 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto">
                   <Layers className="w-6 h-6" />
