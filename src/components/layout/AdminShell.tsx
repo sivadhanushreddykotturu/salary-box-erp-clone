@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -11,7 +11,8 @@ import {
   Bell,
   Megaphone,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  LogOut
 } from "lucide-react";
 import {
   MyTeamIcon,
@@ -35,6 +36,94 @@ export function AdminShell({ children }: AdminShellProps) {
   const [attendanceExpanded, setAttendanceExpanded] = useState(false);
   const [crmExpanded, setCrmExpanded] = useState(true);
   const [reportsExpanded, setReportsExpanded] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  const [userProfile, setUserProfile] = useState<{
+    name: string;
+    role: string;
+    initials: string;
+    companyName: string;
+    companyCode: string;
+  }>({
+    name: "PAPPU SRINIVASA PRABHAKAR RAO",
+    role: "Admin",
+    initials: "PR",
+    companyName: "RSS LOGISTICS",
+    companyCode: "IDGWDA",
+  });
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/v1/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.data) {
+            const user = data.data;
+            const fullName = user.employee
+              ? `${user.employee.firstName || ""} ${user.employee.lastName || ""}`.trim()
+              : user.name || user.email?.split("@")[0] || "PAPPU SRINIVASA PRABHAKAR RAO";
+
+            const roleFormatted =
+              user.role === "SUPER_ADMIN"
+                ? "Super Admin"
+                : user.role === "COMPANY_OWNER" || user.role === "HR_ADMIN"
+                ? "Admin"
+                : user.role === "MANAGER"
+                ? "Manager"
+                : "Staff";
+
+            const parts = fullName.trim().split(/\s+/);
+            const initials =
+              parts.length > 1
+                ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+                : fullName.slice(0, 2).toUpperCase();
+
+            setUserProfile({
+              name: fullName.toUpperCase(),
+              role: roleFormatted,
+              initials: initials || "PR",
+              companyName: user.company?.name || "RSS LOGISTICS",
+              companyCode: user.company?.companyCode || "IDGWDA",
+            });
+          }
+        }
+      } catch (err) {
+        // Keep standard default
+      }
+    }
+    loadProfile();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileOpen]);
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    } catch (e) {
+      // ignore
+    }
+    window.location.href = "/login";
+  };
 
   // Sub-items for Attendance
   const attendanceSubItems = [
@@ -349,8 +438,41 @@ export function AdminShell({ children }: AdminShellProps) {
               <img src="/icons/announcement-svgrepo-com.svg" alt="Announcements" className="w-4 h-4 object-contain opacity-70" />
             </Link>
 
-            <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs border border-purple-200 cursor-pointer ml-1">
-              PR
+            {/* Profile Avatar & Dropdown Popup */}
+            <div className="relative" ref={profileMenuRef}>
+              <button
+                type="button"
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs border border-purple-200 cursor-pointer ml-1 hover:ring-2 hover:ring-purple-200 transition-all focus:outline-none"
+                aria-label="User profile menu"
+                aria-expanded={profileOpen}
+              >
+                {userProfile.initials}
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-slate-200 py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="px-4 py-1.5">
+                    <div className="text-[13px] font-bold text-slate-900 tracking-tight leading-snug uppercase">
+                      {userProfile.name}
+                    </div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">
+                      Role - {userProfile.role}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-100 my-1.5"></div>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-red-600 transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
