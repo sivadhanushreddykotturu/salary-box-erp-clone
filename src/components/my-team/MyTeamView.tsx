@@ -63,27 +63,6 @@ interface EmployeeItem {
 
 const INITIAL_STAFF: EmployeeItem[] = [
   {
-    id: "1",
-    name: "Anil",
-    initials: "A",
-    avatarColor: "bg-blue-500",
-    jobTitle: "",
-    verificationStatus: "Not Started",
-    dateOfJoining: "",
-    scheduleType: "Fixed",
-    smartphoneAttendance: "Yes",
-    selfie: "Yes",
-    qr: "No",
-    markFrom: "Anywhere",
-    biometric: "No",
-    autoPresent: "No",
-    presentOnPunchIn: "No",
-    bankName: "HDFC Bank",
-    bankAccount: "•••• 4812",
-    monthlyCtc: 35000,
-    leaveBalance: 12,
-  },
-  {
     id: "2",
     name: "Bobba Prasad",
     initials: "BP",
@@ -255,6 +234,28 @@ const INITIAL_STAFF: EmployeeItem[] = [
     leaveBalance: 12,
   },
   {
+    id: "1",
+    name: "Anil",
+    initials: "A",
+    avatarColor: "bg-blue-500",
+    jobTitle: "",
+    verificationStatus: "Not Started",
+    dateOfJoining: "",
+    needsActivation: true,
+    scheduleType: "Fixed",
+    smartphoneAttendance: "Yes",
+    selfie: "Yes",
+    qr: "No",
+    markFrom: "Anywhere",
+    biometric: "No",
+    autoPresent: "No",
+    presentOnPunchIn: "No",
+    bankName: "HDFC Bank",
+    bankAccount: "•••• 4812",
+    monthlyCtc: 35000,
+    leaveBalance: 12,
+  },
+  {
     id: "10",
     name: "Venkat Krish...",
     initials: "V",
@@ -353,6 +354,7 @@ export function MyTeamView() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isShowFieldsOpen, setIsShowFieldsOpen] = useState(false);
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+  const [activatingStaff, setActivatingStaff] = useState<EmployeeItem | null>(null);
 
   // More Filters state (1:1 Screenshots Match)
   const [filterStaffStatus, setFilterStaffStatus] = useState("All Staff");
@@ -1217,7 +1219,7 @@ export function MyTeamView() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              alert(`Activating employee ${staff.name}...`);
+                              setActivatingStaff(staff);
                             }}
                             className="px-2 py-0.5 text-[10px] font-semibold text-[#007BFF] border border-[#007BFF] rounded-full hover:bg-blue-50 cursor-pointer"
                           >
@@ -1507,6 +1509,58 @@ export function MyTeamView() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 1:1 SalaryBox Mark Staff Active Modal */}
+      {activatingStaff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 animate-in fade-in duration-150">
+          <div
+            className="fixed inset-0"
+            onClick={() => setActivatingStaff(null)}
+          />
+          <div className="relative w-full max-w-[480px] bg-white rounded-lg shadow-2xl z-10 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="px-6 py-4">
+              <h3 className="text-base font-semibold text-slate-800">
+                Mark {activatingStaff.name} Active
+              </h3>
+            </div>
+
+            <div className="border-t border-slate-200" />
+
+            {/* Modal Body */}
+            <div className="px-6 py-6">
+              <p className="text-sm text-slate-700 font-normal">
+                Are you sure, you want to mark this staff Active ?
+              </p>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 pb-6 pt-2 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setActivatingStaff(null)}
+                className="px-5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStaffList((prev) =>
+                    prev.map((s) =>
+                      s.id === activatingStaff.id ? { ...s, needsActivation: false } : s
+                    )
+                  );
+                  setActivatingStaff(null);
+                }}
+                className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+              >
+                Mark Staff Active
+              </button>
+            </div>
           </div>
         </div>
       )}
