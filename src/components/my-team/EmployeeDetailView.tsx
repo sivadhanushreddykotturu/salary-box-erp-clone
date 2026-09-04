@@ -600,6 +600,15 @@ export function EmployeeDetailView({
   const [weekOffPayType, setWeekOffPayType] = useState("Fixed Daily Rate");
   const [weekOffPayAmount, setWeekOffPayAmount] = useState("0");
 
+  // Leave Details State (1:1 Match with Screenshots)
+  const [leaveSubView, setLeaveSubView] = useState<"root" | "leave_policy" | "leave_balance">("root");
+  const [leaveCycle, setLeaveCycle] = useState<"Monthly" | "Yearly">("Monthly");
+  const [leaveBalances, setLeaveBalances] = useState({
+    privilegedLeave: "",
+    sickLeave: "",
+    casualLeave: "",
+  });
+
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
 
@@ -4951,6 +4960,212 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 10: Leave Details (1:1 Screenshot Match) */}
+          {activeTab === "Leave Details" && (
+            <div className="space-y-6 max-w-4xl pb-16">
+              {/* SUBVIEW 1: Landing Root List (Screenshot 1) */}
+              {leaveSubView === "root" && (
+                <>
+                  <div className="pb-3 border-b border-slate-100">
+                    <h3 className="text-base font-bold text-slate-800">
+                      Leave Details
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* 1. Leave Policy Card */}
+                    <div
+                      onClick={() => setLeaveSubView("leave_policy")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <span className="font-medium text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                        Leave Policy
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* 2. Leave Balance Card */}
+                    <div
+                      onClick={() => setLeaveSubView("leave_balance")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <span className="font-medium text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                        Leave Balance
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* SUBVIEW 2: Leave Policy (Screenshot 2) */}
+              {leaveSubView === "leave_policy" && (
+                <div className="space-y-5">
+                  {/* Breadcrumb Header & Update Details */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setLeaveSubView("root")}
+                        className="text-[#007BFF] font-medium hover:underline cursor-pointer"
+                      >
+                        Leave Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-700 font-bold">Leave Policy</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => alert("Leave Policy updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  {/* Leave Cycle Card */}
+                  <div className="p-5 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                    <span className="font-semibold text-slate-800 text-xs">
+                      Leave Cycle
+                    </span>
+                    <div className="flex items-center gap-6 text-xs text-slate-700 font-medium">
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="leaveCycle"
+                          checked={leaveCycle === "Monthly"}
+                          onChange={() => setLeaveCycle("Monthly")}
+                          className="w-4 h-4 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span>Monthly</span>
+                      </label>
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="leaveCycle"
+                          checked={leaveCycle === "Yearly"}
+                          onChange={() => setLeaveCycle("Yearly")}
+                          className="w-4 h-4 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span>Yearly</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SUBVIEW 3: Leave Balance (Screenshot 3) */}
+              {leaveSubView === "leave_balance" && (
+                <div className="space-y-5">
+                  {/* Breadcrumb Header & Update Details */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setLeaveSubView("root")}
+                        className="text-[#007BFF] font-medium hover:underline cursor-pointer"
+                      >
+                        Leave Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-700 font-bold">Leave Balance</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => alert("Leave Balances updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  {/* Leave Balance Table Container */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    {/* Header */}
+                    <div className="grid grid-cols-12 gap-4 px-6 py-3.5 bg-slate-50/70 border-b border-slate-200 text-xs font-semibold text-slate-700">
+                      <div className="col-span-6">Leave Type</div>
+                      <div className="col-span-6">Remaining Balance</div>
+                    </div>
+
+                    {/* Rows */}
+                    <div className="divide-y divide-slate-100 text-xs">
+                      {/* Privileged Leave */}
+                      <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
+                        <div className="col-span-6 font-medium text-slate-800">
+                          Privileged Leave
+                        </div>
+                        <div className="col-span-6 flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={leaveBalances.privilegedLeave}
+                            onChange={(e) =>
+                              setLeaveBalances({
+                                ...leaveBalances,
+                                privilegedLeave: e.target.value.replace(/[^0-9.]/g, ""),
+                              })
+                            }
+                            className="w-32 px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <span className="text-slate-500 font-medium text-xs">
+                            leaves
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Sick Leave */}
+                      <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
+                        <div className="col-span-6 font-medium text-slate-800">
+                          Sick Leave
+                        </div>
+                        <div className="col-span-6 flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={leaveBalances.sickLeave}
+                            onChange={(e) =>
+                              setLeaveBalances({
+                                ...leaveBalances,
+                                sickLeave: e.target.value.replace(/[^0-9.]/g, ""),
+                              })
+                            }
+                            className="w-32 px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <span className="text-slate-500 font-medium text-xs">
+                            leaves
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Casual Leave */}
+                      <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
+                        <div className="col-span-6 font-medium text-slate-800">
+                          Casual Leave
+                        </div>
+                        <div className="col-span-6 flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={leaveBalances.casualLeave}
+                            onChange={(e) =>
+                              setLeaveBalances({
+                                ...leaveBalances,
+                                casualLeave: e.target.value.replace(/[^0-9.]/g, ""),
+                              })
+                            }
+                            className="w-32 px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <span className="text-slate-500 font-medium text-xs">
+                            leaves
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
@@ -4961,6 +5176,7 @@ export function EmployeeDetailView({
             activeTab !== "User Permission" &&
             activeTab !== "Attendance Details" &&
             activeTab !== "Salary Details" &&
+            activeTab !== "Leave Details" &&
             activeTab !== "Penalty & Overtime Details" &&
             activeTab !== "Documents" &&
             activeTab !== "Additional Settings" && (
