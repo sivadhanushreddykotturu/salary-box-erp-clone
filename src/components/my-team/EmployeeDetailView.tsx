@@ -32,7 +32,10 @@ import {
   Camera,
   Wifi,
   Shield,
-  Fingerprint
+  Fingerprint,
+  QrCode,
+  ScanFace,
+  Compass
 } from "lucide-react";
 import { TaxDeclarationsView } from "./TaxDeclarationsView";
 
@@ -241,13 +244,12 @@ export function EmployeeDetailView({
   const [coreHoursEnd, setCoreHoursEnd] = useState("04:00 PM");
   const [flexibleWeekoffDays, setFlexibleWeekoffDays] = useState<string[]>(["Sun"]);
 
-  // Attendance Modes State
-  const [isGeofenceEnabled, setIsGeofenceEnabled] = useState(true);
-  const [geofenceRadius, setGeofenceRadius] = useState("100");
-  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
-  const [isSelfieEnabled, setIsSelfieEnabled] = useState(true);
-  const [isWebPunchEnabled, setIsWebPunchEnabled] = useState(true);
-  const [isIpRestricted, setIsIpRestricted] = useState(false);
+  // Attendance Modes State (1:1 Screenshot Match)
+  const [allowPunchFromStaffApp, setAllowPunchFromStaffApp] = useState(true);
+  const [isSelfieAttendance, setIsSelfieAttendance] = useState(true);
+  const [isQrAttendance, setIsQrAttendance] = useState(false);
+  const [isGpsAttendance, setIsGpsAttendance] = useState(true);
+  const [markAttendanceFrom, setMarkAttendanceFrom] = useState<"From Office" | "From Anywhere">("From Office");
 
   // Automation Rules State
   const [autoHalfDayThreshold, setAutoHalfDayThreshold] = useState("4.5");
@@ -2526,7 +2528,7 @@ export function EmployeeDetailView({
                 </div>
               )}
 
-              {/* SUBVIEW 3: Attendance Modes */}
+              {/* SUBVIEW 3: Attendance Modes (1:1 Screenshot Match) */}
               {attendanceDetailsSubView === "attendance_modes" && (
                 <div className="space-y-5">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -2534,159 +2536,185 @@ export function EmployeeDetailView({
                       <button
                         type="button"
                         onClick={() => setAttendanceDetailsSubView("landing")}
-                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-slate-600 font-bold"
+                        className="hover:text-[#007BFF] transition-colors cursor-pointer text-[#007BFF] font-bold underline-offset-2 hover:underline"
                       >
                         Attendance Details
                       </button>
                       <span className="text-slate-400 font-normal">»</span>
-                      <span className="text-slate-900 font-bold">Attendance Modes</span>
+                      <span className="text-slate-700 font-bold">Attendance Modes</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => alert("Attendance modes updated successfully!")}
-                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
-                    >
-                      Update Details
-                    </button>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* Mode 1: Geofence */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#007BFF] flex items-center justify-center">
-                            <MapPin className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <div className="font-bold text-slate-800 text-xs">
-                              Geofence Attendance
-                            </div>
-                            <div className="text-[11px] text-slate-500">
-                              Allow staff to punch only within branch radius
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setIsGeofenceEnabled(!isGeofenceEnabled)}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            isGeofenceEnabled ? "bg-[#007BFF]" : "bg-slate-300"
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    {/* Top Header: Allow punch in from Staff App */}
+                    <div className="bg-[#F0F7FF] px-5 py-3.5 flex items-center justify-between border-b border-blue-100/70">
+                      <span className="text-xs font-semibold text-slate-800">
+                        Allow punch in from Staff App
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setAllowPunchFromStaffApp(!allowPunchFromStaffApp)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          allowPunchFromStaffApp ? "bg-[#007BFF]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                            allowPunchFromStaffApp ? "translate-x-5" : "translate-x-0"
                           }`}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                              isGeofenceEnabled ? "translate-x-5" : "translate-x-0"
+                        />
+                      </button>
+                    </div>
+
+                    {allowPunchFromStaffApp && (
+                      <div className="divide-y divide-slate-100">
+                        {/* 1. Selfie Attendance */}
+                        <div className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <ScanFace className="w-4 h-4 text-slate-700 stroke-[2]" />
+                            <span className="text-xs font-medium text-slate-800">
+                              Selfie Attendance
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsSelfieAttendance(!isSelfieAttendance)}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                              isSelfieAttendance ? "bg-[#007BFF]" : "bg-slate-300"
                             }`}
-                          />
-                        </button>
-                      </div>
-                      {isGeofenceEnabled && (
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                          <span className="text-slate-600 font-medium">Geofence Radius:</span>
-                          <select
-                            value={geofenceRadius}
-                            onChange={(e) => setGeofenceRadius(e.target.value)}
-                            className="px-3 py-1 text-xs rounded border border-slate-300 bg-white"
                           >
-                            <option value="50">50 meters</option>
-                            <option value="100">100 meters (Default)</option>
-                            <option value="200">200 meters</option>
-                            <option value="500">500 meters</option>
-                          </select>
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                isSelfieAttendance ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Mode 2: Biometric Device */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                          <Fingerprint className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-800 text-xs">
-                            Biometric / Facial Device
+                        {/* 2. QR Attendance */}
+                        <div className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <QrCode className="w-4 h-4 text-slate-700 stroke-[2]" />
+                            <span className="text-xs font-medium text-slate-800">
+                              QR Attendance
+                            </span>
                           </div>
-                          <div className="text-[11px] text-slate-500">
-                            Sync punches from office biometric hardware machine
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsQrAttendance(!isQrAttendance)}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                              isQrAttendance ? "bg-[#007BFF]" : "bg-slate-300"
+                            }`}
+                          >
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                isQrAttendance ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsBiometricEnabled(!isBiometricEnabled)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          isBiometricEnabled ? "bg-[#007BFF]" : "bg-slate-300"
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                            isBiometricEnabled ? "translate-x-5" : "translate-x-0"
-                          }`}
-                        />
-                      </button>
-                    </div>
 
-                    {/* Mode 3: Selfie Attendance */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                          <Camera className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-800 text-xs">
-                            Selfie Attendance with GPS
+                        {/* 3. GPS Attendance */}
+                        <div className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50/40 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <Compass className="w-4 h-4 text-slate-700 stroke-[2]" />
+                            <span className="text-xs font-medium text-slate-800">
+                              GPS Attendance
+                            </span>
                           </div>
-                          <div className="text-[11px] text-slate-500">
-                            Require selfie verification upon clocking in
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsGpsAttendance(!isGpsAttendance)}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                              isGpsAttendance ? "bg-[#007BFF]" : "bg-slate-300"
+                            }`}
+                          >
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                isGpsAttendance ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsSelfieEnabled(!isSelfieEnabled)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          isSelfieEnabled ? "bg-[#007BFF]" : "bg-slate-300"
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                            isSelfieEnabled ? "translate-x-5" : "translate-x-0"
-                          }`}
-                        />
-                      </button>
-                    </div>
 
-                    {/* Mode 4: Web / Mobile Punch */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                          <Smartphone className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-800 text-xs">
-                            Mobile App & Web Punch
+                        {/* Mark attendance from Section */}
+                        {isGpsAttendance && (
+                          <div className="p-5 space-y-3 bg-white">
+                            <div className="text-xs font-bold text-slate-800">
+                              Mark attendance from
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setMarkAttendanceFrom("From Office")}
+                                className={`px-4 py-2 rounded-lg border text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all ${
+                                  markAttendanceFrom === "From Office"
+                                    ? "border-blue-500 text-blue-600 bg-blue-50/30 ring-1 ring-blue-500"
+                                    : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                                }`}
+                              >
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                                    markAttendanceFrom === "From Office"
+                                      ? "border-blue-500"
+                                      : "border-slate-400"
+                                  }`}
+                                >
+                                  {markAttendanceFrom === "From Office" && (
+                                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                  )}
+                                </span>
+                                <span>From Office</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setMarkAttendanceFrom("From Anywhere")}
+                                className={`px-4 py-2 rounded-lg border text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all ${
+                                  markAttendanceFrom === "From Anywhere"
+                                    ? "border-blue-500 text-blue-600 bg-blue-50/30 ring-1 ring-blue-500"
+                                    : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                                }`}
+                              >
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                                    markAttendanceFrom === "From Anywhere"
+                                      ? "border-blue-500"
+                                      : "border-slate-400"
+                                  }`}
+                                >
+                                  {markAttendanceFrom === "From Anywhere" && (
+                                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                  )}
+                                </span>
+                                <span>From Anywhere</span>
+                              </button>
+                            </div>
+
+                            {markAttendanceFrom === "From Office" && (
+                              <div className="p-4 rounded-xl border border-slate-200 bg-[#FAFAFA]/50 flex items-center justify-between text-xs mt-3">
+                                <div className="space-y-1">
+                                  <div className="font-bold text-slate-800 text-xs">
+                                    VIJAYAWADA
+                                  </div>
+                                  <div className="text-slate-500 text-[11px]">
+                                    GM2F+G66, P48, Auto Nagar, Vijayawada, Andhra Pradesh 520007, India
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-slate-800 text-xs">
+                                    20m
+                                  </div>
+                                  <div className="text-slate-500 text-[11px]">
+                                    Allowed Radius
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <div className="text-[11px] text-slate-500">
-                            Allow staff to punch in/out from SalaryBox employee app
-                          </div>
-                        </div>
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsWebPunchEnabled(!isWebPunchEnabled)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          isWebPunchEnabled ? "bg-[#007BFF]" : "bg-slate-300"
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                            isWebPunchEnabled ? "translate-x-5" : "translate-x-0"
-                          }`}
-                        />
-                      </button>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
