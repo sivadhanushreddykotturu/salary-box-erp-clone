@@ -176,6 +176,7 @@ model Company {
   crmCustomers           CRMCustomer[]
   auditLogs              AuditLog[]
   notifications          Notification[]
+  announcements          Announcement[]
 }
 
 model Subscription {
@@ -786,3 +787,20 @@ model Notification {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 }
+
+// ----------------------------------------------------
+// 11. Company Announcements
+// ----------------------------------------------------
+
+model Announcement {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  companyId    String    @db.ObjectId
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  branchIds    String[]  // Array of branch IDs (empty array implies all branches)
+  createdByUserId String? @db.ObjectId
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+

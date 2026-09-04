@@ -341,9 +341,13 @@ export function AdminShell({ children }: AdminShellProps) {
               <img src="/icons/bell-svgrepo-com.svg" alt="Notifications" className="w-4 h-4 object-contain opacity-70" />
             </Link>
 
-            <button className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer flex items-center justify-center">
+            <Link
+              href="/announcements"
+              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer flex items-center justify-center transition-colors"
+              title="Announcements"
+            >
               <img src="/icons/announcement-svgrepo-com.svg" alt="Announcements" className="w-4 h-4 object-contain opacity-70" />
-            </button>
+            </Link>
 
             <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs border border-purple-200 cursor-pointer ml-1">
               PR
