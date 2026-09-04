@@ -35,6 +35,7 @@ import {
   Fingerprint,
   QrCode,
   ScanFace,
+  Search,
   Compass
 } from "lucide-react";
 import { TaxDeclarationsView } from "./TaxDeclarationsView";
@@ -210,11 +211,75 @@ export function EmployeeDetailView({
       (p) => p.view || p.edit || p.approve
     );
 
+  // Timezone options exactly matching SalaryBox (with Calcutta, Asia default)
+  const TIMEZONE_OPTIONS = [
+    { city: "Calcutta", region: "Asia", code: "IST", offset: "GMT +05:30" },
+    { city: "Asmara", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Asmera", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Bamako", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Bangui", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Banjul", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Bissau", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Blantyre", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Brazzaville", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Bujumbura", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Cairo", region: "Africa", code: "EEST", offset: "GMT +03:00" },
+    { city: "Casablanca", region: "Africa", code: "+01", offset: "GMT +01:00" },
+    { city: "Ceuta", region: "Africa", code: "CEST", offset: "GMT +02:00" },
+    { city: "Conakry", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Dakar", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Dar es Salaam", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Djibouti", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Douala", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "El Aaiun", region: "Africa", code: "+01", offset: "GMT +01:00" },
+    { city: "Freetown", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Gaborone", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Harare", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Johannesburg", region: "Africa", code: "SAST", offset: "GMT +02:00" },
+    { city: "Juba", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Kampala", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Khartoum", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Kigali", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Kinshasa", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Lagos", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Libreville", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Lome", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Luanda", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Lubumbashi", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Lusaka", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Malabo", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Maputo", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Maseru", region: "Africa", code: "SAST", offset: "GMT +02:00" },
+    { city: "Mbabane", region: "Africa", code: "SAST", offset: "GMT +02:00" },
+    { city: "Mogadishu", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Monrovia", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Nairobi", region: "Africa", code: "EAT", offset: "GMT +03:00" },
+    { city: "Ndjamena", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Niamey", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Nouakchott", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Ouagadougou", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Porto-Novo", region: "Africa", code: "WAT", offset: "GMT +01:00" },
+    { city: "Sao Tome", region: "Africa", code: "GMT", offset: "GMT +00:00" },
+    { city: "Tripoli", region: "Africa", code: "EEST", offset: "GMT +02:00" },
+    { city: "Tunis", region: "Africa", code: "CET", offset: "GMT +01:00" },
+    { city: "Windhoek", region: "Africa", code: "CAT", offset: "GMT +02:00" },
+    { city: "Dubai", region: "Asia", code: "GST", offset: "GMT +04:00" },
+    { city: "Singapore", region: "Asia", code: "SGT", offset: "GMT +08:00" },
+    { city: "Tokyo", region: "Asia", code: "JST", offset: "GMT +09:00" },
+    { city: "Hong Kong", region: "Asia", code: "HKT", offset: "GMT +08:00" },
+    { city: "Bangkok", region: "Asia", code: "ICT", offset: "GMT +07:00" },
+    { city: "London", region: "Europe", code: "BST", offset: "GMT +01:00" },
+    { city: "New York", region: "America", code: "EDT", offset: "GMT -04:00" },
+    { city: "Sydney", region: "Australia", code: "AEST", offset: "GMT +10:00" },
+  ];
+
   // Attendance Details State (Screenshot Match)
   const [attendanceDetailsSubView, setAttendanceDetailsSubView] = useState<
     "landing" | "work_timings" | "attendance_modes" | "automation_rules"
   >("landing");
   const [attendanceTimezone, setAttendanceTimezone] = useState("Calcutta, Asia");
+  const [isTimezoneDropdownOpen, setIsTimezoneDropdownOpen] = useState(false);
+  const [timezoneSearchQuery, setTimezoneSearchQuery] = useState("");
   const [canStaffViewOwnAttendance, setCanStaffViewOwnAttendance] = useState(true);
 
   // Work Timings Schedule State (Screenshot Match)
@@ -2304,21 +2369,90 @@ export function EmployeeDetailView({
                       <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
                     </div>
 
-                    {/* 4. Attendance Timezone Card */}
-                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                    {/* 4. Attendance Timezone Card (1:1 Screenshot Match) */}
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between relative">
                       <span className="font-semibold text-slate-800 text-xs">
                         Attendance Timezone
                       </span>
-                      <select
-                        value={attendanceTimezone}
-                        onChange={(e) => setAttendanceTimezone(e.target.value)}
-                        className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      >
-                        <option>Calcutta, Asia</option>
-                        <option>Dubai, Asia</option>
-                        <option>Singapore, Asia</option>
-                        <option>London, Europe</option>
-                      </select>
+                      
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsTimezoneDropdownOpen(!isTimezoneDropdownOpen);
+                            setTimezoneSearchQuery("");
+                          }}
+                          className="px-3 py-1.5 text-xs rounded-md border border-slate-300 bg-white text-slate-800 font-medium hover:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 flex items-center gap-2 cursor-pointer shadow-2xs"
+                        >
+                          <span>{attendanceTimezone}</span>
+                          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isTimezoneDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+
+                        {/* Dropdown Popup exactly matching SalaryBox screenshot */}
+                        {isTimezoneDropdownOpen && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-40"
+                              onClick={() => setIsTimezoneDropdownOpen(false)}
+                            />
+                            <div className="absolute right-0 top-full mt-1.5 w-72 bg-white rounded-lg shadow-xl border border-blue-400/80 z-50 overflow-hidden text-xs animate-in fade-in zoom-in-95 duration-100">
+                              {/* Search Input */}
+                              <div className="p-2 border-b border-slate-100 bg-white">
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    autoFocus
+                                    placeholder="Calcutta, Asia"
+                                    value={timezoneSearchQuery}
+                                    onChange={(e) => setTimezoneSearchQuery(e.target.value)}
+                                    className="w-full pl-3 pr-8 py-1.5 text-xs text-slate-700 bg-white rounded border border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 font-normal"
+                                  />
+                                  <Search className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                </div>
+                              </div>
+
+                              {/* Timezone List with region and GMT offsets */}
+                              <div className="max-h-60 overflow-y-auto py-1 scrollbar-thin divide-y divide-slate-50">
+                                {TIMEZONE_OPTIONS.filter((tz) => {
+                                  const fullLabel = `${tz.city}, ${tz.region} ${tz.code} ${tz.offset}`.toLowerCase();
+                                  return fullLabel.includes(timezoneSearchQuery.toLowerCase());
+                                }).map((tz) => {
+                                  const label = `${tz.city}, ${tz.region}`;
+                                  const isSelected = attendanceTimezone === label;
+                                  return (
+                                    <div
+                                      key={`${tz.city}-${tz.region}`}
+                                      onClick={() => {
+                                        setAttendanceTimezone(label);
+                                        setIsTimezoneDropdownOpen(false);
+                                      }}
+                                      className={`px-3.5 py-2.5 cursor-pointer hover:bg-blue-50/70 transition-colors ${
+                                        isSelected ? "bg-blue-50/50" : ""
+                                      }`}
+                                    >
+                                      <div className="font-bold text-slate-800 text-xs">
+                                        {tz.city}, {tz.region}
+                                      </div>
+                                      <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                        {tz.code} • {tz.offset}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+
+                                {TIMEZONE_OPTIONS.filter((tz) => {
+                                  const fullLabel = `${tz.city}, ${tz.region} ${tz.code} ${tz.offset}`.toLowerCase();
+                                  return fullLabel.includes(timezoneSearchQuery.toLowerCase());
+                                }).length === 0 && (
+                                  <div className="px-4 py-6 text-center text-xs text-slate-400">
+                                    No timezones found
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     {/* 5. Staff can view own attendance Toggle Card */}
