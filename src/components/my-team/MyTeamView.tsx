@@ -345,6 +345,109 @@ const INITIAL_STAFF: EmployeeItem[] = [
   },
 ];
 
+const getFieldsForCurrentTab = (tab: string, subTab: string): { key: string; label: string }[] => {
+  if (tab === "Staff Details") {
+    return [
+      { key: "jobTitle", label: "Job Title" },
+      { key: "verificationStatus", label: "Verification Status" },
+      { key: "employeeId", label: "Employee ID" },
+      { key: "employeeType", label: "Employee Type" },
+      { key: "dateOfJoining", label: "Date of Joining" },
+      { key: "dateOfLeaving", label: "Date of Leaving" },
+      { key: "dateOfBirth", label: "Date of Birth" },
+      { key: "mobileNumber", label: "Mobile Number" },
+      { key: "personalEmail", label: "Personal Email ID" },
+      { key: "officialEmail", label: "Official Email ID" },
+      { key: "maritalStatus", label: "Marital Status" },
+      { key: "gender", label: "Gender" },
+      { key: "bloodGroup", label: "Blood Group" },
+      { key: "currentAddress", label: "Current Address" },
+      { key: "permanentAddress", label: "Permanent Address" },
+      { key: "aadhaar", label: "Aadhaar" },
+      { key: "pan", label: "PAN" },
+      { key: "uan", label: "UAN" },
+      { key: "pfAccountNo", label: "PF A/C No." },
+      { key: "esiAccountNo", label: "ESI A/C No." },
+      { key: "drivingLicense", label: "Driving License" },
+      { key: "voterId", label: "Voter ID" },
+      { key: "guardianName", label: "Guardian Name" },
+      { key: "emergencyContactName", label: "Emergency Contact Name" },
+      { key: "emergencyContactPhone", label: "Emergency Contact Phone Number" },
+      { key: "emergencyContactRelationship", label: "Emergency Contact Relationship" },
+      { key: "emergencyContactAddress", label: "Emergency Contact Address" },
+    ];
+  }
+  if (tab === "Attendance Details") {
+    if (subTab === "Work Timings") {
+      return [
+        { key: "scheduleType", label: "Schedule Type" },
+      ];
+    }
+    if (subTab === "Attendance Modes") {
+      return [
+        { key: "smartphoneAttendance", label: "Smartphone Attendance" },
+        { key: "selfie", label: "Selfie" },
+        { key: "qr", label: "QR" },
+        { key: "markFrom", label: "Mark Attendance From" },
+        { key: "biometric", label: "Biometric" },
+      ];
+    }
+    if (subTab === "Automation Rules") {
+      return [
+        { key: "autoPresent", label: "Auto Present" },
+        { key: "presentOnPunchIn", label: "Present on Punch In" },
+        { key: "autoHalfDay", label: "Auto Half Day" },
+        { key: "mandatoryHalfDayHours", label: "Mandatory Half Day Hours" },
+        { key: "mandatoryFullDayHours", label: "Mandatory Full Day Hours" },
+      ];
+    }
+  }
+  if (tab === "Bank Details") {
+    return [
+      { key: "bankName", label: "Bank Name" },
+      { key: "bankAccount", label: "Bank Account" },
+      { key: "pennyDropStatus", label: "Penny Drop Status" },
+    ];
+  }
+  if (tab === "Salary Details") {
+    return [
+      { key: "monthlyCtc", label: "Monthly CTC" },
+      { key: "basicPay", label: "Basic Pay (50%)" },
+      { key: "hra", label: "HRA (25%)" },
+      { key: "pfDeduction", label: "PF Deduction (12%)" },
+      { key: "esi", label: "ESI" },
+      { key: "netPay", label: "Net Pay" },
+    ];
+  }
+  if (tab === "Leave Details") {
+    return [
+      { key: "availableLeaves", label: "Available Leaves" },
+      { key: "leaveHistory", label: "Leave History" },
+    ];
+  }
+  if (tab === "Penalty & Overtime") {
+    return [
+      { key: "earlyLeaving", label: "Early Leaving Policy" },
+      { key: "lateComing", label: "Late Coming Policy" },
+      { key: "overtime", label: "Overtime Policy" },
+    ];
+  }
+  if (tab === "Permissions") {
+    return [
+      { key: "role", label: "Role" },
+      { key: "appAccess", label: "App Access" },
+      { key: "webAccess", label: "Web Access" },
+    ];
+  }
+  if (tab === "Approval Flows") {
+    return [
+      { key: "leaveApprover", label: "Leave Approver" },
+      { key: "attendanceApprover", label: "Attendance Approver" },
+    ];
+  }
+  return [];
+};
+
 export function MyTeamView() {
   const [activeTab, setActiveActiveTab] = useState("Staff Details");
   const [activeSubTab, setActiveSubTab] = useState("Work Timings");
@@ -721,288 +824,53 @@ export function MyTeamView() {
                   onClick={() => setIsShowFieldsOpen(false)}
                 />
 
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[520px] bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-6 animate-in fade-in zoom-in-95 duration-150">
+                <div className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 ${getFieldsForCurrentTab(activeTab, activeSubTab).length > 4 ? "w-[520px]" : "w-[360px]"} bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-6 animate-in fade-in zoom-in-95 duration-150`}>
                   {/* Top Arrow Tip */}
                   <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-slate-200 rotate-45" />
 
-                  {/* 2-Column Checkboxes Grid */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-3.5 text-xs text-slate-800">
-                    {/* Column 1 (Left) */}
-                    <div className="space-y-3.5">
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.jobTitle}
-                          onChange={() => toggleColumn("jobTitle")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Job Title</span>
-                      </label>
+                  {/* Dynamic Checkboxes Grid */}
+                  {(() => {
+                    const fields = getFieldsForCurrentTab(activeTab, activeSubTab);
+                    const midpoint = Math.ceil(fields.length / 2);
+                    const col1 = fields.slice(0, midpoint);
+                    const col2 = fields.slice(midpoint);
 
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.employeeId}
-                          onChange={() => toggleColumn("employeeId")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Employee ID</span>
-                      </label>
+                    return (
+                      <div className={`grid ${fields.length > 4 ? "grid-cols-2 gap-x-8" : "grid-cols-1"} gap-y-3.5 text-xs text-slate-800`}>
+                        {/* Column 1 (Left) */}
+                        <div className="space-y-3.5">
+                          {col1.map((field) => (
+                            <label key={field.key} className="flex items-center gap-2.5 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={visibleColumns[field.key] !== false}
+                                onChange={() => toggleColumn(field.key)}
+                                className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                              />
+                              <span className="font-medium">{field.label}</span>
+                            </label>
+                          ))}
+                        </div>
 
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.dateOfJoining}
-                          onChange={() => toggleColumn("dateOfJoining")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Date of Joining</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.dateOfBirth}
-                          onChange={() => toggleColumn("dateOfBirth")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Date of Birth</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.personalEmail}
-                          onChange={() => toggleColumn("personalEmail")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Personal Email ID</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.maritalStatus}
-                          onChange={() => toggleColumn("maritalStatus")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Marital Status</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.bloodGroup}
-                          onChange={() => toggleColumn("bloodGroup")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Blood Group</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.permanentAddress}
-                          onChange={() => toggleColumn("permanentAddress")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Permanent Address</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.pan}
-                          onChange={() => toggleColumn("pan")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">PAN</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.pfAccountNo}
-                          onChange={() => toggleColumn("pfAccountNo")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">PF A/C No.</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.drivingLicense}
-                          onChange={() => toggleColumn("drivingLicense")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Driving License</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.guardianName}
-                          onChange={() => toggleColumn("guardianName")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Guardian Name</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.emergencyContactPhone}
-                          onChange={() => toggleColumn("emergencyContactPhone")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Emergency Contact Phone Number</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.emergencyContactAddress}
-                          onChange={() => toggleColumn("emergencyContactAddress")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Emergency Contact Address</span>
-                      </label>
-                    </div>
-
-                    {/* Column 2 (Right) */}
-                    <div className="space-y-3.5">
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.verificationStatus}
-                          onChange={() => toggleColumn("verificationStatus")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Verification Status</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.employeeType}
-                          onChange={() => toggleColumn("employeeType")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Employee Type</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.dateOfLeaving}
-                          onChange={() => toggleColumn("dateOfLeaving")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Date of Leaving</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.mobileNumber}
-                          onChange={() => toggleColumn("mobileNumber")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Mobile Number</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.officialEmail}
-                          onChange={() => toggleColumn("officialEmail")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Official Email ID</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.gender}
-                          onChange={() => toggleColumn("gender")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Gender</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.currentAddress}
-                          onChange={() => toggleColumn("currentAddress")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Current Address</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.aadhaar}
-                          onChange={() => toggleColumn("aadhaar")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Aadhaar</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.uan}
-                          onChange={() => toggleColumn("uan")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">UAN</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.esiAccountNo}
-                          onChange={() => toggleColumn("esiAccountNo")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">ESI A/C No.</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.voterId}
-                          onChange={() => toggleColumn("voterId")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Voter ID</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.emergencyContactName}
-                          onChange={() => toggleColumn("emergencyContactName")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Emergency Contact Name</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns.emergencyContactRelationship}
-                          onChange={() => toggleColumn("emergencyContactRelationship")}
-                          className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
-                        />
-                        <span className="font-medium">Emergency Contact Relationship</span>
-                      </label>
-                    </div>
-                  </div>
+                        {/* Column 2 (Right) */}
+                        {col2.length > 0 && (
+                          <div className="space-y-3.5">
+                            {col2.map((field) => (
+                              <label key={field.key} className="flex items-center gap-2.5 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={visibleColumns[field.key] !== false}
+                                  onChange={() => toggleColumn(field.key)}
+                                  className="w-4 h-4 rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                                />
+                                <span className="font-medium">{field.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Apply Button */}
                   <div className="pt-4 mt-4 border-t border-slate-100 flex justify-center">
@@ -1131,52 +999,77 @@ export function MyTeamView() {
               )}
 
               {activeTab === "Attendance Details" && activeSubTab === "Work Timings" && (
-                <th className="px-4 py-3">SCHEDULE TYPE</th>
+                <>
+                  {visibleColumns.scheduleType !== false && <th className="px-4 py-3">SCHEDULE TYPE</th>}
+                </>
               )}
 
               {activeTab === "Attendance Details" && activeSubTab === "Attendance Modes" && (
                 <>
-                  <th className="px-4 py-3">SMARTPHONE ATTENDANCE</th>
-                  <th className="px-4 py-3">SELFIE</th>
-                  <th className="px-4 py-3">QR</th>
-                  <th className="px-4 py-3">MARK ATTENDANCE FROM</th>
-                  <th className="px-4 py-3">BIOMETRIC</th>
+                  {visibleColumns.smartphoneAttendance !== false && <th className="px-4 py-3">SMARTPHONE ATTENDANCE</th>}
+                  {visibleColumns.selfie !== false && <th className="px-4 py-3">SELFIE</th>}
+                  {visibleColumns.qr !== false && <th className="px-4 py-3">QR</th>}
+                  {visibleColumns.markFrom !== false && <th className="px-4 py-3">MARK ATTENDANCE FROM</th>}
+                  {visibleColumns.biometric !== false && <th className="px-4 py-3">BIOMETRIC</th>}
                 </>
               )}
 
               {activeTab === "Attendance Details" && activeSubTab === "Automation Rules" && (
                 <>
-                  <th className="px-4 py-3">AUTO PRESENT</th>
-                  <th className="px-4 py-3">PRESENT ON PUNCH IN</th>
-                  <th className="px-4 py-3">AUTO HALF DAY</th>
-                  <th className="px-4 py-3">MANDATORY HALF DAY HOURS</th>
-                  <th className="px-4 py-3">MANDATORY FULL DAY HOURS</th>
+                  {visibleColumns.autoPresent !== false && <th className="px-4 py-3">AUTO PRESENT</th>}
+                  {visibleColumns.presentOnPunchIn !== false && <th className="px-4 py-3">PRESENT ON PUNCH IN</th>}
+                  {visibleColumns.autoHalfDay !== false && <th className="px-4 py-3">AUTO HALF DAY</th>}
+                  {visibleColumns.mandatoryHalfDayHours !== false && <th className="px-4 py-3">MANDATORY HALF DAY HOURS</th>}
+                  {visibleColumns.mandatoryFullDayHours !== false && <th className="px-4 py-3">MANDATORY FULL DAY HOURS</th>}
                 </>
               )}
 
               {activeTab === "Bank Details" && (
                 <>
-                  <th className="px-4 py-3">BANK NAME</th>
-                  <th className="px-4 py-3">BANK ACCOUNT</th>
-                  <th className="px-4 py-3">PENNY DROP STATUS</th>
+                  {visibleColumns.bankName !== false && <th className="px-4 py-3">BANK NAME</th>}
+                  {visibleColumns.bankAccount !== false && <th className="px-4 py-3">BANK ACCOUNT</th>}
+                  {visibleColumns.pennyDropStatus !== false && <th className="px-4 py-3">PENNY DROP STATUS</th>}
                 </>
               )}
 
               {activeTab === "Salary Details" && (
                 <>
-                  <th className="px-4 py-3">MONTHLY CTC</th>
-                  <th className="px-4 py-3">BASIC PAY (50%)</th>
-                  <th className="px-4 py-3">HRA (25%)</th>
-                  <th className="px-4 py-3">PF DEDUCTION (12%)</th>
-                  <th className="px-4 py-3">ESI</th>
-                  <th className="px-4 py-3">NET PAY</th>
+                  {visibleColumns.monthlyCtc !== false && <th className="px-4 py-3">MONTHLY CTC</th>}
+                  {visibleColumns.basicPay !== false && <th className="px-4 py-3">BASIC PAY (50%)</th>}
+                  {visibleColumns.hra !== false && <th className="px-4 py-3">HRA (25%)</th>}
+                  {visibleColumns.pfDeduction !== false && <th className="px-4 py-3">PF DEDUCTION (12%)</th>}
+                  {visibleColumns.esi !== false && <th className="px-4 py-3">ESI</th>}
+                  {visibleColumns.netPay !== false && <th className="px-4 py-3">NET PAY</th>}
                 </>
               )}
 
               {activeTab === "Leave Details" && (
                 <>
-                  <th className="px-4 py-3">AVAILABLE LEAVES</th>
-                  <th className="px-4 py-3">LEAVE HISTORY</th>
+                  {visibleColumns.availableLeaves !== false && <th className="px-4 py-3">AVAILABLE LEAVES</th>}
+                  {visibleColumns.leaveHistory !== false && <th className="px-4 py-3">LEAVE HISTORY</th>}
+                </>
+              )}
+
+              {activeTab === "Penalty & Overtime" && (
+                <>
+                  {visibleColumns.earlyLeaving !== false && <th className="px-4 py-3">EARLY LEAVING POLICY</th>}
+                  {visibleColumns.lateComing !== false && <th className="px-4 py-3">LATE COMING POLICY</th>}
+                  {visibleColumns.overtime !== false && <th className="px-4 py-3">OVERTIME POLICY</th>}
+                </>
+              )}
+
+              {activeTab === "Permissions" && (
+                <>
+                  {visibleColumns.role !== false && <th className="px-4 py-3">ROLE</th>}
+                  {visibleColumns.appAccess !== false && <th className="px-4 py-3">APP ACCESS</th>}
+                  {visibleColumns.webAccess !== false && <th className="px-4 py-3">WEB ACCESS</th>}
+                </>
+              )}
+
+              {activeTab === "Approval Flows" && (
+                <>
+                  {visibleColumns.leaveApprover !== false && <th className="px-4 py-3">LEAVE APPROVER</th>}
+                  {visibleColumns.attendanceApprover !== false && <th className="px-4 py-3">ATTENDANCE APPROVER</th>}
                 </>
               )}
             </tr>
@@ -1232,8 +1125,8 @@ export function MyTeamView() {
 
                   {activeTab === "Staff Details" && (
                     <>
-                      {visibleColumns.jobTitle && <td className="px-4 py-3 text-slate-600">{staff.jobTitle || "-"}</td>}
-                      {visibleColumns.verificationStatus && (
+                      {visibleColumns.jobTitle !== false && <td className="px-4 py-3 text-slate-600">{staff.jobTitle || "-"}</td>}
+                      {visibleColumns.verificationStatus !== false && (
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-700">
                             <span className="w-3.5 h-3.5 rounded-full bg-red-500 text-white flex items-center justify-center text-[9px] font-bold">!</span>
@@ -1241,77 +1134,77 @@ export function MyTeamView() {
                           </span>
                         </td>
                       )}
-                      {visibleColumns.employeeId && (
+                      {visibleColumns.employeeId !== false && (
                         <td className="px-4 py-3 font-mono text-slate-500">{staff.employeeId || "-"}</td>
                       )}
-                      {visibleColumns.employeeType && (
+                      {visibleColumns.employeeType !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.employeeType || "Full Time"}</td>
                       )}
-                      {visibleColumns.dateOfJoining && (
+                      {visibleColumns.dateOfJoining !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.dateOfJoining || "-"}</td>
                       )}
-                      {visibleColumns.dateOfLeaving && (
+                      {visibleColumns.dateOfLeaving !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.dateOfLeaving || "-"}</td>
                       )}
-                      {visibleColumns.dateOfBirth && (
+                      {visibleColumns.dateOfBirth !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.dateOfBirth || "-"}</td>
                       )}
-                      {visibleColumns.mobileNumber && (
+                      {visibleColumns.mobileNumber !== false && (
                         <td className="px-4 py-3 font-mono">{staff.mobileNumber || "-"}</td>
                       )}
-                      {visibleColumns.personalEmail && (
+                      {visibleColumns.personalEmail !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.personalEmail || "-"}</td>
                       )}
-                      {visibleColumns.officialEmail && (
+                      {visibleColumns.officialEmail !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.officialEmail || "-"}</td>
                       )}
-                      {visibleColumns.maritalStatus && (
+                      {visibleColumns.maritalStatus !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.maritalStatus || "-"}</td>
                       )}
-                      {visibleColumns.gender && (
+                      {visibleColumns.gender !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.gender || "Male"}</td>
                       )}
-                      {visibleColumns.bloodGroup && (
+                      {visibleColumns.bloodGroup !== false && (
                         <td className="px-4 py-3 text-slate-600">{staff.bloodGroup || "-"}</td>
                       )}
-                      {visibleColumns.currentAddress && (
+                      {visibleColumns.currentAddress !== false && (
                         <td className="px-4 py-3 max-w-[200px] truncate" title={staff.currentAddress}>
                           {staff.currentAddress || "-"}
                         </td>
                       )}
-                      {visibleColumns.permanentAddress && (
+                      {visibleColumns.permanentAddress !== false && (
                         <td className="px-4 py-3 max-w-[200px] truncate">{staff.permanentAddress || "-"}</td>
                       )}
-                      {visibleColumns.aadhaar && (
+                      {visibleColumns.aadhaar !== false && (
                         <td className="px-4 py-3 font-mono">{staff.aadhaar || "•••• •••• ••••"}</td>
                       )}
-                      {visibleColumns.pan && (
+                      {visibleColumns.pan !== false && (
                         <td className="px-4 py-3 font-mono">{staff.pan || "••••••••••"}</td>
                       )}
-                      {visibleColumns.uan && <td className="px-4 py-3 font-mono">{staff.uan || "-"}</td>}
-                      {visibleColumns.pfAccountNo && (
+                      {visibleColumns.uan !== false && <td className="px-4 py-3 font-mono">{staff.uan || "-"}</td>}
+                      {visibleColumns.pfAccountNo !== false && (
                         <td className="px-4 py-3 font-mono">{staff.pfAccountNo || "-"}</td>
                       )}
-                      {visibleColumns.esiAccountNo && (
+                      {visibleColumns.esiAccountNo !== false && (
                         <td className="px-4 py-3 font-mono">{staff.esiAccountNo || "-"}</td>
                       )}
-                      {visibleColumns.drivingLicense && <td className="px-4 py-3">{staff.drivingLicense || "-"}</td>}
-                      {visibleColumns.voterId && <td className="px-4 py-3">{staff.voterId || "-"}</td>}
-                      {visibleColumns.guardianName && <td className="px-4 py-3">{staff.guardianName || "-"}</td>}
-                      {visibleColumns.emergencyContactName && (
+                      {visibleColumns.drivingLicense !== false && <td className="px-4 py-3">{staff.drivingLicense || "-"}</td>}
+                      {visibleColumns.voterId !== false && <td className="px-4 py-3">{staff.voterId || "-"}</td>}
+                      {visibleColumns.guardianName !== false && <td className="px-4 py-3">{staff.guardianName || "-"}</td>}
+                      {visibleColumns.emergencyContactName !== false && (
                         <td className="px-4 py-3 font-semibold text-slate-800">
                           {staff.emergencyContactName || "-"}
                         </td>
                       )}
-                      {visibleColumns.emergencyContactPhone && (
+                      {visibleColumns.emergencyContactPhone !== false && (
                         <td className="px-4 py-3 font-mono text-slate-700">
                           {staff.emergencyContactPhone || "-"}
                         </td>
                       )}
-                      {visibleColumns.emergencyContactRelationship && (
+                      {visibleColumns.emergencyContactRelationship !== false && (
                         <td className="px-4 py-3">{staff.emergencyContactRelationship || "-"}</td>
                       )}
-                      {visibleColumns.emergencyContactAddress && (
+                      {visibleColumns.emergencyContactAddress !== false && (
                         <td className="px-4 py-3 max-w-[200px] truncate" title={staff.emergencyContactAddress}>
                           {staff.emergencyContactAddress || "-"}
                         </td>
@@ -1320,69 +1213,104 @@ export function MyTeamView() {
                   )}
 
                   {activeTab === "Attendance Details" && activeSubTab === "Work Timings" && (
-                    <td className="px-4 py-3 text-slate-600">{staff.scheduleType || "Fixed"}</td>
+                    <>
+                      {visibleColumns.scheduleType !== false && <td className="px-4 py-3 text-slate-600">{staff.scheduleType || "Fixed"}</td>}
+                    </>
                   )}
 
                   {activeTab === "Attendance Details" && activeSubTab === "Attendance Modes" && (
                     <>
-                      <td className="px-4 py-3 text-slate-600">{staff.smartphoneAttendance}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.selfie}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.qr}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.markFrom}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.biometric}</td>
+                      {visibleColumns.smartphoneAttendance !== false && <td className="px-4 py-3 text-slate-600">{staff.smartphoneAttendance}</td>}
+                      {visibleColumns.selfie !== false && <td className="px-4 py-3 text-slate-600">{staff.selfie}</td>}
+                      {visibleColumns.qr !== false && <td className="px-4 py-3 text-slate-600">{staff.qr}</td>}
+                      {visibleColumns.markFrom !== false && <td className="px-4 py-3 text-slate-600">{staff.markFrom}</td>}
+                      {visibleColumns.biometric !== false && <td className="px-4 py-3 text-slate-600">{staff.biometric}</td>}
                     </>
                   )}
 
                   {activeTab === "Attendance Details" && activeSubTab === "Automation Rules" && (
                     <>
-                      <td className="px-4 py-3 text-slate-600">{staff.autoPresent}</td>
-                      <td className="px-4 py-3 text-slate-600">{staff.presentOnPunchIn}</td>
-                      <td className="px-4 py-3 text-slate-400">-</td>
-                      <td className="px-4 py-3 text-slate-400">-</td>
-                      <td className="px-4 py-3 text-slate-400">-</td>
+                      {visibleColumns.autoPresent !== false && <td className="px-4 py-3 text-slate-600">{staff.autoPresent}</td>}
+                      {visibleColumns.presentOnPunchIn !== false && <td className="px-4 py-3 text-slate-600">{staff.presentOnPunchIn}</td>}
+                      {visibleColumns.autoHalfDay !== false && <td className="px-4 py-3 text-slate-400">-</td>}
+                      {visibleColumns.mandatoryHalfDayHours !== false && <td className="px-4 py-3 text-slate-400">-</td>}
+                      {visibleColumns.mandatoryFullDayHours !== false && <td className="px-4 py-3 text-slate-400">-</td>}
                     </>
                   )}
 
                   {activeTab === "Bank Details" && (
                     <>
-                      <td className="px-4 py-3 font-medium text-slate-800">{staff.bankName}</td>
-                      <td className="px-4 py-3 font-mono text-slate-600">{staff.bankAccount}</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          <span>Penny Drop Verified</span>
-                        </span>
-                      </td>
+                      {visibleColumns.bankName !== false && <td className="px-4 py-3 font-medium text-slate-800">{staff.bankName}</td>}
+                      {visibleColumns.bankAccount !== false && <td className="px-4 py-3 font-mono text-slate-600">{staff.bankAccount}</td>}
+                      {visibleColumns.pennyDropStatus !== false && (
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            <span>Penny Drop Verified</span>
+                          </span>
+                        </td>
+                      )}
                     </>
                   )}
 
                   {activeTab === "Salary Details" && (
                     <>
-                      <td className="px-4 py-3 font-semibold text-slate-800">
-                        ₹{staff.monthlyCtc?.toLocaleString("en-IN")} / mo
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        ₹{Math.round((staff.monthlyCtc || 0) * 0.5).toLocaleString("en-IN")}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">Standard 12% PF</td>
-                      <td className="px-4 py-3 text-rose-600 font-semibold">
-                        ₹{Math.round((staff.monthlyCtc || 0) * 0.5 * 0.12).toLocaleString("en-IN")}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">₹200</td>
-                      <td className="px-4 py-3 font-bold text-emerald-600">
-                        ₹{(
-                          (staff.monthlyCtc || 0) -
-                          Math.round((staff.monthlyCtc || 0) * 0.5 * 0.12) -
-                          200
-                        ).toLocaleString("en-IN")}
-                      </td>
+                      {visibleColumns.monthlyCtc !== false && (
+                        <td className="px-4 py-3 font-semibold text-slate-800">
+                          ₹{staff.monthlyCtc?.toLocaleString("en-IN")} / mo
+                        </td>
+                      )}
+                      {visibleColumns.basicPay !== false && (
+                        <td className="px-4 py-3 text-slate-600">
+                          ₹{Math.round((staff.monthlyCtc || 0) * 0.5).toLocaleString("en-IN")}
+                        </td>
+                      )}
+                      {visibleColumns.hra !== false && <td className="px-4 py-3 text-slate-600">Standard 25% HRA</td>}
+                      {visibleColumns.pfDeduction !== false && (
+                        <td className="px-4 py-3 text-rose-600 font-semibold">
+                          ₹{Math.round((staff.monthlyCtc || 0) * 0.5 * 0.12).toLocaleString("en-IN")}
+                        </td>
+                      )}
+                      {visibleColumns.esi !== false && <td className="px-4 py-3 text-slate-600">₹200</td>}
+                      {visibleColumns.netPay !== false && (
+                        <td className="px-4 py-3 font-bold text-emerald-600">
+                          ₹{(
+                            (staff.monthlyCtc || 0) -
+                            Math.round((staff.monthlyCtc || 0) * 0.5 * 0.12) -
+                            200
+                          ).toLocaleString("en-IN")}
+                        </td>
+                      )}
                     </>
                   )}
 
                   {activeTab === "Leave Details" && (
                     <>
-                      <td className="px-4 py-3 font-bold text-blue-600">{staff.leaveBalance} Days</td>
-                      <td className="px-4 py-3 text-slate-500">0 Used in 2026</td>
+                      {visibleColumns.availableLeaves !== false && <td className="px-4 py-3 font-bold text-blue-600">{staff.leaveBalance} Days</td>}
+                      {visibleColumns.leaveHistory !== false && <td className="px-4 py-3 text-slate-500">0 Used in 2026</td>}
+                    </>
+                  )}
+
+                  {activeTab === "Penalty & Overtime" && (
+                    <>
+                      {visibleColumns.earlyLeaving !== false && <td className="px-4 py-3 text-slate-600">Grace 15 mins (Deduct 0.5 Day)</td>}
+                      {visibleColumns.lateComing !== false && <td className="px-4 py-3 text-slate-600">Grace 15 mins (Deduct 0.5 Day)</td>}
+                      {visibleColumns.overtime !== false && <td className="px-4 py-3 text-emerald-600 font-medium">1.5x Hourly Rate</td>}
+                    </>
+                  )}
+
+                  {activeTab === "Permissions" && (
+                    <>
+                      {visibleColumns.role !== false && <td className="px-4 py-3 font-medium text-slate-800">Regular Employee</td>}
+                      {visibleColumns.appAccess !== false && <td className="px-4 py-3 text-emerald-600 font-medium">Enabled</td>}
+                      {visibleColumns.webAccess !== false && <td className="px-4 py-3 text-slate-500">Disabled</td>}
+                    </>
+                  )}
+
+                  {activeTab === "Approval Flows" && (
+                    <>
+                      {visibleColumns.leaveApprover !== false && <td className="px-4 py-3 text-slate-700 font-medium">Reporting Manager</td>}
+                      {visibleColumns.attendanceApprover !== false && <td className="px-4 py-3 text-slate-700 font-medium">Reporting Manager</td>}
                     </>
                   )}
                 </tr>
