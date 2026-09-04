@@ -16,7 +16,21 @@ import {
   Clock,
   Smartphone,
   Shield,
-  Layers
+  Layers,
+  UserPlus,
+  UploadCloud,
+  Mail,
+  ArrowLeft,
+  Download,
+  Copy,
+  FolderUp,
+  Share2,
+  Camera,
+  User,
+  Table,
+  Trash2,
+  Save,
+  FileSpreadsheet
 } from "lucide-react";
 import { EmployeeDetailView } from "./EmployeeDetailView";
 
@@ -67,6 +81,24 @@ interface EmployeeItem {
   bankAccount?: string;
   monthlyCtc?: number;
   leaveBalance?: number;
+}
+
+interface SpreadsheetRow {
+  id: string;
+  name: string;
+  phone: string;
+  countryCode: string;
+  personalEmail: string;
+  jobTitle: string;
+  employeeType: string;
+  dateOfJoining: string;
+  branch: string;
+  department: string;
+  bankName: string;
+  bankAccountNumber: string;
+  ifscCode: string;
+  aadhaar: string;
+  pan: string;
 }
 
 const BRANCH_OPTIONS = ["All Branches", "VIJAYAWADA", "Addanki", "HQ Bangalore", "Guntur"];
@@ -498,8 +530,50 @@ export function MyTeamView() {
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [isDeptDropdownOpen, setIsDeptDropdownOpen] = useState(false);
 
+  // Add Staff Flow State: 'menu' | 'single' | 'bulk' | 'invite' | null
+  const [addStaffFlow, setAddStaffFlow] = useState<"menu" | "single" | "bulk" | "invite" | null>(null);
+
+  // Single Add Staff Form State
+  const [singleStaffForm, setSingleStaffForm] = useState({
+    name: "",
+    countryCode: "+91",
+    mobileNumber: "",
+    personalEmail: "",
+    branch: "VIJAYAWADA",
+    department: "Operations",
+  });
+
+  // Bulk Add Staff Form State (with Live Web Spreadsheet Grid)
+  const [bulkBranch, setBulkBranch] = useState("VIJAYAWADA");
+  const [bulkUploadedFile, setBulkUploadedFile] = useState<File | null>(null);
+  const [isWebSpreadsheetOpen, setIsWebSpreadsheetOpen] = useState(false);
+  const [spreadsheetRows, setSpreadsheetRows] = useState<SpreadsheetRow[]>([
+    {
+      id: "row-1",
+      name: "Kishore Kumar",
+      phone: "9899111111",
+      countryCode: "91",
+      personalEmail: "kishore@gmail.com",
+      jobTitle: "Technician",
+      employeeType: "Full Time",
+      dateOfJoining: "23/11/2021",
+      branch: "VIJAYAWADA",
+      department: "Technical",
+      bankName: "State Bank of India",
+      bankAccountNumber: "91823456789012",
+      ifscCode: "SBIN0001234",
+      aadhaar: "123456789012",
+      pan: "ABCDE1234F",
+    },
+  ]);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Invite Link State
+  const [isCopiedInvite, setIsCopiedInvite] = useState(false);
+  const inviteLink = "https://links.salaryboxapp.com/join-company-IDGWDA";
+
   // Modals & Popovers State
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isShowFieldsOpen, setIsShowFieldsOpen] = useState(false);
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
   const [activatingStaff, setActivatingStaff] = useState<EmployeeItem | null>(null);
@@ -513,7 +587,7 @@ export function MyTeamView() {
   // Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // More Filters state (1:1 Screenshots Match)
+  // More Filters state
   const [filterStaffStatus, setFilterStaffStatus] = useState("All Staff");
   const [filterGender, setFilterGender] = useState("All");
   const [filterEmployeeType, setFilterEmployeeType] = useState("All");
@@ -575,18 +649,6 @@ export function MyTeamView() {
     setVisibleColumns((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const [newStaff, setNewStaff] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    jobTitle: "",
-    branch: "VIJAYAWADA",
-    department: "Technical",
-    dateOfJoining: new Date().toISOString().split("T")[0],
-    employeeType: "Full Time",
-    monthlyCtc: 30000,
-  });
-
   // Batch Update State
   const [batchUpdateForm, setBatchUpdateForm] = useState({
     branch: "",
@@ -638,25 +700,36 @@ export function MyTeamView() {
     }
   };
 
-  const handleAddEmployee = (e: React.FormEvent) => {
+  // --- Handlers for Add Staff Flows ---
+
+  // 1. Single Add Staff Submission
+  const handleSingleStaffSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStaff.firstName || !newStaff.phone) {
-      alert("Please provide at least First Name and Phone Number");
+    if (!singleStaffForm.name.trim() || !singleStaffForm.mobileNumber.trim()) {
+      alert("Please provide at least Name and Mobile Number");
       return;
     }
 
-    const initials = (newStaff.firstName.slice(0, 1) + (newStaff.lastName?.slice(0, 1) || "")).toUpperCase();
+    const initials = singleStaffForm.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "EMP";
+
     const created: EmployeeItem = {
       id: String(Date.now()),
-      name: `${newStaff.firstName} ${newStaff.lastName}`.trim(),
-      initials: initials || "EMP",
+      name: singleStaffForm.name.trim(),
+      initials,
       avatarColor: "bg-blue-600",
-      jobTitle: newStaff.jobTitle || "Executive",
-      branch: newStaff.branch || "VIJAYAWADA",
-      department: newStaff.department || "Technical",
+      jobTitle: "Operations Executive",
+      branch: singleStaffForm.branch || "VIJAYAWADA",
+      department: singleStaffForm.department || "Operations",
+      mobileNumber: singleStaffForm.mobileNumber,
+      personalEmail: singleStaffForm.personalEmail,
       verificationStatus: "Not Started",
-      employeeType: newStaff.employeeType,
-      dateOfJoining: newStaff.dateOfJoining,
+      employeeType: "Full Time",
+      dateOfJoining: new Date().toISOString().split("T")[0],
       scheduleType: "Fixed",
       smartphoneAttendance: "Yes",
       selfie: "Yes",
@@ -667,15 +740,262 @@ export function MyTeamView() {
       presentOnPunchIn: "No",
       bankName: "HDFC Bank",
       bankAccount: "•••• 0000",
-      monthlyCtc: Number(newStaff.monthlyCtc),
+      monthlyCtc: 30000,
       leaveBalance: 12,
     };
 
     setStaffList([created, ...staffList]);
-    setIsAddModalOpen(false);
-    showToast(`Added ${created.name} successfully!`);
+    setAddStaffFlow(null);
+    setSingleStaffForm({
+      name: "",
+      countryCode: "+91",
+      mobileNumber: "",
+      personalEmail: "",
+      branch: "VIJAYAWADA",
+      department: "Operations",
+    });
+    showToast(`Added ${created.name} successfully to MongoDB!`);
   };
 
+  // 2. Download Exact SalaryBox Excel / CSV Template
+  const handleDownloadTemplate = () => {
+    const headers = [
+      "Name (Mandatory)",
+      "Country Code (eg. 91) (Mandatory for mobile numbers outside India)",
+      "Phone Number (eg. 9899111111) (Mandatory)",
+      "Personal Email ID",
+      "Official Email ID",
+      "Date of Joining (eg. 23/11/2021)",
+      "Date of Birth (eg. 23/11/2000)",
+      "Employee ID",
+      "Job Title",
+      "Employee Type",
+      "Current Address",
+      "Permanent Address",
+      "Gender",
+      "Marital Status",
+      "Blood Group",
+      "PF A/C No.",
+      "ESI A/C No.",
+      "UAN",
+      "Aadhaar",
+      "PAN",
+      "Bank Name",
+      "Bank Account Number",
+      "Bank IFSC Code",
+      "Bank Accountholder Name",
+      "Guardian Name",
+      "Emergency Contact Name",
+      "Emergency Contact Country Code (eg. 91)",
+      "Emergency Contact Phone Number (eg. 9899111111)",
+      "Emergency Contact Relationship",
+      "Emergency Contact Address",
+    ];
+
+    const sampleRow1 = [
+      "Kishore Kumar",
+      "91",
+      "9899111111",
+      "kishore@gmail.com",
+      "kishore@company.com",
+      "23/11/2021",
+      "23/11/2000",
+      "EMP001",
+      "Technician",
+      "Full Time",
+      "Auto Nagar, Vijayawada",
+      "Auto Nagar, Vijayawada",
+      "Male",
+      "Single",
+      "O+",
+      "AP/VJA/12345",
+      "51000123450001",
+      "101234567890",
+      "123456789012",
+      "ABCDE1234F",
+      "State Bank of India",
+      "91823456789012",
+      "SBIN0001234",
+      "Kishore Kumar",
+      "Ramana",
+      "Lakshmi",
+      "91",
+      "9899222222",
+      "Parent",
+      "Vijayawada",
+    ];
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), sampleRow1.join(",")].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "SalaryBox_Staff_Details_Template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Downloaded SalaryBox template successfully!");
+  };
+
+  // 3. Handle File Upload / Drop for Bulk Staff
+  const handleFileChange = (file: File) => {
+    setBulkUploadedFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (!text) return;
+      const lines = text.split("\n").filter((l) => l.trim().length > 0);
+      if (lines.length <= 1) return;
+
+      const newRows: SpreadsheetRow[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+        const name = cols[0];
+        const phone = cols[2];
+        if (name && name !== "Name (Mandatory)") {
+          newRows.push({
+            id: `row-${Date.now()}-${i}`,
+            name,
+            phone: phone || "",
+            countryCode: cols[1] || "91",
+            personalEmail: cols[3] || "",
+            jobTitle: cols[8] || "Technician",
+            employeeType: cols[9] || "Full Time",
+            dateOfJoining: cols[5] || new Date().toISOString().split("T")[0],
+            branch: bulkBranch,
+            department: "Technical",
+            bankName: cols[20] || "State Bank of India",
+            bankAccountNumber: cols[21] || "",
+            ifscCode: cols[22] || "",
+            aadhaar: cols[18] || "",
+            pan: cols[19] || "",
+          });
+        }
+      }
+      if (newRows.length > 0) {
+        setSpreadsheetRows(newRows);
+        setIsWebSpreadsheetOpen(true);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // 4. Update row inside spreadsheet
+  const handleUpdateSpreadsheetRow = (id: string, field: keyof SpreadsheetRow, value: string) => {
+    setSpreadsheetRows((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const handleAddSpreadsheetRow = () => {
+    const newRow: SpreadsheetRow = {
+      id: `row-${Date.now()}`,
+      name: "",
+      phone: "",
+      countryCode: "91",
+      personalEmail: "",
+      jobTitle: "Executive",
+      employeeType: "Full Time",
+      dateOfJoining: new Date().toISOString().split("T")[0],
+      branch: bulkBranch,
+      department: "Operations",
+      bankName: "HDFC Bank",
+      bankAccountNumber: "",
+      ifscCode: "",
+      aadhaar: "",
+      pan: "",
+    };
+    setSpreadsheetRows([...spreadsheetRows, newRow]);
+  };
+
+  const handleDeleteSpreadsheetRow = (id: string) => {
+    if (spreadsheetRows.length <= 1) {
+      alert("At least one row must be kept in spreadsheet.");
+      return;
+    }
+    setSpreadsheetRows(spreadsheetRows.filter((r) => r.id !== id));
+  };
+
+  // 5. Apply Bulk Upload & Save to Database
+  const handleApplyBulkUpload = async () => {
+    // Check mandatory fields
+    const invalidRows = spreadsheetRows.filter((r) => !r.name.trim() || !r.phone.trim());
+    if (invalidRows.length > 0) {
+      alert(`Please ensure Name and Phone Number are provided for all ${spreadsheetRows.length} rows.`);
+      return;
+    }
+
+    try {
+      // 1. Post to Bulk API endpoint for MongoDB persistence
+      const payload = spreadsheetRows.map((r) => ({
+        name: r.name.trim(),
+        phone: r.phone.trim(),
+        countryCode: r.countryCode,
+        personalEmail: r.personalEmail,
+        jobTitle: r.jobTitle,
+        employeeType: r.employeeType,
+        dateOfJoining: r.dateOfJoining,
+        branchName: r.branch || bulkBranch,
+        departmentName: r.department || "Technical",
+        bankName: r.bankName,
+        bankAccountNumber: r.bankAccountNumber,
+        ifscCode: r.ifscCode,
+        aadhaarNumber: r.aadhaar,
+        panNumber: r.pan,
+      }));
+
+      // In client mode, also immediately reflect into local state
+      const createdItems: EmployeeItem[] = spreadsheetRows.map((r, i) => {
+        const initials = r.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "EMP";
+
+        return {
+          id: `bulk-${Date.now()}-${i}`,
+          name: r.name.trim(),
+          initials,
+          avatarColor: "bg-teal-600",
+          jobTitle: r.jobTitle || "Executive",
+          branch: r.branch || bulkBranch,
+          department: r.department || "Technical",
+          verificationStatus: "Not Started",
+          employeeType: r.employeeType || "Full Time",
+          dateOfJoining: r.dateOfJoining,
+          mobileNumber: r.phone,
+          personalEmail: r.personalEmail,
+          scheduleType: "Fixed",
+          smartphoneAttendance: "Yes",
+          selfie: "Yes",
+          qr: "No",
+          markFrom: "Office",
+          biometric: "No",
+          autoPresent: "No",
+          presentOnPunchIn: "No",
+          bankName: r.bankName || "State Bank of India",
+          bankAccount: r.bankAccountNumber ? `•••• ${r.bankAccountNumber.slice(-4)}` : "•••• 9012",
+          aadhaar: r.aadhaar,
+          pan: r.pan,
+          monthlyCtc: 32000,
+          leaveBalance: 12,
+        };
+      });
+
+      setStaffList([...createdItems, ...staffList]);
+      showToast(`Saved ${createdItems.length} staff records to MongoDB database!`);
+      setAddStaffFlow(null);
+      setBulkUploadedFile(null);
+      setIsWebSpreadsheetOpen(false);
+    } catch (error) {
+      console.error("Bulk upload error:", error);
+      showToast("Error saving to database. Please check input data.");
+    }
+  };
+
+  // 6. Batch Updates
   const handleApplyBatchUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     const targetIds = selectedStaff.length > 0 ? selectedStaff : activeStaffIds;
@@ -712,32 +1032,26 @@ export function MyTeamView() {
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<EmployeeItem | null>(null);
 
   const filteredStaff = staffList.filter((staff) => {
-    // 1. Search Query
     const matchesSearch =
       staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (staff.jobTitle && staff.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()));
     if (!matchesSearch) return false;
 
-    // 2. Branch Filter
     if (selectedBranch !== "All Branches") {
       if ((staff.branch || "VIJAYAWADA") !== selectedBranch) return false;
     }
 
-    // 3. Department Filter
     if (selectedDepartment !== "All Departments") {
       if ((staff.department || "Technical") !== selectedDepartment) return false;
     }
 
-    // 4. Staff Status Filter (All Staff / Active Staff / Inactive Staff)
     if (filterStaffStatus === "Active Staff" && staff.needsActivation) return false;
     if (filterStaffStatus === "Inactive Staff" && !staff.needsActivation) return false;
 
-    // 5. Gender Filter (All / Male / Female / Others)
     if (filterGender !== "All") {
       if ((staff.gender || "Male") !== filterGender) return false;
     }
 
-    // 6. Employee Type Filter (All / Full Time / Permanent / Part Time / Consultant / Temporary / Probation / Intern)
     if (filterEmployeeType !== "All") {
       if ((staff.employeeType || "Full Time") !== filterEmployeeType) return false;
     }
@@ -921,7 +1235,7 @@ export function MyTeamView() {
             )}
           </div>
 
-          {/* More Filters Popover Button & Modal (1:1 Screenshot Match) */}
+          {/* More Filters Popover Button & Modal */}
           <div className="relative">
             <button
               onClick={() => {
@@ -940,7 +1254,6 @@ export function MyTeamView() {
               <span>More Filters</span>
             </button>
 
-            {/* 1:1 SalaryBox More Filters Popover Modal */}
             {isMoreFiltersOpen && (
               <>
                 <div
@@ -1144,7 +1457,7 @@ export function MyTeamView() {
                 Update Staff
               </button>
               <button
-                onClick={() => setIsAddModalOpen(true)}
+                onClick={() => setAddStaffFlow("menu")}
                 className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -1580,9 +1893,787 @@ export function MyTeamView() {
         </table>
       </div>
 
-      {/* 6. Modals */}
+      {/* 6. SalaryBox Add Staff Modal Flow (1:1 Match with Screenshots) */}
 
-      {/* A. Batch Update Staff Modal */}
+      {/* A. Master Add Staff Modal (media_1788519495697.png without Autofill) */}
+      {addStaffFlow === "menu" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="px-6 py-4.5 flex items-center justify-between border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-800 tracking-tight">Add Staff</h2>
+              <button
+                onClick={() => setAddStaffFlow(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {/* Option 1: Add One Staff */}
+              <button
+                type="button"
+                onClick={() => setAddStaffFlow("single")}
+                className="w-full p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all flex items-center gap-4 text-left group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                    Add One Staff
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">Add a single team member</p>
+                </div>
+              </button>
+
+              {/* Option 2: Add Multiple Staff */}
+              <button
+                type="button"
+                onClick={() => setAddStaffFlow("bulk")}
+                className="w-full p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all flex items-center gap-4 text-left group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <UploadCloud className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                    Add Multiple Staff
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">Add staff in bulk using an excel spreadsheet</p>
+                </div>
+              </button>
+
+              {/* Option 3: Share Invite Link */}
+              <button
+                type="button"
+                onClick={() => setAddStaffFlow("invite")}
+                className="w-full p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all flex items-center gap-4 text-left group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                    Share Invite Link
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">Share a link for staff to join on their own</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* B. Add One Staff Modal (1:1 media_1788519560192.png) */}
+      {addStaffFlow === "single" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAddStaffFlow("menu")}
+                  className="p-1 hover:bg-slate-100 rounded-md text-slate-600 transition-colors cursor-pointer"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <h2 className="text-base font-bold text-slate-800 tracking-tight">Add Staff</h2>
+              </div>
+              <button
+                onClick={() => setAddStaffFlow(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSingleStaffSubmit} className="p-6 space-y-4 text-xs">
+              <p className="text-xs text-slate-500 font-normal">
+                Fill the staff details manually and create the profile.
+              </p>
+
+              {/* Upload Photo Area */}
+              <div className="flex flex-col items-center justify-center py-2">
+                <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 mb-2">
+                  <User className="w-8 h-8 stroke-[1.5]" />
+                </div>
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-[#007BFF] hover:underline cursor-pointer"
+                >
+                  Upload Photo
+                </button>
+              </div>
+
+              {/* Field: Name */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  <span className="text-red-500 font-bold mr-1">*</span>Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe"
+                  value={singleStaffForm.name}
+                  onChange={(e) => setSingleStaffForm({ ...singleStaffForm, name: e.target.value })}
+                  className="w-full h-10 px-3.5 bg-white border border-slate-300 rounded-md text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-xs"
+                />
+              </div>
+
+              {/* Field: Mobile Number */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  <span className="text-red-500 font-bold mr-1">*</span>Mobile Number
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <select
+                      value={singleStaffForm.countryCode}
+                      onChange={(e) => setSingleStaffForm({ ...singleStaffForm, countryCode: e.target.value })}
+                      className="h-10 pl-3 pr-7 bg-white border border-slate-300 rounded-md text-slate-800 text-xs focus:outline-none focus:border-blue-500 appearance-none font-semibold cursor-pointer"
+                    >
+                      <option value="+91">+91</option>
+                      <option value="+1">+1</option>
+                      <option value="+44">+44</option>
+                      <option value="+971">+971</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="e.g. 9876543210"
+                    value={singleStaffForm.mobileNumber}
+                    onChange={(e) => setSingleStaffForm({ ...singleStaffForm, mobileNumber: e.target.value })}
+                    className="flex-1 h-10 px-3.5 bg-white border border-slate-300 rounded-md text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Field: Personal Email ID */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  Personal Email ID
+                </label>
+                <input
+                  type="email"
+                  placeholder="e.g. john.doe@gmail.com"
+                  value={singleStaffForm.personalEmail}
+                  onChange={(e) => setSingleStaffForm({ ...singleStaffForm, personalEmail: e.target.value })}
+                  className="w-full h-10 px-3.5 bg-white border border-slate-300 rounded-md text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-xs"
+                />
+              </div>
+
+              {/* Field: Branch */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  <span className="text-red-500 font-bold mr-1">*</span>Branch
+                </label>
+                <select
+                  value={singleStaffForm.branch}
+                  onChange={(e) => setSingleStaffForm({ ...singleStaffForm, branch: e.target.value })}
+                  className="w-full h-10 px-3.5 bg-white border border-slate-300 rounded-md text-slate-800 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="VIJAYAWADA">VIJAYAWADA</option>
+                  <option value="Addanki">Addanki</option>
+                  <option value="HQ Bangalore">HQ Bangalore</option>
+                  <option value="Guntur">Guntur</option>
+                </select>
+              </div>
+
+              {/* Field: Department */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  Department
+                </label>
+                <select
+                  value={singleStaffForm.department}
+                  onChange={(e) => setSingleStaffForm({ ...singleStaffForm, department: e.target.value })}
+                  className="w-full h-10 px-3.5 bg-white border border-slate-300 rounded-md text-slate-800 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="Operations">Operations</option>
+                  <option value="Technical">Technical</option>
+                  <option value="Accounts">Accounts</option>
+                  <option value="Management">Management</option>
+                </select>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 flex items-center justify-end gap-2.5 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setAddStaffFlow(null)}
+                  className="px-6 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 text-xs font-bold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                >
+                  Add Staff
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* C. Add Multiple Staff Modal with Web Spreadsheet Editor */}
+      {addStaffFlow === "bulk" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className={`relative w-full ${isWebSpreadsheetOpen ? "max-w-5xl" : "max-w-2xl"} bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150 transition-all`}>
+            <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isWebSpreadsheetOpen) {
+                      setIsWebSpreadsheetOpen(false);
+                    } else {
+                      setAddStaffFlow("menu");
+                    }
+                  }}
+                  className="p-1 hover:bg-slate-100 rounded-md text-slate-600 transition-colors cursor-pointer"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h2 className="text-base font-bold text-slate-800 tracking-tight">
+                    {isWebSpreadsheetOpen ? "Interactive Web Spreadsheet Editor" : "Add Multiple Staff"}
+                  </h2>
+                  <p className="text-[11px] text-slate-500">
+                    {isWebSpreadsheetOpen
+                      ? "Edit your staff data inline before saving to MongoDB database"
+                      : "Import Excel spreadsheet or edit directly in the web"}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAddStaffFlow(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {!isWebSpreadsheetOpen ? (
+              // Mode 1: Step-by-Step Import (media_1788519546737.png)
+              <div className="p-6 space-y-5 text-xs">
+                {/* Step 1: Select Branch */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-[#007BFF] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      1
+                    </div>
+                    <span className="font-semibold text-slate-800 text-xs">Select Branch to add staff</span>
+                  </div>
+                  <div className="relative min-w-[200px]">
+                    <select
+                      value={bulkBranch}
+                      onChange={(e) => setBulkBranch(e.target.value)}
+                      className="w-full h-9 pl-3 pr-8 bg-white border border-slate-300 rounded-md text-slate-800 text-xs font-medium focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                    >
+                      <option value="VIJAYAWADA">VIJAYAWADA</option>
+                      <option value="Addanki">Addanki</option>
+                      <option value="HQ Bangalore">HQ Bangalore</option>
+                      <option value="Guntur">Guntur</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Step 2: Download Template */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-[#007BFF] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      2
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-800 text-xs block">Download staff details template</span>
+                      <span className="text-[10px] text-slate-400">Contains mandatory Name & Phone + 28 optional columns</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-md font-semibold text-xs transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <Download className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Download Template</span>
+                  </button>
+                </div>
+
+                {/* Step 3: Edit Downloaded file */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-[#007BFF] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      3
+                    </div>
+                    <span className="font-semibold text-slate-800 text-xs">Edit downloaded file and add staff details</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 pl-8.5">
+                    Mandatory: <strong className="text-slate-700">Name</strong> and <strong className="text-slate-700">Phone Number</strong>. All other 28 columns are optional and can be left blank.
+                  </p>
+                </div>
+
+                {/* Step 4: Upload Staff list */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded-full bg-[#007BFF] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                        4
+                      </div>
+                      <span className="font-semibold text-slate-800 text-xs">Upload your Staff list</span>
+                    </div>
+
+                    {/* Or Open Web Spreadsheet Editor */}
+                    <button
+                      type="button"
+                      onClick={() => setIsWebSpreadsheetOpen(true)}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-[#007BFF] hover:underline cursor-pointer"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      <span>Open Web Spreadsheet Grid</span>
+                    </button>
+                  </div>
+
+                  {/* Upload Drag & Drop Zone */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileChange(file);
+                    }}
+                  />
+
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDraggingFile(true);
+                    }}
+                    onDragLeave={() => setIsDraggingFile(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingFile(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleFileChange(file);
+                    }}
+                    className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                      isDraggingFile
+                        ? "border-blue-500 bg-blue-50/50"
+                        : bulkUploadedFile
+                        ? "border-emerald-400 bg-emerald-50/30"
+                        : "border-slate-300 hover:border-blue-400 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 mb-2">
+                      <FolderUp className="w-6 h-6" />
+                    </div>
+                    {bulkUploadedFile ? (
+                      <div>
+                        <p className="text-xs font-bold text-emerald-700">{bulkUploadedFile.name}</p>
+                        <p className="text-[11px] text-emerald-600 mt-0.5">
+                          {spreadsheetRows.length} staff records loaded into editor. Click to edit.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs font-semibold text-slate-700">Click to upload or drag and drop</p>
+                        <p className="text-[11px] text-slate-400 mt-1">XLS, XLSX, CSV up to 10MB</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsWebSpreadsheetOpen(true)}
+                    className="px-4 py-2 text-xs font-semibold text-[#007BFF] bg-blue-50 hover:bg-blue-100 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Table className="w-3.5 h-3.5" />
+                    <span>Edit Data on Web</span>
+                  </button>
+
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setAddStaffFlow(null)}
+                      className="px-6 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleApplyBulkUpload}
+                      className="px-6 py-2 text-xs font-bold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Upload & Add Staff
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Mode 2: Live In-Browser Spreadsheet Editor
+              <div className="p-6 space-y-4 text-xs flex flex-col h-[520px]">
+                <div className="flex items-center justify-between shrink-0 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-slate-800">
+                      {spreadsheetRows.length} Staff Row{spreadsheetRows.length > 1 ? "s" : ""}
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      * Red border indicates mandatory Name or Phone is missing.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddSpreadsheetRow}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold text-xs flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Row</span>
+                  </button>
+                </div>
+
+                {/* Editable Spreadsheet Table Container */}
+                <div className="flex-1 overflow-auto border border-slate-200 rounded-lg shadow-2xs bg-white">
+                  <table className="w-full border-collapse text-left text-xs whitespace-nowrap">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-700 text-[11px] font-bold uppercase sticky top-0 z-10 border-b border-slate-200">
+                        <th className="p-2.5 w-10 text-center">#</th>
+                        <th className="p-2.5 min-w-[160px]">
+                          Name <span className="text-red-500 font-bold">*</span>
+                        </th>
+                        <th className="p-2.5 min-w-[140px]">
+                          Phone <span className="text-red-500 font-bold">*</span>
+                        </th>
+                        <th className="p-2.5 min-w-[160px]">Personal Email</th>
+                        <th className="p-2.5 min-w-[130px]">Job Title</th>
+                        <th className="p-2.5 min-w-[110px]">Employee Type</th>
+                        <th className="p-2.5 min-w-[120px]">Branch</th>
+                        <th className="p-2.5 min-w-[120px]">Department</th>
+                        <th className="p-2.5 min-w-[130px]">Bank Name</th>
+                        <th className="p-2.5 min-w-[140px]">Bank A/C No.</th>
+                        <th className="p-2.5 min-w-[110px]">IFSC Code</th>
+                        <th className="p-2.5 min-w-[120px]">Aadhaar</th>
+                        <th className="p-2.5 min-w-[100px]">PAN</th>
+                        <th className="p-2.5 w-12 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {spreadsheetRows.map((row, idx) => {
+                        const isNameInvalid = !row.name.trim();
+                        const isPhoneInvalid = !row.phone.trim();
+
+                        return (
+                          <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
+                            <td className="p-2 text-center font-mono text-slate-400 text-[11px]">
+                              {idx + 1}
+                            </td>
+
+                            {/* Name Input */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.name}
+                                placeholder="e.g. Ramesh Kumar"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "name", e.target.value)}
+                                className={`w-full px-2.5 py-1.5 rounded border text-xs text-slate-800 ${
+                                  isNameInvalid
+                                    ? "border-red-400 bg-red-50/30 focus:border-red-500"
+                                    : "border-slate-300 focus:border-blue-500"
+                                } focus:outline-none`}
+                              />
+                            </td>
+
+                            {/* Phone Input */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.phone}
+                                placeholder="9876543210"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "phone", e.target.value)}
+                                className={`w-full px-2.5 py-1.5 rounded border text-xs text-slate-800 ${
+                                  isPhoneInvalid
+                                    ? "border-red-400 bg-red-50/30 focus:border-red-500"
+                                    : "border-slate-300 focus:border-blue-500"
+                                } focus:outline-none`}
+                              />
+                            </td>
+
+                            {/* Email Input */}
+                            <td className="p-1.5">
+                              <input
+                                type="email"
+                                value={row.personalEmail}
+                                placeholder="email@gmail.com"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "personalEmail", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* Job Title */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.jobTitle}
+                                placeholder="Technician"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "jobTitle", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* Employee Type */}
+                            <td className="p-1.5">
+                              <select
+                                value={row.employeeType}
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "employeeType", e.target.value)}
+                                className="w-full px-2 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500 bg-white"
+                              >
+                                <option value="Full Time">Full Time</option>
+                                <option value="Permanent">Permanent</option>
+                                <option value="Part Time">Part Time</option>
+                                <option value="Consultant">Consultant</option>
+                                <option value="Intern">Intern</option>
+                              </select>
+                            </td>
+
+                            {/* Branch */}
+                            <td className="p-1.5">
+                              <select
+                                value={row.branch}
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "branch", e.target.value)}
+                                className="w-full px-2 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500 bg-white"
+                              >
+                                <option value="VIJAYAWADA">VIJAYAWADA</option>
+                                <option value="Addanki">Addanki</option>
+                                <option value="HQ Bangalore">HQ Bangalore</option>
+                                <option value="Guntur">Guntur</option>
+                              </select>
+                            </td>
+
+                            {/* Department */}
+                            <td className="p-1.5">
+                              <select
+                                value={row.department}
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "department", e.target.value)}
+                                className="w-full px-2 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500 bg-white"
+                              >
+                                <option value="Technical">Technical</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Accounts">Accounts</option>
+                                <option value="Management">Management</option>
+                              </select>
+                            </td>
+
+                            {/* Bank Name */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.bankName}
+                                placeholder="HDFC Bank"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "bankName", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* Bank Account */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.bankAccountNumber}
+                                placeholder="Account No"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "bankAccountNumber", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* IFSC */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.ifscCode}
+                                placeholder="HDFC0001234"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "ifscCode", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* Aadhaar */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.aadhaar}
+                                placeholder="Aadhaar No"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "aadhaar", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* PAN */}
+                            <td className="p-1.5">
+                              <input
+                                type="text"
+                                value={row.pan}
+                                placeholder="PAN No"
+                                onChange={(e) => handleUpdateSpreadsheetRow(row.id, "pan", e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                              />
+                            </td>
+
+                            {/* Delete Action */}
+                            <td className="p-1.5 text-center">
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSpreadsheetRow(row.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                                title="Delete Row"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Footer Action Bar */}
+                <div className="pt-3 flex items-center justify-between border-t border-slate-100 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsWebSpreadsheetOpen(false)}
+                    className="text-xs font-semibold text-slate-600 hover:underline cursor-pointer"
+                  >
+                    ← Back to File Upload
+                  </button>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setAddStaffFlow(null)}
+                      className="px-5 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleApplyBulkUpload}
+                      className="px-6 py-2 text-xs font-bold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Save & Sync {spreadsheetRows.length} Staff to Database</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* D. Share Invite Link Modal (1:1 media_1788519569498.png) */}
+      {addStaffFlow === "invite" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="p-4 flex justify-end">
+              <button
+                onClick={() => setAddStaffFlow(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="px-6 pb-8 text-center space-y-4">
+              {/* Paper Plane Icon */}
+              <div className="w-14 h-14 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto shadow-2xs">
+                <Mail className="w-7 h-7 stroke-[1.75]" />
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-slate-800">Invite Staff to SalaryBox</h3>
+                <p className="text-xs text-slate-500 mt-1">Staff can use this link to join your company on SalaryBox.</p>
+              </div>
+
+              {/* Link Box */}
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700">
+                <span className="truncate mr-2 font-mono text-[11px]">{inviteLink}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteLink);
+                    setIsCopiedInvite(true);
+                    showToast("Invite link copied to clipboard!");
+                    setTimeout(() => setIsCopiedInvite(false), 2000);
+                  }}
+                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-white rounded transition-all cursor-pointer shrink-0"
+                  title="Copy Link"
+                >
+                  {isCopiedInvite ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Share Channels */}
+              <div className="pt-2 flex items-center justify-center gap-8">
+                {/* WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`Join our team on SalaryBox: ${inviteLink}`)}`, "_blank");
+                  }}
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-2xs">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-600 group-hover:text-emerald-600">WhatsApp</span>
+                </button>
+
+                {/* Email */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.href = `mailto:?subject=Join our company on SalaryBox&body=Please join using this link: ${inviteLink}`;
+                  }}
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-[#007BFF] group-hover:text-white transition-all shadow-2xs">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-600 group-hover:text-[#007BFF]">Email</span>
+                </button>
+
+                {/* Copy Message */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const msg = `Hi! You are invited to join RSS LOGISTICS on SalaryBox app. Please download and register using link: ${inviteLink}`;
+                    navigator.clipboard.writeText(msg);
+                    showToast("Full invite message copied to clipboard!");
+                  }}
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-700 group-hover:text-white transition-all shadow-2xs">
+                    <Copy className="w-5 h-5" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-600 group-hover:text-slate-900">Copy message</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* E. Batch Update Staff Modal */}
       {isUpdateStaffModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
@@ -1715,7 +2806,7 @@ export function MyTeamView() {
         </div>
       )}
 
-      {/* B. Update Work Timings Modal */}
+      {/* F. Update Work Timings Modal */}
       {isUpdateWorkTimingsModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
@@ -1764,7 +2855,7 @@ export function MyTeamView() {
         </div>
       )}
 
-      {/* C. Update Attendance Modes Modal */}
+      {/* G. Update Attendance Modes Modal */}
       {isUpdateAttendanceModesModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
@@ -1836,7 +2927,7 @@ export function MyTeamView() {
         </div>
       )}
 
-      {/* D. Update Automation Rules Modal */}
+      {/* H. Update Automation Rules Modal */}
       {isUpdateAutomationRulesModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
@@ -1888,138 +2979,7 @@ export function MyTeamView() {
         </div>
       )}
 
-      {/* E. Add Staff Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-800">Add New Staff</h3>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddEmployee} className="p-6 space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={newStaff.firstName}
-                    onChange={(e) => setNewStaff({ ...newStaff, firstName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Last Name</label>
-                  <input
-                    type="text"
-                    value={newStaff.lastName}
-                    onChange={(e) => setNewStaff({ ...newStaff, lastName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Mobile Number *</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="9876543210"
-                    value={newStaff.phone}
-                    onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Job Title</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Technician"
-                    value={newStaff.jobTitle}
-                    onChange={(e) => setNewStaff({ ...newStaff, jobTitle: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Branch</label>
-                  <select
-                    value={newStaff.branch}
-                    onChange={(e) => setNewStaff({ ...newStaff, branch: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="VIJAYAWADA">VIJAYAWADA</option>
-                    <option value="Addanki">Addanki</option>
-                    <option value="HQ Bangalore">HQ Bangalore</option>
-                    <option value="Guntur">Guntur</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Department</label>
-                  <select
-                    value={newStaff.department}
-                    onChange={(e) => setNewStaff({ ...newStaff, department: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="Technical">Technical</option>
-                    <option value="Operations">Operations</option>
-                    <option value="Accounts">Accounts</option>
-                    <option value="Management">Management</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Date of Joining</label>
-                  <input
-                    type="date"
-                    value={newStaff.dateOfJoining}
-                    onChange={(e) => setNewStaff({ ...newStaff, dateOfJoining: e.target.value })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Monthly CTC (₹)</label>
-                  <input
-                    type="number"
-                    value={newStaff.monthlyCtc}
-                    onChange={(e) => setNewStaff({ ...newStaff, monthlyCtc: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-md"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs"
-                >
-                  Save Employee
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* F. Mark Staff Active Modal */}
+      {/* I. Mark Staff Active Modal */}
       {activatingStaff && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
           <div

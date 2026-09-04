@@ -183,6 +183,140 @@ export class EmployeeService {
       return doc;
     });
   }
+
+  async createBulkEmployees(companyId: string, employees: any[], creatorUserId?: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const createdList: any[] = [];
+      const currentYear = new Date().getFullYear();
+      const leaveTypes = await tx.leaveType.findMany({ where: { companyId } });
+      const pinHash = await hashPin('1234');
+
+      for (let i = 0; i < employees.length; i++) {
+        const item = employees[i];
+        if (!item.name || !item.phone) continue; // Mandatory checks
+
+        const cleanPhone = String(item.phone).replace(/\D/g, '');
+        if (!cleanPhone) continue;
+
+        // Check if user exists
+        let user = await tx.user.findFirst({ where: { phone: cleanPhone } });
+        if (!user) {
+          user = await tx.user.create({
+            data: {
+              companyId,
+              phone: cleanPhone,
+              email: item.personalEmail?.toLowerCase() || item.officialEmail?.toLowerCase(),
+              pinHash,
+              role: Role.EMPLOYEE,
+            },
+          });
+        }
+
+        const count = await tx.employee.count({ where: { companyId } });
+        const employeeCode = item.employeeCode || `EMP${String(count + 1).padStart(3, '0')}`;
+
+        const nameParts = item.name.trim().split(' ');
+        const firstName = nameParts[0] || item.name;
+        const lastName = nameParts.slice(1).join(' ') || undefined;
+
+        // Resolve branch / department if names provided
+        let branchId = item.branchId;
+        if (!branchId && item.branchName) {
+          const branch = await tx.branch.findFirst({ where: { companyId, name: item.branchName } });
+          if (branch) branchId = branch.id;
+        }
+
+        let departmentId = item.departmentId;
+        if (!departmentId && item.departmentName) {
+          const dept = await tx.department.findFirst({ where: { companyId, name: item.departmentName } });
+          if (dept) departmentId = dept.id;
+        }
+
+        let employee = await tx.employee.findFirst({
+          where: { companyId, userId: user.id },
+        });
+
+        if (!employee) {
+          employee = await tx.employee.create({
+            data: {
+              companyId,
+              userId: user.id,
+              employeeCode,
+              firstName,
+              lastName,
+              jobTitle: item.jobTitle || 'Executive',
+              employeeType: item.employeeType || 'Full Time',
+              dateOfJoining: item.dateOfJoining ? new Date(item.dateOfJoining) : new Date(),
+              dob: item.dob ? new Date(item.dob) : undefined,
+              gender: item.gender || 'Male',
+              maritalStatus: item.maritalStatus,
+              bloodGroup: item.bloodGroup,
+              mobileNumber: cleanPhone,
+              personalEmail: item.personalEmail,
+              officialEmail: item.officialEmail,
+              currentAddress: item.currentAddress,
+              permanentAddress: item.permanentAddress,
+              guardianName: item.guardianName,
+              emergencyContactName: item.emergencyContactName,
+              emergencyContactPhone: item.emergencyContactPhone,
+              emergencyContactRelationship: item.emergencyContactRelationship,
+              emergencyContactAddress: item.emergencyContactAddress,
+              bankName: item.bankName,
+              bankAccountNumber: item.bankAccountNumber,
+              ifscCode: item.ifscCode,
+              accountHolderName: item.accountHolderName,
+              branchId,
+              departmentId,
+            },
+          });
+
+          // Create KYC record
+          if (item.aadhaarNumber || item.panNumber || item.bankAccountNumber || item.uanNumber) {
+            await tx.employeeKYC.create({
+              data: {
+                employeeId: employee.id,
+                aadhaarNumber: item.aadhaarNumber,
+                panNumber: item.panNumber,
+                bankAccountNumber: item.bankAccountNumber,
+                ifscCode: item.ifscCode,
+                bankAccountName: item.accountHolderName,
+                uanNumber: item.uanNumber,
+                pfNumber: item.pfNumber,
+                esiNumber: item.esiNumber,
+              },
+            });
+          }
+
+          // Seed leave balances
+          for (const lt of leaveTypes) {
+            await tx.leaveBalance.create({
+              data: {
+                employeeId: employee.id,
+                leaveTypeId: lt.id,
+                year: currentYear,
+                totalDays: lt.daysPerYear,
+              },
+            });
+          }
+        }
+
+        createdList.push(employee);
+      }
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId: creatorUserId,
+        action: 'EMPLOYEES_BULK_IMPORTED',
+        resource: 'Employee',
+        metadata: { importedCount: createdList.length },
+      });
+
+      return {
+        importedCount: createdList.length,
+        employees: createdList,
+      };
+    });
+  }
 }
 
 export const employeeService = new EmployeeService();
