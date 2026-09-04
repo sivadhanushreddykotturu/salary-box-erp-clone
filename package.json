@@ -10,6 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
+    "server:dev": "tsx watch src/server/server.ts",
+    "server:start": "tsx src/server/server.ts",
     "test": "tsx --test tests/all.test.ts"
   },
   "dependencies": {
@@ -19,6 +21,8 @@
     "@tailwindcss/postcss": "^4.3.3",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^1.39.0",
     "next": "^15.1.7",
@@ -33,6 +37,8 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.5",
     "@types/node-cron": "^3.0.11",

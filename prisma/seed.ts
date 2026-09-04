@@ -221,7 +221,6 @@ async function main() {
           expenseDate: new Date("2026-08-12"),
         },
       ],
-      skipDuplicates: true,
     });
     console.log("✅ Seeded reimbursement requests");
   }
@@ -257,11 +256,10 @@ async function main() {
         leadValue: 350000,
       },
     ],
-    skipDuplicates: true,
   });
-  console.log("✅ Seeded CRM leads on Neon!");
+  console.log("✅ Seeded CRM leads on MongoDB!");
 
-  console.log("🎉 All live data successfully seeded on Neon PostgreSQL!");
+  console.log("🎉 All live data successfully seeded on MongoDB!");
 }
 
 main()

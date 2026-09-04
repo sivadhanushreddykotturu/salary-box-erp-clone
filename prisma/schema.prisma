@@ -1,7 +1,6 @@
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -101,7 +100,7 @@ enum WebhookStatus {
 // ----------------------------------------------------
 
 model SuperAdmin {
-  id           String   @id @default(uuid())
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   email        String   @unique
   passwordHash String
   name         String
@@ -110,7 +109,7 @@ model SuperAdmin {
 }
 
 model Plan {
-  id              String         @id @default(uuid())
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
   name            String         @unique
   code            String         @unique
   description     String?
@@ -127,7 +126,7 @@ model Plan {
 }
 
 model Company {
-  id                     String         @id @default(uuid())
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
   companyCode            String         @unique
   name                   String
   businessEmail          String
@@ -138,7 +137,7 @@ model Company {
   state                  String?
   pincode                String?
   status                 CompanyStatus  @default(TRIAL)
-  planId                 String
+  planId                 String         @db.ObjectId
   plan                   Plan           @relation(fields: [planId], references: [id])
   subscriptionExpiresAt  DateTime
   cashfreeSubscriptionId String?
@@ -165,10 +164,10 @@ model Company {
 }
 
 model Subscription {
-  id                     String        @id @default(uuid())
-  companyId              String
+  id                     String        @id @default(auto()) @map("_id") @db.ObjectId
+  companyId              String        @db.ObjectId
   company                Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  planId                 String
+  planId                 String        @db.ObjectId
   plan                   Plan          @relation(fields: [planId], references: [id])
   billingCycle           String        // "MONTHLY" or "YEARLY"
   amount                 Float
@@ -185,7 +184,7 @@ model Subscription {
 }
 
 model WebhookEvent {
-  id          String        @id @default(uuid())
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
   provider    String        // "DECENTRO" | "CASHFREE"
   eventId     String        @unique
   eventType   String
@@ -202,8 +201,8 @@ model WebhookEvent {
 // ----------------------------------------------------
 
 model User {
-  id           String    @id @default(uuid())
-  companyId    String?   // Nullable for Super Admins
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  companyId    String?   @db.ObjectId // Nullable for Super Admins
   company      Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   phone        String?   @unique
   email        String?   @unique
@@ -220,8 +219,8 @@ model User {
 }
 
 model Branch {
-  id           String      @id @default(uuid())
-  companyId    String
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  companyId    String      @db.ObjectId
   company      Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name         String
   code         String?
@@ -236,8 +235,8 @@ model Branch {
 }
 
 model Department {
-  id        String     @id @default(uuid())
-  companyId String
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  companyId String     @db.ObjectId
   company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name      String
   createdAt DateTime   @default(now())
@@ -247,8 +246,8 @@ model Department {
 }
 
 model Designation {
-  id        String     @id @default(uuid())
-  companyId String
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  companyId String     @db.ObjectId
   company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   title     String
   createdAt DateTime   @default(now())
@@ -258,8 +257,8 @@ model Designation {
 }
 
 model Shift {
-  id               String     @id @default(uuid())
-  companyId        String
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
+  companyId        String     @db.ObjectId
   company          Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name             String     // e.g. "General Day Shift"
   startTime        String     // e.g. "09:00"
@@ -279,10 +278,10 @@ model Shift {
 // ----------------------------------------------------
 
 model Employee {
-  id                  String             @id @default(uuid())
-  companyId           String
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  companyId           String             @db.ObjectId
   company             Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  userId              String             @unique
+  userId              String             @unique @db.ObjectId
   user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   employeeCode        String
   firstName           String
@@ -293,23 +292,23 @@ model Employee {
   dateOfLeaving       DateTime?
   status              EmployeeStatus     @default(ACTIVE)
   
-  branchId            String?
+  branchId            String?            @db.ObjectId
   branch              Branch?            @relation(fields: [branchId], references: [id])
-  departmentId        String?
+  departmentId        String?            @db.ObjectId
   department          Department?        @relation(fields: [departmentId], references: [id])
-  designationId       String?
+  designationId       String?            @db.ObjectId
   designation         Designation?       @relation(fields: [designationId], references: [id])
-  shiftId             String?
+  shiftId             String?            @db.ObjectId
   shift               Shift?             @relation(fields: [shiftId], references: [id])
   
-  reportingManagerId  String?
-  reportingManager    Employee?          @relation("ManagerSubordinates", fields: [reportingManagerId], references: [id])
+  reportingManagerId  String?            @db.ObjectId
+  reportingManager    Employee?          @relation("ManagerSubordinates", fields: [reportingManagerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subordinates        Employee[]         @relation("ManagerSubordinates")
   
   emergencyContactName  String?
   emergencyContactPhone String?
   
-  salaryStructureId   String?
+  salaryStructureId   String?            @db.ObjectId
   salaryStructure     SalaryStructure?   @relation(fields: [salaryStructureId], references: [id])
 
   createdAt           DateTime           @default(now())
@@ -330,11 +329,11 @@ model Employee {
 }
 
 model EmployeeKYC {
-  id                  String             @id @default(uuid())
-  employeeId          String             @unique
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId          String             @unique @db.ObjectId
   employee            Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   
-  // Aadhaar Data (Full number stored for UI/Employer view, Last4 for masking, Decentro verification reference)
+  // Aadhaar Data
   aadhaarNumber       String?
   aadhaarLast4        String?
   aadhaarStatus       VerificationStatus @default(NOT_SUBMITTED)
@@ -346,7 +345,7 @@ model EmployeeKYC {
   panLegalName        String?
   panNameMatchScore   Float?
   
-  // Bank Account Data (Full number stored for Admin/Export, Last4 for display, Penny Drop verification)
+  // Bank Account Data
   bankAccountNumber   String?
   bankAccountLast4    String?
   ifscCode            String?
@@ -365,8 +364,8 @@ model EmployeeKYC {
 }
 
 model EmployeeDocument {
-  id           String             @id @default(uuid())
-  employeeId   String
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId   String             @db.ObjectId
   employee     Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   documentType String             // "AADHAAR", "PAN", "RESUME", "OFFER_LETTER", "PASSBOOK", "DEGREE"
   title        String
@@ -384,8 +383,8 @@ model EmployeeDocument {
 // ----------------------------------------------------
 
 model AttendanceRule {
-  id                 String   @id @default(uuid())
-  companyId          String   @unique
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId          String   @unique @db.ObjectId
   company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   geofenceMandatory  Boolean  @default(true)
   preventMockGPS     Boolean  @default(true)
@@ -397,10 +396,10 @@ model AttendanceRule {
 }
 
 model AttendanceRecord {
-  id               String           @id @default(uuid())
-  employeeId       String
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId       String           @db.ObjectId
   employee         Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  date             DateTime         @db.Date
+  date             DateTime
   firstIn          DateTime?
   lastOut          DateTime?
   totalWorkMinutes Int              @default(0)
@@ -416,8 +415,8 @@ model AttendanceRecord {
 }
 
 model AttendancePunch {
-  id                 String    @id @default(uuid())
-  employeeId         String
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId         String    @db.ObjectId
   employee           Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   punchType          PunchType
   timestamp          DateTime  @default(now())
@@ -432,15 +431,15 @@ model AttendancePunch {
 }
 
 model AttendanceRegularization {
-  id          String      @id @default(uuid())
-  employeeId  String
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId  String      @db.ObjectId
   employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  date        DateTime    @db.Date
+  date        DateTime
   requestedFirstIn DateTime?
   requestedLastOut DateTime?
   reason      String
   status      LeaveStatus @default(PENDING)
-  approvedById String?
+  approvedById String?    @db.ObjectId
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -450,8 +449,8 @@ model AttendanceRegularization {
 // ----------------------------------------------------
 
 model LeaveType {
-  id          String         @id @default(uuid())
-  companyId   String
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String         @db.ObjectId
   company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name        String         // "Casual Leave", "Sick Leave", "Earned Leave"
   code        String         // "CL", "SL", "EL"
@@ -468,10 +467,10 @@ model LeaveType {
 }
 
 model LeaveBalance {
-  id          String    @id @default(uuid())
-  employeeId  String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId  String    @db.ObjectId
   employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  leaveTypeId String
+  leaveTypeId String    @db.ObjectId
   leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
   year        Int
   totalDays   Float
@@ -484,18 +483,18 @@ model LeaveBalance {
 }
 
 model LeaveRequest {
-  id           String      @id @default(uuid())
-  employeeId   String
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId   String      @db.ObjectId
   employee     Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  leaveTypeId  String
+  leaveTypeId  String      @db.ObjectId
   leaveType    LeaveType   @relation(fields: [leaveTypeId], references: [id])
-  startDate    DateTime    @db.Date
-  endDate      DateTime    @db.Date
+  startDate    DateTime
+  endDate      DateTime
   totalDays    Float
   halfDayType  HalfDayType @default(NONE)
   reason       String
   status       LeaveStatus @default(PENDING)
-  approvedById String?
+  approvedById String?     @db.ObjectId
   rejectionReason String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -506,8 +505,8 @@ model LeaveRequest {
 // ----------------------------------------------------
 
 model SalaryStructure {
-  id              String      @id @default(uuid())
-  companyId       String
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  companyId       String      @db.ObjectId
   company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   title           String      // e.g. "Standard Executive CTC 5LPA"
   monthlyCtc      Float
@@ -529,8 +528,8 @@ model SalaryStructure {
 }
 
 model PayrollRun {
-  id              String        @id @default(uuid())
-  companyId       String
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  companyId       String        @db.ObjectId
   company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   month           Int           // 1 to 12
   year            Int
@@ -549,10 +548,10 @@ model PayrollRun {
 }
 
 model PayrollItem {
-  id                 String     @id @default(uuid())
-  payrollRunId       String
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  payrollRunId       String     @db.ObjectId
   payrollRun         PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
-  employeeId         String
+  employeeId         String     @db.ObjectId
   employee           Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   
   totalDaysInMonth   Int
@@ -588,18 +587,18 @@ model PayrollItem {
 // ----------------------------------------------------
 
 model ReimbursementClaim {
-  id          String      @id @default(uuid())
-  companyId   String
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String      @db.ObjectId
   company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  employeeId  String
+  employeeId  String      @db.ObjectId
   employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   category    String      // "TRAVEL", "FOOD", "INTERNET", "OFFICE_SUPPLIES", "CLIENT_ENTERTAINMENT"
   amount      Float
-  expenseDate DateTime    @db.Date
+  expenseDate DateTime
   description String
   receiptS3Key String?    // Uploaded receipt bill on AWS S3
   status      ClaimStatus @default(PENDING)
-  approvedById String?
+  approvedById String?    @db.ObjectId
   payrollMonth Int?
   payrollYear  Int?
   createdAt   DateTime    @default(now())
@@ -607,10 +606,10 @@ model ReimbursementClaim {
 }
 
 model SalaryAdvance {
-  id             String        @id @default(uuid())
-  companyId      String
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  companyId      String        @db.ObjectId
   company        Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  employeeId     String
+  employeeId     String        @db.ObjectId
   employee       Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   totalAmount    Float
   monthlyEmi     Float
@@ -619,7 +618,7 @@ model SalaryAdvance {
   remainingAmount Float
   reason         String
   status         AdvanceStatus @default(PENDING)
-  approvedById   String?
+  approvedById   String?       @db.ObjectId
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 }
@@ -629,8 +628,8 @@ model SalaryAdvance {
 // ----------------------------------------------------
 
 model CRMLead {
-  id          String        @id @default(uuid())
-  companyId   String
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String        @db.ObjectId
   company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name        String
   email       String?
@@ -644,8 +643,8 @@ model CRMLead {
 }
 
 model CRMCustomer {
-  id          String        @id @default(uuid())
-  companyId   String
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String        @db.ObjectId
   company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name        String
   email       String?
@@ -658,10 +657,10 @@ model CRMCustomer {
 }
 
 model CRMActivity {
-  id          String       @id @default(uuid())
-  leadId      String?
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  leadId      String?      @db.ObjectId
   lead        CRMLead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  customerId  String?
+  customerId  String?      @db.ObjectId
   customer    CRMCustomer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
   type        String       // "CALL", "MEETING", "EMAIL", "NOTE"
   notes       String
@@ -674,10 +673,10 @@ model CRMActivity {
 // ----------------------------------------------------
 
 model AuditLog {
-  id          String   @id @default(uuid())
-  companyId   String?
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String?  @db.ObjectId
   company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  userId      String?
+  userId      String?  @db.ObjectId
   user        User?    @relation(fields: [userId], references: [id])
   action      String   // e.g. "AUTH_LOGIN", "PUNCH_IN", "PAYROLL_FINALIZED", "KYC_VERIFIED"
   resource    String   // e.g. "AttendancePunch", "PayrollRun", "Employee"
