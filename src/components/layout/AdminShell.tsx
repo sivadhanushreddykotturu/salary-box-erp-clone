@@ -408,7 +408,7 @@ export function AdminShell({ children }: AdminShellProps) {
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               <span>Pending Requests</span>
               <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full ml-0.5">
-                22
+                6
               </span>
             </Link>
 
