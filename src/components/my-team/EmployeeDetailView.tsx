@@ -4516,10 +4516,23 @@ export function EmployeeDetailView({
                             onChange={(e) => setEarlyLeavingDeductionType(e.target.value)}
                             className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
                           >
-                            <option>Fixed Daily Rate</option>
-                            <option>Fixed Hourly Rate</option>
-                            <option>Half Day Salary</option>
-                            <option>Full Day Salary</option>
+                            {earlyLeavingDeductionMode === "fixed" ? (
+                              <>
+                                <option>Half Day Salary</option>
+                                <option>Full Day Salary</option>
+                                <option>1.5x Daily Salary</option>
+                                <option>Custom Multiplier</option>
+                                <option>Fixed Daily Rate</option>
+                              </>
+                            ) : (
+                              <>
+                                <option>0.5x Hourly Salary</option>
+                                <option>1x Hourly Salary</option>
+                                <option>1.5x Hourly Salary</option>
+                                <option>Custom Multiplier</option>
+                                <option>Fixed Hourly Rate</option>
+                              </>
+                            )}
                           </select>
                           <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
@@ -4537,10 +4550,10 @@ export function EmployeeDetailView({
                             type="text"
                             value={earlyLeavingDeductionAmount}
                             onChange={(e) => setEarlyLeavingDeductionAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                            className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full pl-6 pr-14 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                            /day
+                            {earlyLeavingDeductionMode === "fixed" ? "/day" : "/hour"}
                           </span>
                         </div>
                       </div>
@@ -4621,7 +4634,10 @@ export function EmployeeDetailView({
                       
                       {/* Option 1 (Selected by default) */}
                       <div
-                        onClick={() => setLateComingDeductionMode("fixed")}
+                        onClick={() => {
+                          setLateComingDeductionMode("fixed");
+                          setLateComingDeductionType("Fixed Daily Rate");
+                        }}
                         className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
                           lateComingDeductionMode === "fixed"
                             ? "border-blue-300 bg-blue-50/20"
@@ -4633,7 +4649,10 @@ export function EmployeeDetailView({
                             type="radio"
                             name="lateComingDeductionMode"
                             checked={lateComingDeductionMode === "fixed"}
-                            onChange={() => setLateComingDeductionMode("fixed")}
+                            onChange={() => {
+                              setLateComingDeductionMode("fixed");
+                              setLateComingDeductionType("Fixed Daily Rate");
+                            }}
                             className="mt-0.5 w-3.5 h-3.5 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
                           />
                           <span className="text-slate-800 font-medium text-xs">
@@ -4644,7 +4663,10 @@ export function EmployeeDetailView({
 
                       {/* Option 2 */}
                       <div
-                        onClick={() => setLateComingDeductionMode("dynamic")}
+                        onClick={() => {
+                          setLateComingDeductionMode("dynamic");
+                          setLateComingDeductionType("Fixed Hourly Rate");
+                        }}
                         className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
                           lateComingDeductionMode === "dynamic"
                             ? "border-blue-300 bg-blue-50/20"
@@ -4656,7 +4678,10 @@ export function EmployeeDetailView({
                             type="radio"
                             name="lateComingDeductionMode"
                             checked={lateComingDeductionMode === "dynamic"}
-                            onChange={() => setLateComingDeductionMode("dynamic")}
+                            onChange={() => {
+                              setLateComingDeductionMode("dynamic");
+                              setLateComingDeductionType("Fixed Hourly Rate");
+                            }}
                             className="mt-0.5 w-3.5 h-3.5 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
                           />
                           <span className="text-slate-700 font-normal text-xs">
@@ -4678,10 +4703,23 @@ export function EmployeeDetailView({
                             onChange={(e) => setLateComingDeductionType(e.target.value)}
                             className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
                           >
-                            <option>Fixed Daily Rate</option>
-                            <option>Fixed Hourly Rate</option>
-                            <option>Half Day Salary</option>
-                            <option>Full Day Salary</option>
+                            {lateComingDeductionMode === "fixed" ? (
+                              <>
+                                <option>Half Day Salary</option>
+                                <option>Full Day Salary</option>
+                                <option>1.5x Daily Salary</option>
+                                <option>Custom Multiplier</option>
+                                <option>Fixed Daily Rate</option>
+                              </>
+                            ) : (
+                              <>
+                                <option>0.5x Hourly Salary</option>
+                                <option>1x Hourly Salary</option>
+                                <option>1.5x Hourly Salary</option>
+                                <option>Custom Multiplier</option>
+                                <option>Fixed Hourly Rate</option>
+                              </>
+                            )}
                           </select>
                           <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
@@ -4699,10 +4737,10 @@ export function EmployeeDetailView({
                             type="text"
                             value={lateComingDeductionAmount}
                             onChange={(e) => setLateComingDeductionAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                            className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full pl-6 pr-14 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
-                            /day
+                            {lateComingDeductionMode === "fixed" ? "/day" : "/hour"}
                           </span>
                         </div>
                       </div>
