@@ -179,6 +179,22 @@ export function EmployeeDetailView({
     Array<{ approver: string; policy: string; isDropdownOpen?: boolean }>
   >([{ approver: "All Admins", policy: "Wait for approval" }]);
 
+  // User Permission States (Screenshots 1-3)
+  const initialRole = "Employee";
+  const [selectedUserRole, setSelectedUserRole] = useState("Employee");
+  const [customPermissions, setCustomPermissions] = useState<Record<string, { view?: boolean; edit?: boolean; approve?: boolean }>>({
+    "Staff Attendance Records": { view: false, edit: false },
+    "Attendance Reports": { view: false, edit: false },
+    "Work Timings & Roster": { view: false, edit: false },
+    "Attendance Modes": { view: false, edit: false },
+    "Automation Rules": { view: false, edit: false },
+    "Leave Requests": { approve: false },
+    "Balances & Policies": { view: false, edit: false },
+    "Reimbursement Requests": { view: false, edit: false, approve: false },
+  });
+
+  const isUserPermissionDirty = selectedUserRole !== initialRole || Object.values(customPermissions).some(p => p.view || p.edit || p.approve);
+
   const navTabs = [
     { id: "Personal Details", label: "Personal Details", icon: User },
     { id: "Employment Details", label: "Employment Details", icon: Briefcase },
@@ -1414,13 +1430,545 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 7: User Permission (Screenshots 1-3 Match 1:1) */}
+          {activeTab === "User Permission" && (
+            <div className="space-y-6 max-w-3xl">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-bold text-slate-800">User Permission</h3>
+                <button
+                  disabled={!isUserPermissionDirty}
+                  onClick={() => alert(`User permissions updated for ${formData.name} to ${selectedUserRole}!`)}
+                  className={`px-5 py-2 text-xs font-semibold rounded-md transition-colors ${
+                    isUserPermissionDirty
+                      ? "text-white bg-[#007BFF] hover:bg-blue-600 shadow-xs cursor-pointer"
+                      : "text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed"
+                  }`}
+                >
+                  Update Details
+                </button>
+              </div>
+
+              {/* Role Selection (Screenshot 1 Match) */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-12 items-start gap-4">
+                  <label className="col-span-3 text-slate-700 font-bold text-xs pt-2">
+                    <span className="text-red-500">*</span> Select User Role
+                  </label>
+
+                  <div className="col-span-9 space-y-2 text-xs">
+                    {/* Role 1: Employee */}
+                    <label
+                      onClick={() => setSelectedUserRole("Employee")}
+                      className={`block p-3 rounded-lg border transition-all cursor-pointer ${
+                        selectedUserRole === "Employee"
+                          ? "bg-[#EBF5FF]/50 border-blue-400 shadow-xs"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          type="radio"
+                          name="userRole"
+                          checked={selectedUserRole === "Employee"}
+                          onChange={() => setSelectedUserRole("Employee")}
+                          className="mt-0.5 text-[#007BFF] focus:ring-blue-500"
+                        />
+                        <div>
+                          <div className="font-bold text-slate-800 text-xs">Employee</div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Can mark their own attendance
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Role 2: Branch Admin */}
+                    <label
+                      onClick={() => setSelectedUserRole("Branch Admin")}
+                      className={`block p-3 rounded-lg border transition-all cursor-pointer ${
+                        selectedUserRole === "Branch Admin"
+                          ? "bg-[#EBF5FF]/50 border-blue-400 shadow-xs"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <input
+                          type="radio"
+                          name="userRole"
+                          checked={selectedUserRole === "Branch Admin"}
+                          onChange={() => setSelectedUserRole("Branch Admin")}
+                          className="text-[#007BFF] focus:ring-blue-500"
+                        />
+                        <span className="font-medium text-slate-700 text-xs">
+                          Branch Admin
+                        </span>
+                      </div>
+                    </label>
+
+                    {/* Role 3: Attendance Manager */}
+                    <label
+                      onClick={() => setSelectedUserRole("Attendance Manager")}
+                      className={`block p-3 rounded-lg border transition-all cursor-pointer ${
+                        selectedUserRole === "Attendance Manager"
+                          ? "bg-[#EBF5FF]/50 border-blue-400 shadow-xs"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <input
+                          type="radio"
+                          name="userRole"
+                          checked={selectedUserRole === "Attendance Manager"}
+                          onChange={() => setSelectedUserRole("Attendance Manager")}
+                          className="text-[#007BFF] focus:ring-blue-500"
+                        />
+                        <span className="font-medium text-slate-700 text-xs">
+                          Attendance Manager
+                        </span>
+                      </div>
+                    </label>
+
+                    {/* Role 4: Advanced Attendance Manager */}
+                    <label
+                      onClick={() => setSelectedUserRole("Advanced Attendance Manager")}
+                      className={`block p-3 rounded-lg border transition-all cursor-pointer ${
+                        selectedUserRole === "Advanced Attendance Manager"
+                          ? "bg-[#EBF5FF]/50 border-blue-400 shadow-xs"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <input
+                          type="radio"
+                          name="userRole"
+                          checked={selectedUserRole === "Advanced Attendance Manager"}
+                          onChange={() => setSelectedUserRole("Advanced Attendance Manager")}
+                          className="text-[#007BFF] focus:ring-blue-500"
+                        />
+                        <span className="font-medium text-slate-700 text-xs">
+                          Advanced Attendance Manager
+                        </span>
+                      </div>
+                    </label>
+
+                    {/* Role 5: Custom */}
+                    <label
+                      onClick={() => setSelectedUserRole("Custom")}
+                      className={`block p-3 rounded-lg border transition-all cursor-pointer ${
+                        selectedUserRole === "Custom"
+                          ? "bg-[#EBF5FF]/50 border-blue-400 shadow-xs"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          type="radio"
+                          name="userRole"
+                          checked={selectedUserRole === "Custom"}
+                          onChange={() => setSelectedUserRole("Custom")}
+                          className="mt-0.5 text-[#007BFF] focus:ring-blue-500"
+                        />
+                        <div>
+                          <div className="font-bold text-slate-800 text-xs">Custom</div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Has privileges decided by the admin
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Permission Matrix Table (Screenshots 2 & 3 Match) */}
+              {selectedUserRole === "Custom" && (
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-700">
+                    Provide Custom Permissions below
+                  </h4>
+
+                  <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#FAFBFD] text-slate-500 font-semibold border-b border-slate-200">
+                          <th className="px-5 py-3 w-1/2"></th>
+                          <th className="px-5 py-3 text-center">View</th>
+                          <th className="px-5 py-3 text-center">Create/Edit</th>
+                          <th className="px-5 py-3 text-center">Approve</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-700">
+                        {/* Group 1: Attendance Data */}
+                        <tr className="bg-slate-50/70 font-bold text-slate-800">
+                          <td colSpan={4} className="px-5 py-2">
+                            Attendance Data
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Staff Attendance Records</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Staff Attendance Records"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Staff Attendance Records": {
+                                    ...customPermissions["Staff Attendance Records"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Staff Attendance Records"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Staff Attendance Records": {
+                                    ...customPermissions["Staff Attendance Records"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Attendance Reports</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Attendance Reports"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Attendance Reports": {
+                                    ...customPermissions["Attendance Reports"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Attendance Reports"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Attendance Reports": {
+                                    ...customPermissions["Attendance Reports"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+
+                        {/* Group 2: Attendance Settings */}
+                        <tr className="bg-slate-50/70 font-bold text-slate-800">
+                          <td colSpan={4} className="px-5 py-2">
+                            Attendance Settings
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Work Timings & Roster</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Work Timings & Roster"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Work Timings & Roster": {
+                                    ...customPermissions["Work Timings & Roster"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Work Timings & Roster"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Work Timings & Roster": {
+                                    ...customPermissions["Work Timings & Roster"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Attendance Modes</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Attendance Modes"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Attendance Modes": {
+                                    ...customPermissions["Attendance Modes"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Attendance Modes"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Attendance Modes": {
+                                    ...customPermissions["Attendance Modes"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Automation Rules</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Automation Rules"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Automation Rules": {
+                                    ...customPermissions["Automation Rules"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Automation Rules"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Automation Rules": {
+                                    ...customPermissions["Automation Rules"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Shifts</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Breaks</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+
+                        {/* Group 3: Leave Management */}
+                        <tr className="bg-slate-50/70 font-bold text-slate-800">
+                          <td colSpan={4} className="px-5 py-2">
+                            Leave Management
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Leave Requests</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Leave Requests"]?.approve || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Leave Requests": {
+                                    ...customPermissions["Leave Requests"],
+                                    approve: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Balances & Policies</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Balances & Policies"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Balances & Policies": {
+                                    ...customPermissions["Balances & Policies"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Balances & Policies"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Balances & Policies": {
+                                    ...customPermissions["Balances & Policies"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <span className="w-3.5 h-3.5 bg-slate-200 rounded inline-block opacity-40" />
+                          </td>
+                        </tr>
+
+                        {/* Group 4: Reimbursement Management */}
+                        <tr className="bg-slate-50/70 font-bold text-slate-800">
+                          <td colSpan={4} className="px-5 py-2">
+                            Reimbursement Management
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-5 py-2.5">Reimbursement Requests</td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Reimbursement Requests"]?.view || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Reimbursement Requests": {
+                                    ...customPermissions["Reimbursement Requests"],
+                                    view: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Reimbursement Requests"]?.edit || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Reimbursement Requests": {
+                                    ...customPermissions["Reimbursement Requests"],
+                                    edit: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-5 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={customPermissions["Reimbursement Requests"]?.approve || false}
+                              onChange={(e) =>
+                                setCustomPermissions({
+                                  ...customPermissions,
+                                  "Reimbursement Requests": {
+                                    ...customPermissions["Reimbursement Requests"],
+                                    approve: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="rounded border-slate-300 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
             activeTab !== "Custom Details" &&
             activeTab !== "Background Verification" &&
             activeTab !== "Bank Account" &&
-            activeTab !== "Approval Flows" && (
+            activeTab !== "Approval Flows" &&
+            activeTab !== "User Permission" && (
               <div className="py-16 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-blue-50 text-[#007BFF] flex items-center justify-center mx-auto">
                   <Layers className="w-6 h-6" />
