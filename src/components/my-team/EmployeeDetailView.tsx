@@ -572,6 +572,34 @@ export function EmployeeDetailView({
     Array<{ id: string; docType: string; fileName: string; addedOn: string }>
   >([]);
 
+  // Penalty & Overtime Details State (1:1 Match with Screenshots)
+  const [penaltySubView, setPenaltySubView] = useState<
+    "root" | "early_leaving" | "late_coming" | "overtime"
+  >("root");
+
+  // Early Leaving Policy State
+  const [earlyLeavingAllowedDays, setEarlyLeavingAllowedDays] = useState("0");
+  const [earlyLeavingOnlyDeductIfEarlierThan, setEarlyLeavingOnlyDeductIfEarlierThan] = useState("0");
+  const [earlyLeavingDeductionMode, setEarlyLeavingDeductionMode] = useState<"fixed" | "dynamic">("fixed");
+  const [earlyLeavingDeductionType, setEarlyLeavingDeductionType] = useState("Fixed Daily Rate");
+  const [earlyLeavingDeductionAmount, setEarlyLeavingDeductionAmount] = useState("0");
+
+  // Late Coming Policy State
+  const [lateComingAllowedDays, setLateComingAllowedDays] = useState("0");
+  const [lateComingOnlyDeductIfLateBy, setLateComingOnlyDeductIfLateBy] = useState("0");
+  const [lateComingDeductionMode, setLateComingDeductionMode] = useState<"fixed" | "dynamic">("fixed");
+  const [lateComingDeductionType, setLateComingDeductionType] = useState("Fixed Daily Rate");
+  const [lateComingDeductionAmount, setLateComingDeductionAmount] = useState("0");
+
+  // Overtime Policy State
+  const [overtimeConsideredAfterMins, setOvertimeConsideredAfterMins] = useState("0");
+  const [extraHoursPayType, setExtraHoursPayType] = useState("Fixed Hourly Rate");
+  const [extraHoursPayAmount, setExtraHoursPayAmount] = useState("0");
+  const [publicHolidayPayType, setPublicHolidayPayType] = useState("Fixed Daily Rate");
+  const [publicHolidayPayAmount, setPublicHolidayPayAmount] = useState("0");
+  const [weekOffPayType, setWeekOffPayType] = useState("Fixed Daily Rate");
+  const [weekOffPayAmount, setWeekOffPayAmount] = useState("0");
+
   const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
   const [pendingNavTab, setPendingNavTab] = useState<string | null>(null);
 
@@ -4310,6 +4338,563 @@ export function EmployeeDetailView({
             </div>
           )}
 
+          {/* TAB 11: Penalty & Overtime Details (1:1 Screenshot Match) */}
+          {activeTab === "Penalty & Overtime Details" && (
+            <div className="space-y-6 max-w-4xl pb-16">
+              {/* SUBVIEW 1: Landing Root List (Screenshot 1) */}
+              {penaltySubView === "root" && (
+                <>
+                  <div className="pb-3 border-b border-slate-100">
+                    <h3 className="text-base font-bold text-slate-800">
+                      Penalty & Overtime Details
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* 1. Early Leaving Policy Card */}
+                    <div
+                      onClick={() => setPenaltySubView("early_leaving")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <span className="font-medium text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                        Early Leaving Policy
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* 2. Late Coming Policy Card */}
+                    <div
+                      onClick={() => setPenaltySubView("late_coming")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <span className="font-medium text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                        Late Coming Policy
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+
+                    {/* 3. Overtime Policy Card */}
+                    <div
+                      onClick={() => setPenaltySubView("overtime")}
+                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <span className="font-medium text-slate-800 text-xs group-hover:text-[#007BFF] transition-colors">
+                        Overtime Policy
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#007BFF] transition-colors" />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* SUBVIEW 2: Early Leaving Policy (Screenshot 4) */}
+              {penaltySubView === "early_leaving" && (
+                <div className="space-y-5">
+                  {/* Breadcrumb Header & Update Details */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPenaltySubView("root")}
+                        className="text-[#007BFF] font-medium hover:underline cursor-pointer"
+                      >
+                        Penalty & Overtime Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-700 font-bold">Early Leaving Policy</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => alert("Early Leaving Policy updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  {/* Early Leaving Form Controls */}
+                  <div className="max-w-md mx-auto space-y-6 pt-4 text-xs">
+                    {/* 1. Allowed Early Leaving Days */}
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-600 font-medium text-xs">
+                        Allowed Early Leaving Days <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={earlyLeavingAllowedDays}
+                          onChange={(e) => setEarlyLeavingAllowedDays(e.target.value.replace(/[^0-9]/g, ""))}
+                          className="w-full px-3 py-2 pr-12 rounded-md border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                          days
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 2. Only deduct if they leave earlier than */}
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-600 font-medium text-xs">
+                        Only deduct if they leave earlier than <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={earlyLeavingOnlyDeductIfEarlierThan}
+                          onChange={(e) => setEarlyLeavingOnlyDeductIfEarlierThan(e.target.value.replace(/[^0-9]/g, ""))}
+                          className="w-full px-3 py-2 pr-12 rounded-md border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                          mins
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3. Change deduction based on how early they leave? */}
+                    <div className="space-y-2.5">
+                      <label className="block text-slate-600 font-medium text-xs">
+                        Change deduction based on how early they leave? <span className="text-red-500">*</span>
+                      </label>
+                      
+                      {/* Option 1 (Selected by default) */}
+                      <div
+                        onClick={() => setEarlyLeavingDeductionMode("fixed")}
+                        className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
+                          earlyLeavingDeductionMode === "fixed"
+                            ? "border-blue-300 bg-blue-50/20"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <input
+                            type="radio"
+                            name="earlyLeavingDeductionMode"
+                            checked={earlyLeavingDeductionMode === "fixed"}
+                            onChange={() => setEarlyLeavingDeductionMode("fixed")}
+                            className="mt-0.5 w-3.5 h-3.5 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                          />
+                          <span className="text-slate-800 font-medium text-xs">
+                            No, use a fixed deduction for early leaving
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Option 2 */}
+                      <div
+                        onClick={() => setEarlyLeavingDeductionMode("dynamic")}
+                        className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
+                          earlyLeavingDeductionMode === "dynamic"
+                            ? "border-blue-300 bg-blue-50/20"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <input
+                            type="radio"
+                            name="earlyLeavingDeductionMode"
+                            checked={earlyLeavingDeductionMode === "dynamic"}
+                            onChange={() => setEarlyLeavingDeductionMode("dynamic")}
+                            className="mt-0.5 w-3.5 h-3.5 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                          />
+                          <span className="text-slate-700 font-normal text-xs">
+                            Yes, deduct based on how early they left
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Deduction & Amount */}
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div className="space-y-1.5">
+                        <label className="block text-slate-600 font-medium text-xs">
+                          Deduction <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={earlyLeavingDeductionType}
+                            onChange={(e) => setEarlyLeavingDeductionType(e.target.value)}
+                            className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                          >
+                            <option>Fixed Daily Rate</option>
+                            <option>Fixed Hourly Rate</option>
+                            <option>Half Day Salary</option>
+                            <option>Full Day Salary</option>
+                          </select>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-slate-600 font-medium text-xs">
+                          Amount <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                            ₹
+                          </span>
+                          <input
+                            type="text"
+                            value={earlyLeavingDeductionAmount}
+                            onChange={(e) => setEarlyLeavingDeductionAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                            className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                            /day
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SUBVIEW 3: Late Coming Policy (Screenshot 3) */}
+              {penaltySubView === "late_coming" && (
+                <div className="space-y-5">
+                  {/* Breadcrumb Header & Update Details */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPenaltySubView("root")}
+                        className="text-[#007BFF] font-medium hover:underline cursor-pointer"
+                      >
+                        Penalty & Overtime Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-700 font-bold">Late Coming Policy</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => alert("Late Coming Policy updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  {/* Late Coming Form Controls */}
+                  <div className="max-w-md mx-auto space-y-6 pt-4 text-xs">
+                    {/* 1. Allowed Late Days */}
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-600 font-medium text-xs">
+                        Allowed Late Days <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={lateComingAllowedDays}
+                          onChange={(e) => setLateComingAllowedDays(e.target.value.replace(/[^0-9]/g, ""))}
+                          className="w-full px-3 py-2 pr-12 rounded-md border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                          days
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 2. Only deduct if late by more than */}
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-600 font-medium text-xs">
+                        Only deduct if late by more than <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={lateComingOnlyDeductIfLateBy}
+                          onChange={(e) => setLateComingOnlyDeductIfLateBy(e.target.value.replace(/[^0-9]/g, ""))}
+                          className="w-full px-3 py-2 pr-12 rounded-md border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                          mins
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3. Change deduction based on how late they arrive? */}
+                    <div className="space-y-2.5">
+                      <label className="block text-slate-600 font-medium text-xs">
+                        Change deduction based on how late they arrive? <span className="text-red-500">*</span>
+                      </label>
+                      
+                      {/* Option 1 (Selected by default) */}
+                      <div
+                        onClick={() => setLateComingDeductionMode("fixed")}
+                        className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
+                          lateComingDeductionMode === "fixed"
+                            ? "border-blue-300 bg-blue-50/20"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <input
+                            type="radio"
+                            name="lateComingDeductionMode"
+                            checked={lateComingDeductionMode === "fixed"}
+                            onChange={() => setLateComingDeductionMode("fixed")}
+                            className="mt-0.5 w-3.5 h-3.5 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                          />
+                          <span className="text-slate-800 font-medium text-xs">
+                            No, use a fixed deduction for late arrival
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Option 2 */}
+                      <div
+                        onClick={() => setLateComingDeductionMode("dynamic")}
+                        className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
+                          lateComingDeductionMode === "dynamic"
+                            ? "border-blue-300 bg-blue-50/20"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <input
+                            type="radio"
+                            name="lateComingDeductionMode"
+                            checked={lateComingDeductionMode === "dynamic"}
+                            onChange={() => setLateComingDeductionMode("dynamic")}
+                            className="mt-0.5 w-3.5 h-3.5 text-[#007BFF] focus:ring-blue-500 cursor-pointer"
+                          />
+                          <span className="text-slate-700 font-normal text-xs">
+                            Yes, deduct based on how late they arrived
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Deduction & Amount */}
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div className="space-y-1.5">
+                        <label className="block text-slate-600 font-medium text-xs">
+                          Deduction <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={lateComingDeductionType}
+                            onChange={(e) => setLateComingDeductionType(e.target.value)}
+                            className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                          >
+                            <option>Fixed Daily Rate</option>
+                            <option>Fixed Hourly Rate</option>
+                            <option>Half Day Salary</option>
+                            <option>Full Day Salary</option>
+                          </select>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-slate-600 font-medium text-xs">
+                          Amount <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                            ₹
+                          </span>
+                          <input
+                            type="text"
+                            value={lateComingDeductionAmount}
+                            onChange={(e) => setLateComingDeductionAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                            className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                            /day
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SUBVIEW 4: Overtime Policy (Screenshot 2) */}
+              {penaltySubView === "overtime" && (
+                <div className="space-y-5">
+                  {/* Breadcrumb Header & Update Details */}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPenaltySubView("root")}
+                        className="text-[#007BFF] font-medium hover:underline cursor-pointer"
+                      >
+                        Penalty & Overtime Details
+                      </button>
+                      <span className="text-slate-400 font-normal">»</span>
+                      <span className="text-slate-700 font-bold">Overtime Policy</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => alert("Overtime Policy updated successfully!")}
+                      className="px-5 py-2 text-xs font-semibold text-white bg-[#007BFF] hover:bg-blue-600 rounded-md shadow-xs transition-colors cursor-pointer"
+                    >
+                      Update Details
+                    </button>
+                  </div>
+
+                  {/* Overtime Form Content */}
+                  <div className="max-w-md mx-auto space-y-6 pt-2 text-xs">
+                    {/* Section 1: Working Days */}
+                    <div className="space-y-4">
+                      <h4 className="font-bold text-slate-800 text-xs">Working Days</h4>
+
+                      {/* Overtime considered after */}
+                      <div className="space-y-1.5">
+                        <label className="block text-slate-600 font-medium text-xs">
+                          Overtime considered after <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={overtimeConsideredAfterMins}
+                            onChange={(e) => setOvertimeConsideredAfterMins(e.target.value.replace(/[^0-9]/g, ""))}
+                            className="w-full px-3 py-2 pr-12 rounded-md border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                            mins
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Extra Hours Pay & Amount */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-600 font-medium text-xs">
+                            Extra Hours Pay <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={extraHoursPayType}
+                              onChange={(e) => setExtraHoursPayType(e.target.value)}
+                              className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                            >
+                              <option>Fixed Hourly Rate</option>
+                              <option>1.5x Hourly Rate</option>
+                              <option>2x Hourly Rate</option>
+                            </select>
+                            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-600 font-medium text-xs">
+                            Amount <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                              ₹
+                            </span>
+                            <input
+                              type="text"
+                              value={extraHoursPayAmount}
+                              onChange={(e) => setExtraHoursPayAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                              className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                              /hour
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Weekoffs and Holidays */}
+                    <div className="space-y-4 pt-2">
+                      <h4 className="font-bold text-slate-800 text-xs">Weekoffs and Holidays</h4>
+
+                      {/* Public Holiday Pay & Amount */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-600 font-medium text-xs">
+                            Public Holiday Pay <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={publicHolidayPayType}
+                              onChange={(e) => setPublicHolidayPayType(e.target.value)}
+                              className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                            >
+                              <option>Fixed Daily Rate</option>
+                              <option>2x Daily Rate</option>
+                              <option>1.5x Daily Rate</option>
+                            </select>
+                            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-600 font-medium text-xs">
+                            Amount <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                              ₹
+                            </span>
+                            <input
+                              type="text"
+                              value={publicHolidayPayAmount}
+                              onChange={(e) => setPublicHolidayPayAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                              className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                              /day
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Week Off Pay & Amount */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-600 font-medium text-xs">
+                            Week Off Pay <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={weekOffPayType}
+                              onChange={(e) => setWeekOffPayType(e.target.value)}
+                              className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium cursor-pointer"
+                            >
+                              <option>Fixed Daily Rate</option>
+                              <option>2x Daily Rate</option>
+                              <option>1.5x Daily Rate</option>
+                            </select>
+                            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-600 font-medium text-xs">
+                            Amount <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                              ₹
+                            </span>
+                            <input
+                              type="text"
+                              value={weekOffPayAmount}
+                              onChange={(e) => setWeekOffPayAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                              className="w-full pl-6 pr-12 py-2 rounded-md border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-medium">
+                              /day
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Other Tabs Placeholder */}
           {activeTab !== "Personal Details" &&
             activeTab !== "Employment Details" &&
@@ -4320,6 +4905,7 @@ export function EmployeeDetailView({
             activeTab !== "User Permission" &&
             activeTab !== "Attendance Details" &&
             activeTab !== "Salary Details" &&
+            activeTab !== "Penalty & Overtime Details" &&
             activeTab !== "Documents" &&
             activeTab !== "Additional Settings" && (
               <div className="py-16 text-center space-y-3">
