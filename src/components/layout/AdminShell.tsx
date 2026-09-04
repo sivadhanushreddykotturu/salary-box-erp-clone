@@ -4,15 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Users,
-  Fingerprint,
-  Banknote,
-  Briefcase,
-  FileBarChart2,
-  MapPin,
-  ShieldCheck,
-  CreditCard,
-  Gift,
   Menu,
   ChevronDown,
   Settings,
@@ -22,6 +13,17 @@ import {
   MessageSquare,
   Sparkles
 } from "lucide-react";
+import {
+  MyTeamIcon,
+  AttendanceIcon,
+  PayrollIcon,
+  CrmSuitcaseIcon,
+  ReportsIcon,
+  LocationIcon,
+  VerificationIcon,
+  BillingIcon,
+  ReferIcon
+} from "../icons/SalaryBoxNavIcons";
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -74,7 +76,7 @@ export function AdminShell({ children }: AdminShellProps) {
             }`}
           >
             <div className="flex items-center gap-3">
-              <Users className={`w-4 h-4 shrink-0 ${pathname.startsWith("/my-team") ? "text-[#007BFF]" : "text-slate-500"}`} />
+              <MyTeamIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/my-team") ? "text-[#007BFF]" : "text-slate-500"}`} />
               {sidebarOpen && <span>My Team</span>}
             </div>
           </Link>
@@ -91,7 +93,7 @@ export function AdminShell({ children }: AdminShellProps) {
               }`}
             >
               <div className="flex items-center gap-3">
-                <Fingerprint className={`w-4 h-4 shrink-0 ${pathname.startsWith("/attendance") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                <AttendanceIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/attendance") ? "text-[#007BFF]" : "text-slate-500"}`} />
                 {sidebarOpen && <span>Attendance</span>}
               </div>
               {sidebarOpen && (
@@ -133,7 +135,7 @@ export function AdminShell({ children }: AdminShellProps) {
             }`}
           >
             <div className="flex items-center gap-3">
-              <Banknote className="w-4 h-4 shrink-0 text-slate-500" />
+              <PayrollIcon className="w-4 h-4 shrink-0 text-slate-500" />
               {sidebarOpen && <span>Payroll</span>}
             </div>
             {sidebarOpen && <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
@@ -151,7 +153,7 @@ export function AdminShell({ children }: AdminShellProps) {
               }`}
             >
               <div className="flex items-center gap-3">
-                <Briefcase className={`w-4 h-4 shrink-0 ${pathname.startsWith("/crm") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                <CrmSuitcaseIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/crm") ? "text-[#007BFF]" : "text-slate-500"}`} />
                 {sidebarOpen && <span>CRM</span>}
               </div>
               {sidebarOpen && (
@@ -197,7 +199,7 @@ export function AdminShell({ children }: AdminShellProps) {
               }`}
             >
               <div className="flex items-center gap-3">
-                <FileBarChart2 className={`w-4 h-4 shrink-0 ${pathname.startsWith("/reports") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                <ReportsIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/reports") ? "text-[#007BFF]" : "text-slate-500"}`} />
                 {sidebarOpen && <span>Reports</span>}
               </div>
               {sidebarOpen && (
@@ -236,7 +238,7 @@ export function AdminShell({ children }: AdminShellProps) {
             href="/location"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           >
-            <MapPin className="w-4 h-4 shrink-0 text-slate-500" />
+            <LocationIcon className="w-4 h-4 shrink-0 text-slate-500" />
             {sidebarOpen && <span>Location</span>}
           </Link>
 
@@ -245,7 +247,7 @@ export function AdminShell({ children }: AdminShellProps) {
             href="/verification"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           >
-            <ShieldCheck className="w-4 h-4 shrink-0 text-slate-500" />
+            <VerificationIcon className="w-4 h-4 shrink-0 text-slate-500" />
             {sidebarOpen && <span>Background Verification</span>}
           </Link>
 
@@ -254,7 +256,7 @@ export function AdminShell({ children }: AdminShellProps) {
             href="/billing"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           >
-            <CreditCard className="w-4 h-4 shrink-0 text-slate-500" />
+            <BillingIcon className="w-4 h-4 shrink-0 text-slate-500" />
             {sidebarOpen && <span>Subscriptions & Billing</span>}
           </Link>
 
@@ -263,19 +265,19 @@ export function AdminShell({ children }: AdminShellProps) {
             href="/refer"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           >
-            <Gift className="w-4 h-4 shrink-0 text-slate-500" />
+            <ReferIcon className="w-4 h-4 shrink-0 text-slate-500" />
             {sidebarOpen && <span>Refer a Friend</span>}
           </Link>
         </div>
 
         {/* Bottom SalaryBox Branding */}
-        <div className="p-4 border-t border-slate-100 flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#00D1B2] flex items-center justify-center text-white font-bold text-xs shadow-sm">
-            âš¡
-          </div>
+        <div className="p-4 border-t border-slate-100 flex items-center gap-2.5">
+          <svg className="w-5 h-5 text-slate-900" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 14l8-8 8 8-3.5 3.5L12 13l-4.5 4.5L4 14z" />
+          </svg>
           {sidebarOpen && (
-            <span className="font-bold text-slate-900 tracking-tight text-sm">
-              Salary<span className="text-[#007BFF]">Box</span>
+            <span className="font-bold text-slate-900 tracking-tight text-sm font-sans">
+              Salary<span className="text-slate-900">Box</span>
             </span>
           )}
         </div>
