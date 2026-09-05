@@ -23,7 +23,12 @@ import {
   LocationIcon,
   VerificationIcon,
   BillingIcon,
-  ReferIcon
+  ReferIcon,
+  HeaderPendingRequestsIcon,
+  HeaderSettingsIcon,
+  HeaderHelpIcon,
+  HeaderBellIcon,
+  HeaderMegaphoneIcon
 } from "../icons/SalaryBoxNavIcons";
 
 interface AdminShellProps {
@@ -378,79 +383,104 @@ export function AdminShell({ children }: AdminShellProps) {
 
       {/* 2. Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="h-14 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0 z-20">
+        <header className="h-12 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0 z-20">
+          {/* Left section: Hamburger, Company Logo avatar, Company Name dropdown, Divider, Company Code */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-md hover:bg-slate-100 text-slate-600 focus:outline-none"
+              className="p-1 rounded text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+              aria-label="Toggle menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4 stroke-[2]" />
             </button>
 
-            <div className="flex items-center gap-2.5 pl-1">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                RSS
+            <div className="flex items-center gap-2">
+              {/* Company Logo Badge: Dark navy background with RSS LOGISTICS text logo */}
+              <div className="w-6 h-6 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center text-[9px] font-extrabold tracking-tighter shadow-xs overflow-hidden shrink-0 border border-slate-200">
+                <span className="scale-[0.85] font-black">RSS</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button className="flex items-center gap-1 text-xs font-bold text-slate-800 hover:text-blue-600">
-                  RSS LOGISTICS
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-[13px] font-bold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  <span>{userProfile.companyName}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-500 stroke-[2.5]" />
                 </button>
-                <span className="text-slate-300">|</span>
-                <span className="text-xs text-slate-500 font-medium">
-                  Company Code: <strong className="text-slate-700 font-semibold">IDGWDA</strong>
+                <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+                <span className="text-xs text-slate-500 font-normal">
+                  Company Code: <span className="text-slate-700 font-semibold">{userProfile.companyCode}</span>
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Right section: Pending Requests (red badge 22), Settings, Help, Divider, Bell, Megaphone, Divider, Profile initials avatar */}
+          <div className="flex items-center gap-2.5">
+            {/* Pending Requests */}
             <Link
               href="/pending-requests"
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <HeaderPendingRequestsIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
               <span>Pending Requests</span>
-              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full ml-0.5">
-                6
+              <span className="bg-[#E53E3E] text-white text-[9px] font-bold px-1.5 py-[1px] rounded-full leading-none -ml-0.5">
+                22
               </span>
             </Link>
 
+            {/* Settings */}
             <Link
               href="/settings"
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer"
+              className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
             >
-              <img src="/icons/setting-2-svgrepo-com.svg" alt="Settings" className="w-3.5 h-3.5 object-contain opacity-70" />
+              <HeaderSettingsIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
               <span>Settings</span>
             </Link>
 
-            <button className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer">
-              <img src="/icons/help-circle-svgrepo-com.svg" alt="Help" className="w-3.5 h-3.5 object-contain opacity-70" />
+            {/* Vertical Divider */}
+            <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+
+            {/* Help */}
+            <button
+              type="button"
+              className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
+            >
+              <HeaderHelpIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
               <span>Help</span>
             </button>
 
+            {/* Vertical Divider */}
+            <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+
+            {/* Notifications Bell */}
             <Link
               href="/notifications"
-              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer flex items-center justify-center transition-colors"
+              className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer flex items-center justify-center"
               title="Notifications"
             >
-              <img src="/icons/bell-svgrepo-com.svg" alt="Notifications" className="w-4 h-4 object-contain opacity-70" />
+              <HeaderBellIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
             </Link>
 
+            {/* Announcements Megaphone */}
             <Link
               href="/announcements"
-              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer flex items-center justify-center transition-colors"
+              className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer flex items-center justify-center"
               title="Announcements"
             >
-              <img src="/icons/announcement-svgrepo-com.svg" alt="Announcements" className="w-4 h-4 object-contain opacity-70" />
+              <HeaderMegaphoneIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
             </Link>
 
-            {/* Profile Avatar & Dropdown Popup */}
+            {/* Vertical Divider */}
+            <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+
+            {/* User Profile Avatar with PR badge */}
             <div className="relative" ref={profileMenuRef}>
               <button
                 type="button"
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs border border-purple-200 cursor-pointer ml-1 hover:ring-2 hover:ring-purple-200 transition-all focus:outline-none"
+                className="w-6 h-6 rounded bg-[#FCE7F3] text-[#BE185D] hover:bg-[#FBCFE8] flex items-center justify-center font-bold text-[10px] tracking-tight transition-all focus:outline-none cursor-pointer border border-[#F472B6]/30"
                 aria-label="User profile menu"
                 aria-expanded={profileOpen}
               >
