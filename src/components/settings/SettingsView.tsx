@@ -57,7 +57,23 @@ export function SettingsView() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Company Details State
-  const [companyDetails, setCompanyDetails] = useState({
+  const [companyDetails, setCompanyDetails] = useState<{
+    name: string;
+    companyCode: string;
+    businessEmail: string;
+    phone: string;
+    gstin: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+    logo?: string | null;
+    businessType?: string | null;
+    udyamNumber?: string | null;
+    branchesCount: number;
+    departmentsCount: number;
+    employeesCount: number;
+  }>({
     name: "RSS LOGISTICS",
     companyCode: "IDGWDA",
     businessEmail: "admin@rsslogistics.in",
@@ -67,6 +83,9 @@ export function SettingsView() {
     city: "Vijayawada",
     state: "Andhra Pradesh",
     pincode: "520007",
+    logo: null,
+    businessType: "",
+    udyamNumber: "",
     branchesCount: 3,
     departmentsCount: 5,
     employeesCount: 42,
@@ -373,13 +392,21 @@ export function SettingsView() {
           <div className="divide-y divide-slate-100">
             {/* Edit Company Details */}
             <div
-              onClick={() => setActiveModal("editCompany")}
+              onClick={() => router.push("/add-edit-company")}
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                  RSS
-                </div>
+                {companyDetails.logo ? (
+                  <img
+                    src={companyDetails.logo}
+                    alt={companyDetails.name}
+                    className="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
+                    RSS
+                  </div>
+                )}
                 <div>
                   <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                     {companyDetails.name}

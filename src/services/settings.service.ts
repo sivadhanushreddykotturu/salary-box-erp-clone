@@ -70,6 +70,9 @@ export class SettingsService {
           city: company.city,
           state: company.state,
           pincode: company.pincode,
+          logo: company.logo,
+          businessType: company.businessType,
+          udyamNumber: company.udyamNumber,
           status: company.status,
           branchesCount: company.branches.length,
           departmentsCount: company.departments.length,
@@ -116,6 +119,9 @@ export class SettingsService {
         city?: string;
         state?: string;
         pincode?: string;
+        logo?: string;
+        businessType?: string;
+        udyamNumber?: string;
       };
     },
     userId?: string
@@ -163,6 +169,9 @@ export class SettingsService {
         if (payload.companyDetails.city !== undefined) updateData.city = payload.companyDetails.city;
         if (payload.companyDetails.state !== undefined) updateData.state = payload.companyDetails.state;
         if (payload.companyDetails.pincode !== undefined) updateData.pincode = payload.companyDetails.pincode;
+        if (payload.companyDetails.logo !== undefined) updateData.logo = payload.companyDetails.logo;
+        if (payload.companyDetails.businessType !== undefined) updateData.businessType = payload.companyDetails.businessType;
+        if (payload.companyDetails.udyamNumber !== undefined) updateData.udyamNumber = payload.companyDetails.udyamNumber;
       }
 
       const updated = await tx.company.update({

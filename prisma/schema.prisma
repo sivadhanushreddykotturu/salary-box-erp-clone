@@ -150,6 +150,9 @@ model Company {
   city                   String?
   state                  String?
   pincode                String?
+  logo                   String?
+  businessType           String?
+  udyamNumber            String?
   status                 CompanyStatus  @default(TRIAL)
   planId                 String         @db.ObjectId
   plan                   Plan           @relation(fields: [planId], references: [id])
