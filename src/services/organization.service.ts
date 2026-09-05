@@ -127,7 +127,19 @@ export class OrganizationService {
     return withTenantContext(companyId, async (tx) => {
       return tx.department.findMany({
         where: { companyId },
-        include: { _count: { select: { employees: true } } },
+        include: {
+          employees: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              employeeCode: true,
+              avatarUrl: true,
+              branchId: true,
+            },
+          },
+          _count: { select: { employees: true } },
+        },
         orderBy: { name: 'asc' },
       });
     });
@@ -137,6 +149,65 @@ export class OrganizationService {
     return withTenantContext(companyId, async (tx) => {
       return tx.department.create({
         data: { companyId, name },
+      });
+    });
+  }
+
+  async updateDepartment(companyId: string, departmentId: string, name: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const existing = await tx.department.findFirst({
+        where: { id: departmentId, companyId },
+      });
+
+      if (!existing) {
+        throw new NotFoundError('Department not found');
+      }
+
+      return tx.department.update({
+        where: { id: departmentId },
+        data: { name },
+      });
+    });
+  }
+
+  async deleteDepartment(companyId: string, departmentId: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const existing = await tx.department.findFirst({
+        where: { id: departmentId, companyId },
+      });
+
+      if (!existing) {
+        throw new NotFoundError('Department not found');
+      }
+
+      // Unassign employees from this department before deleting
+      await tx.employee.updateMany({
+        where: { departmentId, companyId },
+        data: { departmentId: null },
+      });
+
+      await tx.department.delete({
+        where: { id: departmentId },
+      });
+
+      return { success: true };
+    });
+  }
+
+  async assignEmployeeToDepartment(companyId: string, departmentId: string, employeeId: string) {
+    return withTenantContext(companyId, async (tx) => {
+      return tx.employee.update({
+        where: { id: employeeId },
+        data: { departmentId },
+      });
+    });
+  }
+
+  async removeEmployeeFromDepartment(companyId: string, employeeId: string) {
+    return withTenantContext(companyId, async (tx) => {
+      return tx.employee.update({
+        where: { id: employeeId },
+        data: { departmentId: null },
       });
     });
   }

@@ -440,7 +440,7 @@ export function SettingsView() {
 
             {/* My Departments */}
             <div
-              onClick={() => setActiveModal("departments")}
+              onClick={() => router.push("/departments")}
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
