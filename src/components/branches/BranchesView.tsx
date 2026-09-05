@@ -17,6 +17,7 @@ import {
   Minus,
   Navigation
 } from "lucide-react";
+import { BranchMapPicker } from "./BranchMapPicker";
 
 export interface BranchItem {
   id: string;
@@ -596,141 +597,16 @@ export function BranchesView() {
                 </button>
               </form>
 
-              {/* Interactive Map Canvas UI */}
-              <div className="relative w-full h-80 sm:h-96 rounded-lg border border-slate-200 overflow-hidden shadow-inner bg-[#E5E3DF]">
-                {/* Map Layer Canvas Simulation using styled OpenStreetMap / Google Maps View */}
-                <div
-                  className="w-full h-full relative cursor-crosshair select-none flex items-center justify-center bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      mapType === "satellite"
-                        ? "radial-gradient(circle, #334155 10%, #1e293b 90%)"
-                        : "radial-gradient(circle, #F1EFE9 20%, #E2DFD2 90%)",
-                  }}
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left - rect.width / 2;
-                    const y = e.clientY - rect.top - rect.height / 2;
-                    // slight delta adjustment
-                    const deltaLat = -y * 0.0003;
-                    const deltaLng = x * 0.0003;
-                    setFormLat((prev) => +(prev + deltaLat).toFixed(6));
-                    setFormLng((prev) => +(prev + deltaLng).toFixed(6));
-                  }}
-                >
-                  {/* Road Grid Overlay */}
-                  <svg
-                    className="absolute inset-0 w-full h-full pointer-events-none opacity-40"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <pattern
-                        id="grid"
-                        width="80"
-                        height="80"
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <path
-                          d="M 80 0 L 0 0 0 80"
-                          fill="none"
-                          stroke={mapType === "satellite" ? "#475569" : "#CBD5E1"}
-                          strokeWidth="1.5"
-                        />
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                  </svg>
-
-                  {/* Geofence Circle Overlay */}
-                  <div
-                    className="absolute rounded-full pointer-events-none transition-all duration-300 flex items-center justify-center"
-                    style={{
-                      width: `${Math.min(300, Math.max(60, (formRadius || 100) * 1.5))}px`,
-                      height: `${Math.min(300, Math.max(60, (formRadius || 100) * 1.5))}px`,
-                      backgroundColor: "rgba(37, 99, 235, 0.15)",
-                      border: "2px solid rgba(37, 99, 235, 0.6)",
-                    }}
-                  >
-                    <span className="text-[10px] font-bold text-blue-700 bg-white/80 px-1.5 py-0.5 rounded shadow-xs">
-                      {formRadius}m Geofence
-                    </span>
-                  </div>
-
-                  {/* Center Red Map Pin */}
-                  <div className="relative z-10 flex flex-col items-center -translate-y-4 pointer-events-none animate-bounce duration-1000">
-                    <div className="w-8 h-8 text-red-600 drop-shadow-md">
-                      <MapPin className="w-8 h-8 fill-red-600 text-white" />
-                    </div>
-                    <div className="w-2.5 h-1 bg-black/40 rounded-full blur-[1px]"></div>
-                  </div>
-
-                  {/* Map / Satellite Toggle in top left */}
-                  <div className="absolute top-3 left-3 z-20 flex rounded bg-white shadow border border-slate-200 overflow-hidden text-xs">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMapType("map");
-                      }}
-                      className={`px-3 py-1 font-medium transition-colors cursor-pointer ${
-                        mapType === "map"
-                          ? "bg-slate-100 text-slate-900 font-bold"
-                          : "text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      Map
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMapType("satellite");
-                      }}
-                      className={`px-3 py-1 font-medium transition-colors border-l border-slate-200 cursor-pointer ${
-                        mapType === "satellite"
-                          ? "bg-slate-100 text-slate-900 font-bold"
-                          : "text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      Satellite
-                    </button>
-                  </div>
-
-                  {/* Fullscreen Icon in top right */}
-                  <div className="absolute top-3 right-3 z-20 bg-white p-1.5 rounded shadow border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer">
-                    <Maximize2 className="w-4 h-4" />
-                  </div>
-
-                  {/* Zoom controls in bottom right */}
-                  <div className="absolute bottom-3 right-3 z-20 flex flex-col bg-white rounded shadow border border-slate-200 overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setZoomLevel((z) => Math.min(20, z + 1));
-                      }}
-                      className="p-1.5 text-slate-700 hover:bg-slate-50 border-b border-slate-200 cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setZoomLevel((z) => Math.max(1, z - 1));
-                      }}
-                      className="p-1.5 text-slate-700 hover:bg-slate-50 cursor-pointer"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Coordinate info pill at bottom left */}
-                  <div className="absolute bottom-3 left-3 z-20 bg-black/70 backdrop-blur-xs text-white text-[10px] px-2.5 py-1 rounded font-mono">
-                    Lat: {formLat.toFixed(5)}, Lng: {formLng.toFixed(5)}
-                  </div>
-                </div>
-              </div>
+              {/* Real Interactive Google & OSM Map Engine */}
+              <BranchMapPicker
+                latitude={formLat}
+                longitude={formLng}
+                radiusMeters={formRadius}
+                onLocationChange={(lat, lng) => {
+                  setFormLat(lat);
+                  setFormLng(lng);
+                }}
+              />
             </div>
           </div>
         </div>
