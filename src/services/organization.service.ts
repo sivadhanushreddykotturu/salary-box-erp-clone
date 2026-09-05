@@ -58,6 +58,71 @@ export class OrganizationService {
     });
   }
 
+  async updateBranch(
+    companyId: string,
+    branchId: string,
+    input: Partial<CreateBranchInput>,
+    userId?: string
+  ) {
+    return withTenantContext(companyId, async (tx) => {
+      const existing = await tx.branch.findFirst({
+        where: { id: branchId, companyId },
+      });
+
+      if (!existing) {
+        throw new NotFoundError('Branch not found');
+      }
+
+      const updated = await tx.branch.update({
+        where: { id: branchId },
+        data: {
+          name: input.name ?? existing.name,
+          code: input.code !== undefined ? input.code : existing.code,
+          address: input.address !== undefined ? input.address : existing.address,
+          latitude: input.latitude !== undefined ? input.latitude : existing.latitude,
+          longitude: input.longitude !== undefined ? input.longitude : existing.longitude,
+          radiusMeters: input.radiusMeters !== undefined ? input.radiusMeters : existing.radiusMeters,
+        },
+      });
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId,
+        action: 'BRANCH_UPDATED',
+        resource: 'Branch',
+        resourceId: branchId,
+      });
+
+      return updated;
+    });
+  }
+
+  async deleteBranch(companyId: string, branchId: string, userId?: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const existing = await tx.branch.findFirst({
+        where: { id: branchId, companyId },
+      });
+
+      if (!existing) {
+        throw new NotFoundError('Branch not found');
+      }
+
+      await tx.branch.delete({
+        where: { id: branchId },
+      });
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId,
+        action: 'BRANCH_DELETED',
+        resource: 'Branch',
+        resourceId: branchId,
+      });
+
+      return { success: true };
+    });
+  }
+
   async getDepartments(companyId: string) {
     return withTenantContext(companyId, async (tx) => {
       return tx.department.findMany({
