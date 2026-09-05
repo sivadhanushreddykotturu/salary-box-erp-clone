@@ -317,6 +317,158 @@ export class EmployeeService {
       };
     });
   }
+
+  async updateEmployeeRole(
+    companyId: string,
+    employeeId: string,
+    userRole: string,
+    currentUserId?: string
+  ) {
+    return withTenantContext(companyId, async (tx) => {
+      const employee = await tx.employee.findFirst({
+        where: { id: employeeId, companyId },
+        include: { user: true },
+      });
+
+      if (!employee) {
+        throw new NotFoundError('Employee not found');
+      }
+
+      // Map userRole string to Role enum
+      let systemRole: Role = Role.EMPLOYEE;
+      if (userRole === 'Branch Admin' || userRole === 'Admin') {
+        systemRole = Role.HR_ADMIN;
+      } else if (
+        userRole === 'Attendance Manager' ||
+        userRole === 'Advanced Attendance Manager' ||
+        userRole === 'Custom'
+      ) {
+        systemRole = Role.MANAGER;
+      } else if (userRole === 'Company Owner') {
+        systemRole = Role.COMPANY_OWNER;
+      }
+
+      // Update Employee userRole
+      const updatedEmployee = await tx.employee.update({
+        where: { id: employeeId },
+        data: { userRole },
+      });
+
+      // Update User role
+      if (employee.userId) {
+        await tx.user.update({
+          where: { id: employee.userId },
+          data: { role: systemRole },
+        });
+      }
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId: currentUserId,
+        action: 'EMPLOYEE_ROLE_UPDATED',
+        resource: 'Employee',
+        resourceId: employeeId,
+        metadata: { userRole, systemRole },
+      });
+
+      return updatedEmployee;
+    });
+  }
+
+  async getInactiveEmployees(
+    companyId: string,
+    filters?: {
+      branchId?: string;
+      departmentId?: string;
+      startDate?: string;
+      endDate?: string;
+      search?: string;
+    }
+  ) {
+    return withTenantContext(companyId, async (tx) => {
+      const dateFilter: any = {};
+      if (filters?.startDate) {
+        dateFilter.gte = new Date(filters.startDate);
+      }
+      if (filters?.endDate) {
+        const end = new Date(filters.endDate);
+        end.setHours(23, 59, 59, 999);
+        dateFilter.lte = end;
+      }
+
+      return tx.employee.findMany({
+        where: {
+          companyId,
+          status: { in: [EmployeeStatus.INACTIVE, EmployeeStatus.TERMINATED] },
+          ...(filters?.branchId ? { branchId: filters.branchId } : {}),
+          ...(filters?.departmentId ? { departmentId: filters.departmentId } : {}),
+          ...(Object.keys(dateFilter).length > 0 ? { dateOfLeaving: dateFilter } : {}),
+          ...(filters?.search
+            ? {
+                OR: [
+                  { firstName: { contains: filters.search, mode: 'insensitive' } },
+                  { lastName: { contains: filters.search, mode: 'insensitive' } },
+                  { employeeCode: { contains: filters.search, mode: 'insensitive' } },
+                  { mobileNumber: { contains: filters.search, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+        },
+        include: {
+          user: { select: { phone: true, email: true, role: true, isActive: true } },
+          branch: true,
+          department: true,
+          designation: true,
+        },
+        orderBy: { updatedAt: 'desc' },
+      });
+    });
+  }
+
+  async activateEmployees(companyId: string, employeeIds: string[], currentUserId?: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const employees = await tx.employee.findMany({
+        where: {
+          id: { in: employeeIds },
+          companyId,
+        },
+        select: { id: true, userId: true },
+      });
+
+      const validEmpIds = employees.map((e) => e.id);
+      const validUserIds = employees.map((e) => e.userId).filter(Boolean);
+
+      // Reactivate Employee records
+      await tx.employee.updateMany({
+        where: { id: { in: validEmpIds } },
+        data: {
+          status: EmployeeStatus.ACTIVE,
+          dateOfLeaving: null,
+        },
+      });
+
+      // Reactivate User authentication records
+      if (validUserIds.length > 0) {
+        await tx.user.updateMany({
+          where: { id: { in: validUserIds } },
+          data: { isActive: true },
+        });
+      }
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId: currentUserId,
+        action: 'EMPLOYEES_REACTIVATED',
+        resource: 'Employee',
+        metadata: { activatedCount: validEmpIds.length, employeeIds: validEmpIds },
+      });
+
+      return {
+        success: true,
+        activatedCount: validEmpIds.length,
+      };
+    });
+  }
 }
 
 export const employeeService = new EmployeeService();

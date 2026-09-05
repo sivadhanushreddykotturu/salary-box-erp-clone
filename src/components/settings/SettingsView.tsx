@@ -495,7 +495,7 @@ export function SettingsView() {
           <div className="divide-y divide-slate-100">
             {/* Admins */}
             <Link
-              href="/my-team"
+              href="/add-edit-admin"
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
@@ -516,7 +516,7 @@ export function SettingsView() {
 
             {/* Employees & Managers */}
             <Link
-              href="/my-team"
+              href="/add-edit-role"
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
@@ -534,8 +534,8 @@ export function SettingsView() {
             </Link>
 
             {/* Custom Fields */}
-            <div
-              onClick={() => setActiveModal("customFields")}
+            <Link
+              href="/custom-fields"
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
@@ -552,11 +552,11 @@ export function SettingsView() {
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
-            </div>
+            </Link>
 
             {/* Inactive Employees */}
             <Link
-              href="/my-team"
+              href="/inactive-employees"
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
@@ -574,8 +574,8 @@ export function SettingsView() {
             </Link>
 
             {/* Auto Generate Employee ID */}
-            <div
-              onClick={() => showToast("Employee ID auto-generation is active (Prefix: EMP-)")}
+            <Link
+              href="/employee-id-config"
               className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
@@ -592,7 +592,7 @@ export function SettingsView() {
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
-            </div>
+            </Link>
           </div>
         </section>
 

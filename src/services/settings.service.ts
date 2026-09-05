@@ -195,6 +195,164 @@ export class SettingsService {
       };
     });
   }
+
+  async getCustomFields(companyId: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const company = await tx.company.findUnique({
+        where: { id: companyId },
+        select: { settings: true },
+      });
+
+      if (!company) throw new NotFoundError('Company not found');
+      const settings = (company.settings as Record<string, any>) || {};
+      return settings.customFields || [];
+    });
+  }
+
+  async addCustomField(companyId: string, name: string, userId?: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const company = await tx.company.findUnique({
+        where: { id: companyId },
+        select: { settings: true },
+      });
+
+      if (!company) throw new NotFoundError('Company not found');
+      const settings = (company.settings as Record<string, any>) || {};
+      const currentFields = Array.isArray(settings.customFields) ? settings.customFields : [];
+
+      const newField = {
+        id: `cf_${Date.now()}`,
+        name: name.trim(),
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedSettings = {
+        ...settings,
+        customFields: [...currentFields, newField],
+      };
+
+      await tx.company.update({
+        where: { id: companyId },
+        data: { settings: updatedSettings },
+      });
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId,
+        action: 'CUSTOM_FIELD_CREATED',
+        resource: 'Company',
+        resourceId: companyId,
+        metadata: { field: newField },
+      });
+
+      return newField;
+    });
+  }
+
+  async deleteCustomField(companyId: string, fieldId: string, userId?: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const company = await tx.company.findUnique({
+        where: { id: companyId },
+        select: { settings: true },
+      });
+
+      if (!company) throw new NotFoundError('Company not found');
+      const settings = (company.settings as Record<string, any>) || {};
+      const currentFields = Array.isArray(settings.customFields) ? settings.customFields : [];
+
+      const updatedFields = currentFields.filter((f: any) => f.id !== fieldId);
+
+      const updatedSettings = {
+        ...settings,
+        customFields: updatedFields,
+      };
+
+      await tx.company.update({
+        where: { id: companyId },
+        data: { settings: updatedSettings },
+      });
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId,
+        action: 'CUSTOM_FIELD_DELETED',
+        resource: 'Company',
+        resourceId: companyId,
+        metadata: { fieldId },
+      });
+
+      return { success: true };
+    });
+  }
+
+  async getEmployeeIdConfig(companyId: string) {
+    return withTenantContext(companyId, async (tx) => {
+      const company = await tx.company.findUnique({
+        where: { id: companyId },
+        select: { settings: true },
+      });
+
+      if (!company) throw new NotFoundError('Company not found');
+      const settings = (company.settings as Record<string, any>) || {};
+      const config = settings.employeeIdConfig || {
+        autoAssign: true,
+        prefix: '',
+        nextNumber: 1,
+        digitsInNumber: 0,
+      };
+
+      return config;
+    });
+  }
+
+  async updateEmployeeIdConfig(
+    companyId: string,
+    payload: {
+      autoAssign: boolean;
+      prefix?: string;
+      nextNumber?: number;
+      digitsInNumber?: number;
+    },
+    userId?: string
+  ) {
+    return withTenantContext(companyId, async (tx) => {
+      const company = await tx.company.findUnique({
+        where: { id: companyId },
+        select: { settings: true },
+      });
+
+      if (!company) throw new NotFoundError('Company not found');
+      const settings = (company.settings as Record<string, any>) || {};
+
+      const newConfig = {
+        autoAssign: payload.autoAssign,
+        prefix: payload.prefix ?? '',
+        nextNumber: payload.nextNumber ?? 1,
+        digitsInNumber: Math.min(10, Math.max(0, payload.digitsInNumber ?? 0)),
+      };
+
+      const updatedSettings = {
+        ...settings,
+        employeeIdConfig: newConfig,
+      };
+
+      await tx.company.update({
+        where: { id: companyId },
+        data: { settings: updatedSettings },
+      });
+
+      await logAuditEvent(tx as any, {
+        companyId,
+        userId,
+        action: 'EMPLOYEE_ID_CONFIG_UPDATED',
+        resource: 'Company',
+        resourceId: companyId,
+        metadata: { config: newConfig },
+      });
+
+      return newConfig;
+    });
+  }
 }
 
 export const settingsService = new SettingsService();
