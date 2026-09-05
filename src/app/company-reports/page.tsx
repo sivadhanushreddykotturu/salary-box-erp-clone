@@ -1,8 +1,7 @@
-import React from "react";
 import { AdminShell } from "@/components/layout/AdminShell";
 import { CompanyReportsView } from "@/components/reports/CompanyReportsView";
 
-export default function DownloadReportsPage() {
+export default function CompanyReportsPage() {
   return (
     <AdminShell>
       <CompanyReportsView />
