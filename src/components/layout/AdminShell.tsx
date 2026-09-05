@@ -152,369 +152,372 @@ export function AdminShell({ children }: AdminShellProps) {
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#F8FAFC]">
-      {/* 1. Left Sidebar */}
-      <aside
-        className={`flex flex-col border-r border-slate-200 bg-white transition-all duration-200 z-30 ${
-          sidebarOpen ? "w-60 min-w-[240px]" : "w-16 min-w-[64px]"
-        }`}
-      >
-        <div className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
-          {/* My Team */}
-          <Link
-            href="/my-team"
-            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-              pathname.startsWith("/my-team")
-                ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#F8FAFC]">
+      {/* 1. Full-Width Top Header */}
+      <header className="h-12 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0 z-20 w-full">
+        {/* Left section: Hamburger (3 lines at far edge), Company Logo avatar, Company Name dropdown, Divider, Company Code */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1 rounded text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+            aria-label="Toggle menu"
           >
-            <div className="flex items-center gap-3">
-              <MyTeamIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/my-team") ? "text-[#007BFF]" : "text-slate-500"}`} />
-              {sidebarOpen && <span>My Team</span>}
+            <Menu className="w-4 h-4 stroke-[2]" />
+          </button>
+
+          <div className="flex items-center gap-2">
+            {/* Company Logo Badge: Dark navy background with RSS LOGISTICS */}
+            <div className="w-6 h-6 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center text-[9px] font-extrabold tracking-tighter shadow-xs overflow-hidden shrink-0 border border-slate-200">
+              <span className="scale-[0.85] font-black">RSS</span>
             </div>
-          </Link>
 
-          {/* Attendance (Expandable) */}
-          <div>
-            <button
-              type="button"
-              onClick={() => setAttendanceExpanded(!attendanceExpanded)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-                pathname.startsWith("/attendance")
-                  ? "bg-slate-50 text-[#007BFF] font-semibold"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <AttendanceIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/attendance") ? "text-[#007BFF]" : "text-slate-500"}`} />
-                {sidebarOpen && <span>Attendance</span>}
-              </div>
-              {sidebarOpen && (
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform ${attendanceExpanded ? "rotate-180 text-blue-600" : "text-slate-400"}`}
-                />
-              )}
-            </button>
-
-            {sidebarOpen && attendanceExpanded && (
-              <div className="ml-6 pl-2 border-l border-slate-200 mt-1 space-y-1">
-                {attendanceSubItems.map((sub) => {
-                  const isSubActive = pathname === sub.href;
-                  return (
-                    <Link
-                      key={sub.name}
-                      href={sub.href}
-                      className={`block px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                        isSubActive
-                          ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                      }`}
-                    >
-                      {sub.name}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Payroll */}
-          <Link
-            href="/payroll"
-            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-              pathname.startsWith("/payroll")
-                ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <PayrollIcon className="w-4 h-4 shrink-0 text-slate-500" />
-              {sidebarOpen && <span>Payroll</span>}
-            </div>
-            {sidebarOpen && <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
-          </Link>
-
-          {/* CRM (Expandable) matching SalaryBox Style */}
-          <div>
-            <button
-              type="button"
-              onClick={() => setCrmExpanded(!crmExpanded)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-                pathname.startsWith("/crm")
-                  ? "bg-slate-50 text-[#007BFF] font-semibold"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <CrmSuitcaseIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/crm") ? "text-[#007BFF]" : "text-slate-500"}`} />
-                {sidebarOpen && <span>CRM</span>}
-              </div>
-              {sidebarOpen && (
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform ${crmExpanded ? "rotate-180 text-blue-600" : "text-slate-400"}`}
-                />
-              )}
-            </button>
-
-            {sidebarOpen && crmExpanded && (
-              <div className="ml-6 pl-2 border-l border-slate-200 mt-1 space-y-1">
-                {crmSubItems.map((sub) => {
-                  const isSubActive =
-                    pathname === sub.href ||
-                    (sub.href === "/crm/leads" && pathname === "/crm");
-                  return (
-                    <Link
-                      key={sub.name}
-                      href={sub.href}
-                      className={`block px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                        isSubActive
-                          ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                      }`}
-                    >
-                      {sub.name}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Reports (Expandable) */}
-          <div>
-            <button
-              type="button"
-              onClick={() => setReportsExpanded(!reportsExpanded)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-                pathname.startsWith("/reports")
-                  ? "bg-slate-50 text-[#007BFF] font-semibold"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <ReportsIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/reports") ? "text-[#007BFF]" : "text-slate-500"}`} />
-                {sidebarOpen && <span>Reports</span>}
-              </div>
-              {sidebarOpen && (
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform ${reportsExpanded ? "rotate-180 text-blue-600" : "text-slate-400"}`}
-                />
-              )}
-            </button>
-
-            {sidebarOpen && reportsExpanded && (
-              <div className="ml-6 pl-2 border-l border-slate-200 mt-1 space-y-1">
-                {reportsSubItems.map((sub) => {
-                  const isSubActive =
-                    pathname === sub.href ||
-                    (sub.href === "/reports/download" && pathname === "/reports");
-                  return (
-                    <Link
-                      key={sub.name}
-                      href={sub.href}
-                      className={`block px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                        isSubActive
-                          ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                      }`}
-                    >
-                      {sub.name}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Location */}
-          <Link
-            href="/location"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <LocationIcon className="w-4 h-4 shrink-0 text-slate-500" />
-            {sidebarOpen && <span>Location</span>}
-          </Link>
-
-          {/* Background Verification */}
-          <Link
-            href="/verification"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <VerificationIcon className="w-4 h-4 shrink-0 text-slate-500" />
-            {sidebarOpen && <span>Background Verification</span>}
-          </Link>
-
-          {/* Subscriptions & Billing */}
-          <Link
-            href="/billing"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-              pathname.startsWith("/billing") || pathname.startsWith("/subscriptions-billing")
-                ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <BillingIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/billing") || pathname.startsWith("/subscriptions-billing") ? "text-[#007BFF]" : "text-slate-500"}`} />
-            {sidebarOpen && <span>Subscriptions & Billing</span>}
-          </Link>
-
-          {/* Refer a Friend */}
-          <Link
-            href="/refer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <ReferIcon className="w-4 h-4 shrink-0 text-slate-500" />
-            {sidebarOpen && <span>Refer a Friend</span>}
-          </Link>
-        </div>
-
-        {/* Bottom SalaryBox Branding */}
-        <div className="p-4 border-t border-slate-100 flex items-center gap-2.5">
-          <svg className="w-5 h-5 text-slate-900" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M4 14l8-8 8 8-3.5 3.5L12 13l-4.5 4.5L4 14z" />
-          </svg>
-          {sidebarOpen && (
-            <span className="font-bold text-slate-900 tracking-tight text-sm font-sans">
-              Salary<span className="text-slate-900">Box</span>
-            </span>
-          )}
-        </div>
-      </aside>
-
-      {/* 2. Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="h-12 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0 z-20">
-          {/* Left section: Hamburger, Company Logo avatar, Company Name dropdown, Divider, Company Code */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1 rounded text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-4 h-4 stroke-[2]" />
-            </button>
-
-            <div className="flex items-center gap-2">
-              {/* Company Logo Badge: Dark navy background with RSS LOGISTICS text logo */}
-              <div className="w-6 h-6 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center text-[9px] font-extrabold tracking-tighter shadow-xs overflow-hidden shrink-0 border border-slate-200">
-                <span className="scale-[0.85] font-black">RSS</span>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-[13px] font-bold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer"
-                >
-                  <span>{userProfile.companyName}</span>
-                  <ChevronDown className="w-3 h-3 text-slate-500 stroke-[2.5]" />
-                </button>
-                <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
-                <span className="text-xs text-slate-500 font-normal">
-                  Company Code: <span className="text-slate-700 font-semibold">{userProfile.companyCode}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right section: Pending Requests (red badge 22), Settings, Help, Divider, Bell, Megaphone, Divider, Profile initials avatar */}
-          <div className="flex items-center gap-2.5">
-            {/* Pending Requests */}
-            <Link
-              href="/pending-requests"
-              className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
-            >
-              <HeaderPendingRequestsIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
-              <span>Pending Requests</span>
-              <span className="bg-[#E53E3E] text-white text-[9px] font-bold px-1.5 py-[1px] rounded-full leading-none -ml-0.5">
-                22
-              </span>
-            </Link>
-
-            {/* Settings */}
-            <Link
-              href="/settings"
-              className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
-            >
-              <HeaderSettingsIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
-              <span>Settings</span>
-            </Link>
-
-            {/* Vertical Divider */}
-            <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
-
-            {/* Help */}
-            <button
-              type="button"
-              className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
-            >
-              <HeaderHelpIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
-              <span>Help</span>
-            </button>
-
-            {/* Vertical Divider */}
-            <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
-
-            {/* Notifications Bell */}
-            <Link
-              href="/notifications"
-              className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer flex items-center justify-center"
-              title="Notifications"
-            >
-              <HeaderBellIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
-            </Link>
-
-            {/* Announcements Megaphone */}
-            <Link
-              href="/announcements"
-              className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer flex items-center justify-center"
-              title="Announcements"
-            >
-              <HeaderMegaphoneIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
-            </Link>
-
-            {/* Vertical Divider */}
-            <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
-
-            {/* User Profile Avatar with PR badge */}
-            <div className="relative" ref={profileMenuRef}>
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="w-6 h-6 rounded bg-[#FCE7F3] text-[#BE185D] hover:bg-[#FBCFE8] flex items-center justify-center font-bold text-[10px] tracking-tight transition-all focus:outline-none cursor-pointer border border-[#F472B6]/30"
-                aria-label="User profile menu"
-                aria-expanded={profileOpen}
+                className="flex items-center gap-1 text-[13px] font-bold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer"
               >
-                {userProfile.initials}
+                <span>{userProfile.companyName}</span>
+                <ChevronDown className="w-3 h-3 text-slate-500 stroke-[2.5]" />
+              </button>
+              <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+              <span className="text-xs text-slate-500 font-normal">
+                Company Code: <span className="text-slate-700 font-semibold">{userProfile.companyCode}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right section: Pending Requests (red badge 22), Settings, Help, Divider, Bell, Megaphone, Divider, Profile initials avatar */}
+        <div className="flex items-center gap-2.5">
+          {/* Pending Requests */}
+          <Link
+            href="/pending-requests"
+            className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
+          >
+            <HeaderPendingRequestsIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
+            <span>Pending Requests</span>
+            <span className="bg-[#E53E3E] text-white text-[9px] font-bold px-1.5 py-[1px] rounded-full leading-none -ml-0.5">
+              22
+            </span>
+          </Link>
+
+          {/* Settings */}
+          <Link
+            href="/settings"
+            className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
+          >
+            <HeaderSettingsIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
+            <span>Settings</span>
+          </Link>
+
+          {/* Vertical Divider */}
+          <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+
+          {/* Help */}
+          <button
+            type="button"
+            className="flex items-center gap-1 text-xs font-normal text-slate-700 hover:text-slate-900 transition-colors cursor-pointer px-1.5 py-1 rounded-md hover:bg-slate-50"
+          >
+            <HeaderHelpIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
+            <span>Help</span>
+          </button>
+
+          {/* Vertical Divider */}
+          <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+
+          {/* Notifications Bell */}
+          <Link
+            href="/notifications"
+            className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer flex items-center justify-center"
+            title="Notifications"
+          >
+            <HeaderBellIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
+          </Link>
+
+          {/* Announcements Megaphone */}
+          <Link
+            href="/announcements"
+            className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer flex items-center justify-center"
+            title="Announcements"
+          >
+            <HeaderMegaphoneIcon className="w-3.5 h-3.5 text-slate-700 stroke-[1.8]" />
+          </Link>
+
+          {/* Vertical Divider */}
+          <span className="text-slate-300 font-light text-xs mx-0.5">|</span>
+
+          {/* User Profile Avatar with PR badge */}
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              type="button"
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="w-6 h-6 rounded bg-[#FCE7F3] text-[#BE185D] hover:bg-[#FBCFE8] flex items-center justify-center font-bold text-[10px] tracking-tight transition-all focus:outline-none cursor-pointer border border-[#F472B6]/30"
+              aria-label="User profile menu"
+              aria-expanded={profileOpen}
+            >
+              {userProfile.initials}
+            </button>
+
+            {profileOpen && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-slate-200 py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="px-4 py-1.5">
+                  <div className="text-[13px] font-bold text-slate-900 tracking-tight leading-snug uppercase">
+                    {userProfile.name}
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium mt-0.5">
+                    Role - {userProfile.role}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 my-1.5"></div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-red-600 transition-colors text-left cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* 2. Main Body: Sidebar + Page Content underneath Header */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar */}
+        <aside
+          className={`flex flex-col border-r border-slate-200 bg-white transition-all duration-200 z-10 ${
+            sidebarOpen ? "w-56 min-w-[224px]" : "w-16 min-w-[64px]"
+          }`}
+        >
+          {/* pt-3.5 gives the exact vertical spacing for My Team */}
+          <div className="flex-1 overflow-y-auto pt-3.5 pb-3 px-2 space-y-1">
+            {/* My Team */}
+            <Link
+              href="/my-team"
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                pathname.startsWith("/my-team")
+                  ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <MyTeamIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/my-team") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                {sidebarOpen && <span>My Team</span>}
+              </div>
+            </Link>
+
+            {/* Attendance (Expandable) */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setAttendanceExpanded(!attendanceExpanded)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                  pathname.startsWith("/attendance")
+                    ? "bg-slate-50 text-[#007BFF] font-semibold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <AttendanceIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/attendance") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                  {sidebarOpen && <span>Attendance</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${attendanceExpanded ? "rotate-180 text-blue-600" : "text-slate-400"}`}
+                  />
+                )}
               </button>
 
-              {profileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-slate-200 py-2.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="px-4 py-1.5">
-                    <div className="text-[13px] font-bold text-slate-900 tracking-tight leading-snug uppercase">
-                      {userProfile.name}
-                    </div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">
-                      Role - {userProfile.role}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-100 my-1.5"></div>
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-red-600 transition-colors text-left cursor-pointer"
-                  >
-                    <LogOut className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
-                    <span>Logout</span>
-                  </button>
+              {sidebarOpen && attendanceExpanded && (
+                <div className="ml-6 pl-2 border-l border-slate-200 mt-1 space-y-1">
+                  {attendanceSubItems.map((sub) => {
+                    const isSubActive = pathname === sub.href;
+                    return (
+                      <Link
+                        key={sub.name}
+                        href={sub.href}
+                        className={`block px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                          isSubActive
+                            ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        }`}
+                      >
+                        {sub.name}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
-          </div>
-        </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#F8FAFC]">
+            {/* Payroll */}
+            <Link
+              href="/payroll"
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                pathname.startsWith("/payroll")
+                  ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <PayrollIcon className="w-4 h-4 shrink-0 text-slate-500" />
+                {sidebarOpen && <span>Payroll</span>}
+              </div>
+              {sidebarOpen && <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+            </Link>
+
+            {/* CRM (Expandable) matching SalaryBox Style */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setCrmExpanded(!crmExpanded)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                  pathname.startsWith("/crm")
+                    ? "bg-slate-50 text-[#007BFF] font-semibold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <CrmSuitcaseIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/crm") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                  {sidebarOpen && <span>CRM</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${crmExpanded ? "rotate-180 text-blue-600" : "text-slate-400"}`}
+                  />
+                )}
+              </button>
+
+              {sidebarOpen && crmExpanded && (
+                <div className="ml-6 pl-2 border-l border-slate-200 mt-1 space-y-1">
+                  {crmSubItems.map((sub) => {
+                    const isSubActive =
+                      pathname === sub.href ||
+                      (sub.href === "/crm/leads" && pathname === "/crm");
+                    return (
+                      <Link
+                        key={sub.name}
+                        href={sub.href}
+                        className={`block px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                          isSubActive
+                            ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        }`}
+                      >
+                        {sub.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Reports (Expandable) */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setReportsExpanded(!reportsExpanded)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                  pathname.startsWith("/reports")
+                    ? "bg-slate-50 text-[#007BFF] font-semibold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <ReportsIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/reports") ? "text-[#007BFF]" : "text-slate-500"}`} />
+                  {sidebarOpen && <span>Reports</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${reportsExpanded ? "rotate-180 text-blue-600" : "text-slate-400"}`}
+                  />
+                )}
+              </button>
+
+              {sidebarOpen && reportsExpanded && (
+                <div className="ml-6 pl-2 border-l border-slate-200 mt-1 space-y-1">
+                  {reportsSubItems.map((sub) => {
+                    const isSubActive =
+                      pathname === sub.href ||
+                      (sub.href === "/reports/download" && pathname === "/reports");
+                    return (
+                      <Link
+                        key={sub.name}
+                        href={sub.href}
+                        className={`block px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                          isSubActive
+                            ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        }`}
+                      >
+                        {sub.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Location */}
+            <Link
+              href="/location"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <LocationIcon className="w-4 h-4 shrink-0 text-slate-500" />
+              {sidebarOpen && <span>Location</span>}
+            </Link>
+
+            {/* Background Verification */}
+            <Link
+              href="/verification"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <VerificationIcon className="w-4 h-4 shrink-0 text-slate-500" />
+              {sidebarOpen && <span>Background Verification</span>}
+            </Link>
+
+            {/* Subscriptions & Billing */}
+            <Link
+              href="/billing"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                pathname.startsWith("/billing") || pathname.startsWith("/subscriptions-billing")
+                  ? "bg-[#EBF5FF] text-[#007BFF] font-semibold"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <BillingIcon className={`w-4 h-4 shrink-0 ${pathname.startsWith("/billing") || pathname.startsWith("/subscriptions-billing") ? "text-[#007BFF]" : "text-slate-500"}`} />
+              {sidebarOpen && <span>Subscriptions & Billing</span>}
+            </Link>
+
+            {/* Refer a Friend */}
+            <Link
+              href="/refer"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <ReferIcon className="w-4 h-4 shrink-0 text-slate-500" />
+              {sidebarOpen && <span>Refer a Friend</span>}
+            </Link>
+          </div>
+
+          {/* Bottom SalaryBox Branding */}
+          <div className="p-4 border-t border-slate-100 flex items-center gap-2.5">
+            <svg className="w-5 h-5 text-slate-900" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 14l8-8 8 8-3.5 3.5L12 13l-4.5 4.5L4 14z" />
+            </svg>
+            {sidebarOpen && (
+              <span className="font-bold text-slate-900 tracking-tight text-sm font-sans">
+                Salary<span className="text-slate-900">Box</span>
+              </span>
+            )}
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC]">
           {children}
         </main>
       </div>
